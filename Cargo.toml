@@ -1,0 +1,12 @@
+[workspace]
+resolver = "2"
+
+members = [
+	"sea-migration",
+	"sea-entities",
+	"app",
+]
+
+[workspace.dependencies]
+sea-orm = { version = "0.11", features = ["runtime-tokio-rustls","sqlx-sqlite","with-time"]}
+time = "0.3"
