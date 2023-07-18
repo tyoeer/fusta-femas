@@ -2,4 +2,6 @@
 
 pub mod prelude;
 
-pub mod feeds;
+pub mod entry;
+pub mod feed;
+pub mod fetch;

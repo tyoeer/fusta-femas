@@ -3,9 +3,11 @@ use sea_orm_migration::prelude::*;
 use super::utils::*;
 
 #[derive(Iden)]
-enum Iden {
-	Feeds,
+pub enum Iden {
+	Feed,
 	Url,
+	Name,
+	Strategy,
 }
 
 #[derive(DeriveMigrationName)]
@@ -18,13 +20,15 @@ impl MigrationTrait for Migration {
 		add_table(
 			manager,
 			Table::create()
-				.table(Iden::Feeds)
-				.col(ColumnDef::new(Iden::Url).string().not_null().unique_key()),
+				.table(Iden::Feed)
+				.col(ColumnDef::new(Iden::Url).string().not_null().unique_key())
+				.col(ColumnDef::new(Iden::Name).string().not_null().unique_key())
+				.col(ColumnDef::new(Iden::Strategy).string().not_null().unique_key()),
 		)
 		.await
 	}
 
 	async fn down(&self, manager: &SchemaManager) -> DbRes {
-		remove_table(manager, Iden::Feeds).await
+		remove_table(manager, Iden::Feed).await
 	}
 }

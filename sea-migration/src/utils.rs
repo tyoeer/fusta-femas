@@ -3,7 +3,7 @@ use sea_orm_migration::prelude::*;
 pub type DbRes = Result<(), DbErr>;
 
 #[derive(Iden)]
-enum Ident {
+pub enum UtilIdent {
 	Id,
 	CreatedAt,
 	UpdatedAt,
@@ -37,20 +37,20 @@ pub fn get_table_name(tcs: &TableCreateStatement) -> Result<String, DbErr> {
 
 pub async fn add_table(man: &SchemaManager<'_>, tcs: &mut TableCreateStatement) -> DbRes {
 	tcs.col(
-		ColumnDef::new(Ident::Id)
+		ColumnDef::new(UtilIdent::Id)
 			.integer()
 			.not_null()
 			.primary_key()
 			.auto_increment(),
 	)
 	.col(
-		ColumnDef::new(Ident::CreatedAt)
+		ColumnDef::new(UtilIdent::CreatedAt)
 			.timestamp()
 			.not_null()
 			.default(Expr::current_timestamp()),
 	)
 	.col(
-		ColumnDef::new(Ident::UpdatedAt)
+		ColumnDef::new(UtilIdent::UpdatedAt)
 			.timestamp()
 			.not_null()
 			.default(Expr::current_timestamp()),

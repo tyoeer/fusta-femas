@@ -9,7 +9,7 @@ use sea_orm::*;
 pub async fn get_feeds(cx: Scope) -> Result<Vec<String>, ServerFnError> {
 	let conn = use_context::<DatabaseConnection>(cx)
 		.ok_or_else(|| ServerFnError::ServerError("Missing DB connection pool".into()))?;
-	let feeds = feeds::Entity::find().all(&conn).await?;
+	let feeds = feed::Entity::find().all(&conn).await?;
 	let urls = feeds.into_iter().map(|f| f.url).collect();
 	Ok(urls)
 }
