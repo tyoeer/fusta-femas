@@ -3,7 +3,7 @@
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(EnumIter, DeriveActiveEnum)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, EnumIter, DeriveActiveEnum)]
 #[sea_orm(rs_type = "String", db_type = "String(Some(11))")]
 pub enum Status {
     #[sea_orm(string_value = "SUCCESS")]
@@ -18,7 +18,7 @@ pub enum Status {
 #[sea_orm(table_name = "fetch")]
 pub struct Model {
     pub url: String,
-    pub status: String,
+    pub status: Status,
     pub content: Option<String>,
     pub error: Option<String>,
     pub strategy: String,
