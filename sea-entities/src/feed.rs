@@ -6,33 +6,33 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "feed")]
 pub struct Model {
-    pub url: String,
-    pub name: String,
-    pub strategy: String,
-    #[sea_orm(primary_key)]
-    pub id: i32,
-    pub created_at: TimeDateTime,
-    pub updated_at: TimeDateTime,
+	pub url: String,
+	pub name: String,
+	pub strategy: String,
+	#[sea_orm(primary_key)]
+	pub id: i32,
+	pub created_at: TimeDateTime,
+	pub updated_at: TimeDateTime,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(has_many = "super::entry::Entity")]
-    Entry,
-    #[sea_orm(has_many = "super::fetch::Entity")]
-    Fetch,
+	#[sea_orm(has_many = "super::entry::Entity")]
+	Entry,
+	#[sea_orm(has_many = "super::fetch::Entity")]
+	Fetch,
 }
 
 impl Related<super::entry::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Entry.def()
-    }
+	fn to() -> RelationDef {
+		Relation::Entry.def()
+	}
 }
 
 impl Related<super::fetch::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Fetch.def()
-    }
+	fn to() -> RelationDef {
+		Relation::Fetch.def()
+	}
 }
 
 impl ActiveModelBehavior for ActiveModel {}

@@ -6,55 +6,55 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, EnumIter, DeriveActiveEnum)]
 #[sea_orm(rs_type = "String", db_type = "String(Some(20))")]
 pub enum Status {
-    #[sea_orm(string_value = "SUCCESS")]
+	#[sea_orm(string_value = "SUCCESS")]
 	Success,
-    #[sea_orm(string_value = "FETCH_ERROR")]
+	#[sea_orm(string_value = "FETCH_ERROR")]
 	FetchError,
-    #[sea_orm(string_value = "PARSE_ERROR")]
+	#[sea_orm(string_value = "PARSE_ERROR")]
 	ParseError,
-    #[sea_orm(string_value = "ENTRY_UPDATE_ERROR")]
+	#[sea_orm(string_value = "ENTRY_UPDATE_ERROR")]
 	EntryUpdateError,
 }
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "fetch")]
 pub struct Model {
-    pub url: String,
-    pub status: Status,
-    pub content: Option<String>,
-    pub error: Option<String>,
-    pub strategy: String,
-    pub feed_id: i32,
-    #[sea_orm(primary_key)]
-    pub id: i32,
-    pub created_at: TimeDateTime,
-    pub updated_at: TimeDateTime,
+	pub url: String,
+	pub status: Status,
+	pub content: Option<String>,
+	pub error: Option<String>,
+	pub strategy: String,
+	pub feed_id: i32,
+	#[sea_orm(primary_key)]
+	pub id: i32,
+	pub created_at: TimeDateTime,
+	pub updated_at: TimeDateTime,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(has_many = "super::entry::Entity")]
-    Entry,
-    #[sea_orm(
-        belongs_to = "super::feed::Entity",
-        from = "Column::FeedId",
-        to = "super::feed::Column::Id",
-        on_update = "NoAction",
-        on_delete = "NoAction"
-    )]
-    Feed,
+	#[sea_orm(has_many = "super::entry::Entity")]
+	Entry,
+	#[sea_orm(
+		belongs_to = "super::feed::Entity",
+		from = "Column::FeedId",
+		to = "super::feed::Column::Id",
+		on_update = "NoAction",
+		on_delete = "NoAction"
+	)]
+	Feed,
 }
 
 impl Related<super::entry::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Entry.def()
-    }
+	fn to() -> RelationDef {
+		Relation::Entry.def()
+	}
 }
 
 impl Related<super::feed::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Feed.def()
-    }
+	fn to() -> RelationDef {
+		Relation::Feed.def()
+	}
 }
 
 impl ActiveModelBehavior for ActiveModel {}
