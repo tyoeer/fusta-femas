@@ -9,4 +9,30 @@ members = [
 
 [workspace.dependencies]
 sea-orm = { version = "0.11", features = ["runtime-tokio-rustls","sqlx-sqlite","with-time"]}
+serde = {version="1", features=["derive"]}
 time = "0.3"
+
+[[workspace.metadata.leptos]]
+name = "fusta-femas"
+bin-package = "fusta-femas"
+lib-package = "fusta-femas"
+# input
+style-file = "app/style/main.scss"
+assets-dir = "app/public"
+# output
+site-pkg-dir = "pkg"
+browserquery = "defaults"
+# environment
+env = "DEV"
+site-addr = "127.0.0.1:3000"
+reload-port = 3001
+# server features
+bin-features = ["ssr"]
+bin-default-features = false
+# frontwasm features
+lib-features = ["hydrate"]
+lib-default-features = false
+
+# [Optional] Command to use when running end2end tests. It will run in the end2end dir
+# end2end-cmd = "npx playwright test"
+# end2end-dir = "end2end"
