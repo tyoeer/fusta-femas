@@ -16,22 +16,17 @@ pub async fn get_feeds(cx: Scope) -> Result<Vec<String>, ServerFnError> {
 
 #[component]
 pub fn Feeds(cx: Scope) -> impl IntoView {
-	let feeds = create_resource(cx, || (),  move |_| {
-		get_feeds(cx)
-	});
 	view! {cx,
-		<Suspense fallback=move || view!{cx, "Loading..."}>
+		<Await future=get_feeds bind:feeds>
 			<ul>
-				{ move || {
-					feeds.read(cx).map(|res| {
-						res.map(|vec| {
-							vec.into_iter()
-								.map(|e| view! {cx, <li>{e}</li>})
-								.collect::<Vec<_>>()
-						})
+				{
+					feeds.clone().map(|vec| {
+						vec.into_iter()
+							.map(|e| view! {cx, <li>{e}</li>})
+							.collect::<Vec<_>>()
 					})
-				}}
+				}
 			</ul>
-		</Suspense>
+		</Await>
 	}
 }
