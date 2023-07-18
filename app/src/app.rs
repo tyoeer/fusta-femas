@@ -22,6 +22,7 @@ cfg_if! { if #[cfg(feature = "ssr")] {
 pub fn App(cx: Scope) -> impl IntoView {
 	// Provides context that manages stylesheets, titles, meta tags, etc.
 	provide_meta_context(cx);
+	let (_is_routing, set_is_routing) = create_signal(cx, false);
 	
 	view! {
 		cx,
@@ -30,7 +31,7 @@ pub fn App(cx: Scope) -> impl IntoView {
 		<Title text="Fusta Femas"/>
 		
 		// content for this welcome page
-		<Router fallback=|cx| {
+		<Router set_is_routing fallback=|cx| {
 			let mut outside_errors = Errors::default();
 			outside_errors.insert_with_default_key(AppError::NotFound);
 			view! { cx,
@@ -38,6 +39,8 @@ pub fn App(cx: Scope) -> impl IntoView {
 			}
 			.into_view(cx)
 		}>
+			// Default style makes it very quickyl move the page up and down
+			// <RoutingProgress _is_routing />
 			<Nav/>
 			<main>
 				<Routes>
