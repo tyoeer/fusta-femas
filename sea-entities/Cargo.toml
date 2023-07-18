@@ -8,3 +8,4 @@ publish = false
 [dependencies]
 sea-orm = {workspace = true}
 time = {workspace = true}
+serde = {workspace = true}
