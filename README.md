@@ -6,15 +6,20 @@ Aims to not only collect feeds into a database, but also provide convenient ways
 
 ## Getting started
 
-### Prereqs 
+### Prereqs
+
 - `cargo install`
 	- `sea-orm-cli`
 	- `cargo-leptos`
 		- https://github.com/leptos-rs/cargo-leptos/pull/159
 
+### Database management
+
 - Set up a development database with `sea migrate -d sea-migration fresh`
-- Update entities with `sea generate entity --lib -o sea-entities/src --with-serde`
-	- https://github.com/SeaQL/sea-orm/issues/924
+- Update entities:
+	- `sea generate entity --lib -o sea-entities/src --with-serde both`
+		- https://github.com/SeaQL/sea-orm/issues/924
+	- Then manually set `TimeDateTime` and enums
 
 ## Useful links
 
