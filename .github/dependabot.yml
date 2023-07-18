@@ -1,0 +1,7 @@
+# copied from https://github.com/bevyengine/bevy/blob/8c8bd3b41f5e9b801792676dca734cec29e29483/.github/dependabot.yml
+version: 2
+updates:
+  - package-ecosystem: cargo
+    directory: /
+    schedule:
+      interval: "weekly"
