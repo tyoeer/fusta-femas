@@ -8,7 +8,7 @@ use super::m20230718_164002_add_fetches::Iden as Fetch;
 pub enum Iden {
 	Entry,
 	FeedId,
-	FetchId,
+	LatestFetchId,
 	FeedEntryId,
 	ViewUrl,
 	Viewed,
@@ -31,7 +31,7 @@ impl MigrationTrait for Migration {
 				.col(ColumnDef::new(Iden::Viewed).boolean().not_null().default(false))
 				.col(ColumnDef::new(Iden::FeedEntryId).string().not_null())
 				.col(ColumnDef::new(Iden::FeedId).integer().not_null())
-				.col(ColumnDef::new(Iden::FetchId).integer().not_null())
+				.col(ColumnDef::new(Iden::LatestFetchId).integer().not_null())
 				.foreign_key(
 					ForeignKey::create()
 					.from(Iden::Entry, Iden::FeedId)
@@ -39,7 +39,7 @@ impl MigrationTrait for Migration {
 				)
 				.foreign_key(
 					ForeignKey::create()
-					.from(Iden::Entry, Iden::FetchId)
+					.from(Iden::Entry, Iden::LatestFetchId)
 					.to(Fetch::Fetch, UtilIdent::Id)
 				)
 		)

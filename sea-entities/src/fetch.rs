@@ -4,7 +4,7 @@ use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, EnumIter, DeriveActiveEnum)]
-#[sea_orm(rs_type = "String", db_type = "String(Some(11))")]
+#[sea_orm(rs_type = "String", db_type = "String(Some(20))")]
 pub enum Status {
     #[sea_orm(string_value = "SUCCESS")]
 	Success,
@@ -12,6 +12,8 @@ pub enum Status {
 	FetchError,
     #[sea_orm(string_value = "PARSE_ERROR")]
 	ParseError,
+    #[sea_orm(string_value = "ENTRY_UPDATE_ERROR")]
+	EntryUpdateError,
 }
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]

@@ -23,6 +23,7 @@ enum Status {
 	Success,
 	FetchError,
 	ParseError,
+	EntryUpdateError,
 }
 
 #[derive(DeriveMigrationName)]

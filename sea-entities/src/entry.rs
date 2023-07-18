@@ -11,7 +11,7 @@ pub struct Model {
     pub viewed: bool,
     pub feed_entry_id: String,
     pub feed_id: i32,
-    pub fetch_id: i32,
+    pub latest_fetch_id: i32,
     #[sea_orm(primary_key)]
     pub id: i32,
     pub created_at: TimeDateTime,
@@ -30,7 +30,7 @@ pub enum Relation {
     Feed,
     #[sea_orm(
         belongs_to = "super::fetch::Entity",
-        from = "Column::FetchId",
+        from = "Column::LatestFetchId",
         to = "super::fetch::Column::Id",
         on_update = "NoAction",
         on_delete = "NoAction"
