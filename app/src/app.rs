@@ -1,8 +1,10 @@
 use cfg_if::cfg_if;
-use crate::{error_template::{AppError, ErrorTemplate}, feeds::Feeds};
+use crate::error_template::{AppError, ErrorTemplate};
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
+
+use backend::BackendRoutes;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
 	#[derive(Clone)]
@@ -45,7 +47,7 @@ pub fn App(cx: Scope) -> impl IntoView {
 			<main>
 				<Routes>
 					<Route path="" view=HomePage />
-					<Route path="/feeds" view=Feeds />
+					<BackendRoutes/>
 				</Routes>
 			</main>
 		</Router>

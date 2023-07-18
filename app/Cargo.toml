@@ -25,9 +25,10 @@ console_log = {version="1", optional=true}
 wasm-bindgen = {version="=0.2.87", optional=true}
 
 # shared
-leptos = { version = "0.4" }
-leptos_meta = { version = "0.4" }
-leptos_router = { version = "0.4" }
+backend = {path = "../backend", default-features = false}
+leptos = { workspace = true }
+leptos_meta = { workspace = true }
+leptos_router = { workspace = true }
 cfg-if = "1"
 http = "0.2.8"
 serde = {workspace = true}
@@ -42,7 +43,8 @@ hydrate = [
     "dep:wasm-bindgen",
     "leptos/hydrate",
     "leptos_meta/hydrate",
-    "leptos_router/hydrate"
+    "leptos_router/hydrate",
+    "backend/hydrate",
 ]
 ssr = [
     "dep:sea-entities",
@@ -58,6 +60,7 @@ ssr = [
     "leptos/ssr",
     "leptos_meta/ssr",
     "leptos_router/ssr",
+    "backend/ssr",
 ]
 
 [package.metadata.cargo-all-features]

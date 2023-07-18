@@ -1,0 +1,32 @@
+[package]
+name = "backend"
+version = "0.0.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+# server
+sea-entities = {path="../sea-entities", optional = true}
+sea-orm = {workspace = true, optional = true}
+# shared
+leptos = { workspace = true }
+leptos_meta = { workspace = true }
+leptos_router = { workspace = true }
+serde = {workspace = true}
+
+[features]
+default = ["ssr","hydrate"]
+hydrate = [
+	"leptos/hydrate",
+	"leptos_meta/hydrate",
+	"leptos_router/hydrate"
+]
+ssr = [
+	"dep:sea-entities",
+	"dep:sea-orm",
+
+	"leptos/ssr",
+	"leptos_meta/ssr",
+	"leptos_router/ssr",
+]
