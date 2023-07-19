@@ -7,8 +7,11 @@ edition = "2021"
 
 [dependencies]
 # server
+backend-core = {path="../backend-core", optional = true}
 sea-entities = {path="../sea-entities", optional = true}
 sea-orm = {workspace = true, optional = true}
+axum = {workspace=true, optional=true}
+leptos_axum = {workspace=true, optional=true}
 # shared
 leptos = { workspace = true }
 leptos_meta = { workspace = true }
@@ -23,6 +26,9 @@ hydrate = [
 	"leptos_router/hydrate"
 ]
 ssr = [
+	"dep:backend-core",
+	"dep:axum",
+	"dep:leptos_axum",
 	"dep:sea-entities",
 	"dep:sea-orm",
 

@@ -71,7 +71,8 @@ cfg_if! { if #[cfg(feature = "ssr")] {
 			.fallback(file_and_error_handler)
 			.with_state(state)
 		;
-
+		let app = backend::layer(app);
+		
 		// run our app with hyper
 		// `axum::Server` is a re-export of `hyper::Server`
 		log!("listening on http://{}", &addr);

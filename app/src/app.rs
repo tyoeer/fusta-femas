@@ -59,7 +59,8 @@ fn Nav(cx: Scope) -> impl IntoView {
 	view! {cx,
 		<nav>
 			<A href="">Home</A>
-			<A href="feeds">Feeds</A>
+			<A href="backend/feeds">Feeds</A>
+			<A href="backend/strats">Strategies</A>
 		</nav>
 	}
 }

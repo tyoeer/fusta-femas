@@ -246,12 +246,26 @@ dependencies = [
 name = "backend"
 version = "0.0.0"
 dependencies = [
+ "axum",
+ "backend-core",
  "leptos",
+ "leptos_axum",
  "leptos_meta",
  "leptos_router",
  "sea-entities",
  "sea-orm",
  "serde",
+]
+
+[[package]]
+name = "backend-core"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "sea-entities",
+ "sea-orm",
+ "thiserror",
 ]
 
 [[package]]
