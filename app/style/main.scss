@@ -1,3 +1,5 @@
+@use "table";
+
 body {
 	font-family: sans-serif;
 	text-align: center;
@@ -7,11 +9,14 @@ body {
 }
 main {
 	margin: 0 auto;
+	display: flex;
+	flex-direction: column;
 }
 nav {
 	overflow: hidden;
 	display: flex;
 	justify-content: center;
+	border-bottom: 1px solid black;
 }
 nav * {
 	padding: 1em;

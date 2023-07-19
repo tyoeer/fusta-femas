@@ -1,0 +1,22 @@
+li.table_row {
+	list-style-type: none;
+}
+ul.table {
+	padding: 0em;
+}
+
+.table {
+	display: table;
+	box-sizing: border-box;
+	width: 100%;
+}
+.table_row {
+	display: table-row;
+}
+.table_cell {
+	display: table-cell;
+	padding: 0.2em;
+}
+.table_row:nth-child(even) {
+	background-color: lightgrey;
+}

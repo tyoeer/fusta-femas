@@ -15,23 +15,30 @@ pub fn BackendRoutes(cx: Scope) -> impl IntoView {
 
 #[cfg(feature="ssr")]
 pub fn layer(router: axum::routing::Router) -> axum::routing::Router {
-    use backend_core::*;
-
+	use backend_core::*;
+	
 	let mut list = StrategyList::new();
 	list.add(strategy::MockStrat);
 	router.layer(axum::Extension(list))
 }
 
-#[server(GetStrats, "/api")]
-pub async fn get_strategies(cx: Scope) -> Result<Vec<String>, ServerFnError> {
+#[cfg(feature="ssr")]
+pub async fn get_strats(cx: Scope) -> Result<backend_core::strategy_list::StrategyList, ServerFnError> {
 	use backend_core::strategy_list::StrategyList;
 	use axum::*;
 	
 	leptos_axum::extract(cx, |Extension(strats): Extension<StrategyList>| async move {
-		strats.iter_strats().map(|s| s.name().to_owned()).collect::<Vec<String>>()
+		strats
 	}).await.map_err(|e| {
 		ServerFnError::ServerError(format!("{:?}",e))
 	})
+}
+
+#[server(GetStrats, "/api")]
+pub async fn get_strategies(cx: Scope) -> Result<Vec<String>, ServerFnError> {	
+	let strats = get_strats(cx).await?;
+	let list = strats.iter_strats().map(|s| s.name().to_owned()).collect::<Vec<String>>();
+	Ok(list)
 }
 
 #[component]
