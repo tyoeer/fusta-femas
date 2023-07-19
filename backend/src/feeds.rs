@@ -16,7 +16,7 @@ pub struct FeedInfo {
 impl From<feed::Model> for FeedInfo {
 	fn from(model: feed::Model) -> Self {
 		let mut url = model.url;
-		if let None = url.find("://") {
+		if !url.contains("://") {
 			url = format!("https://{}",url);
 		}
 		Self {

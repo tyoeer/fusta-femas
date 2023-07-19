@@ -21,3 +21,6 @@ nav {
 nav * {
 	padding: 1em;
 }
+nav a[aria-current='page'] {
+	background-color: lightgrey;
+}
