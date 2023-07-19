@@ -21,9 +21,9 @@ impl MigrationTrait for Migration {
 			manager,
 			Table::create()
 				.table(Iden::Feed)
-				.col(ColumnDef::new(Iden::Url).string().not_null().unique_key())
-				.col(ColumnDef::new(Iden::Name).string().not_null().unique_key())
-				.col(ColumnDef::new(Iden::Strategy).string().not_null().unique_key()),
+				.col(ColumnDef::new(Iden::Url).string().not_null())
+				.col(ColumnDef::new(Iden::Name).string().not_null())
+				.col(ColumnDef::new(Iden::Strategy).string().not_null()),
 		)
 		.await
 	}
