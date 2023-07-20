@@ -255,6 +255,7 @@ dependencies = [
  "sea-entities",
  "sea-orm",
  "serde",
+ "tracing",
 ]
 
 [[package]]

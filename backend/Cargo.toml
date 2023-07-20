@@ -17,6 +17,7 @@ leptos = { workspace = true }
 leptos_meta = { workspace = true }
 leptos_router = { workspace = true }
 serde = {workspace = true}
+tracing = {workspace = true}
 
 [features]
 default = ["ssr","hydrate"]
