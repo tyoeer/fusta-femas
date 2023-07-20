@@ -13,6 +13,7 @@ cfg_if! { if #[cfg(feature = "ssr")] {
 	use fusta_femas::fileserve::file_and_error_handler;
 	use leptos::*;
 	use leptos_axum::{generate_route_list, handle_server_fns_with_context, LeptosRoutes};
+	use tracing_subscriber::{*, prelude::*};
 	
 	async fn leptos_server_fn_handler(
 		path: Path<String>,
@@ -45,8 +46,13 @@ cfg_if! { if #[cfg(feature = "ssr")] {
 	async fn main() {
 		
 		dotenvy::dotenv().ok();
-		simple_logger::init_with_level(log::Level::Debug).expect("couldn't initialize logging");
 		
+		let fmt_layer = fmt::layer()
+			.event_format(fmt::format().pretty());
+		registry()
+			.with(fmt_layer)
+			.with(EnvFilter::from_default_env())
+			.init();
 		// Setting get_configuration(None) means we'll be using cargo-leptos's env values
 		// For deployment these variables are:
 		// <https://github.com/leptos-rs/start-axum#executing-a-server-on-a-remote-machine-without-the-toolchain>
