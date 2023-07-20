@@ -37,7 +37,7 @@ impl MigrationTrait for Migration {
 			manager,
 			Table::create()
 				.table(Iden::Fetch)
-				.col(ColumnDef::new(Iden::Url).string().not_null().unique_key())
+				.col(ColumnDef::new(Iden::Url).string().not_null())
 				.col(ColumnDef::new(Iden::Status).enumeration(Iden::Status, Status::iter()).not_null())
 				.col(ColumnDef::new(Iden::Content).string().null())
 				.col(ColumnDef::new(Iden::Error).string().null())
