@@ -6,12 +6,14 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "entry")]
 pub struct Model {
+	pub name: String,
 	pub view_url: String,
 	pub embed_url: Option<String>,
 	pub viewed: bool,
 	pub feed_entry_id: String,
 	pub feed_id: i32,
-	pub latest_fetch_id: i32,
+	pub latest_fetch_id: Option<i32>,
+	pub date: Option<TimeDateTime>,
 	#[sea_orm(primary_key)]
 	pub id: i32,
 	pub created_at: TimeDateTime,

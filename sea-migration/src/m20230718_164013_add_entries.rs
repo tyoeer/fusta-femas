@@ -13,6 +13,8 @@ pub enum Iden {
 	ViewUrl,
 	Viewed,
 	EmbedUrl,
+	Name,
+	Date,
 }
 
 #[derive(DeriveMigrationName)]
@@ -26,12 +28,14 @@ impl MigrationTrait for Migration {
 			manager,
 			Table::create()
 				.table(Iden::Entry)
+				.col(ColumnDef::new(Iden::Name).string().not_null())
 				.col(ColumnDef::new(Iden::ViewUrl).string().not_null())
 				.col(ColumnDef::new(Iden::EmbedUrl).string().null())
 				.col(ColumnDef::new(Iden::Viewed).boolean().not_null().default(false))
 				.col(ColumnDef::new(Iden::FeedEntryId).string().not_null())
 				.col(ColumnDef::new(Iden::FeedId).integer().not_null())
-				.col(ColumnDef::new(Iden::LatestFetchId).integer().not_null())
+				.col(ColumnDef::new(Iden::LatestFetchId).integer().null())
+				.col(ColumnDef::new(Iden::Date).timestamp().null())
 				.foreign_key(
 					ForeignKey::create()
 					.from(Iden::Entry, Iden::FeedId)
