@@ -24,8 +24,8 @@ tokio = "1.29.1"
 
 [[workspace.metadata.leptos]]
 name = "fusta-femas"
-bin-package = "fusta-femas"
-lib-package = "fusta-femas"
+bin-package = "app"
+lib-package = "app"
 # input
 style-file = "app/style/main.scss"
 assets-dir = "app/public"

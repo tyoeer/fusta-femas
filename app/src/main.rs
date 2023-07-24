@@ -9,8 +9,8 @@ cfg_if! { if #[cfg(feature = "ssr")] {
 		body::Body,
 		Router,
 	};
-	use fusta_femas::app::*;
-	use fusta_femas::fileserve::file_and_error_handler;
+	use app::app::*;
+	use app::fileserve::file_and_error_handler;
 	use leptos::*;
 	use leptos_axum::{generate_route_list, handle_server_fns_with_context, LeptosRoutes};
 	use tracing_subscriber::{*, prelude::*};
