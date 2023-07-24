@@ -67,7 +67,7 @@ pub fn Feed(cx: Scope, fi: FeedInfo) -> impl IntoView {
 		match fetch_one.value().get() {
 			None => {
 				if fetch_one.pending().get() {
-					"fecthing...".to_owned()
+					"fetching...".to_owned()
 				} else {
 					"fetch".to_owned()
 				}
