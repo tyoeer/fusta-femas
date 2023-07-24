@@ -9,5 +9,6 @@ edition = "2021"
 sea-entities = {path="../sea-entities"}
 sea-orm = {workspace = true}
 async-trait = {workspace = true}
+time = {workspace = true, features = ["formatting","macros","serde"]}
 anyhow = "1.0.72"
 thiserror = "1.0.43"

@@ -267,6 +267,7 @@ dependencies = [
  "sea-entities",
  "sea-orm",
  "thiserror",
+ "time",
 ]
 
 [[package]]

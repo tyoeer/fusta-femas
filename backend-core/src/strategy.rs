@@ -3,8 +3,32 @@ use sea_orm::*;
 
 pub struct EntryInfo {
 	feed_entry_id: String,
+	title: String,
 	view_url: String,
 	embed_url: Option<String>,
+	uploaded_at: Option<time::PrimitiveDateTime>,
+}
+
+impl EntryInfo {
+	pub fn new(feed_entry_id: String, title: String, view_url: String) -> Self {
+		Self {
+			feed_entry_id,
+			title,
+			view_url,
+			embed_url: None,
+			uploaded_at: None,
+		}
+	}
+	
+	pub fn uploaded_at(&mut self, uploaded_at: time::PrimitiveDateTime) -> &mut Self {
+		self.uploaded_at = Some(uploaded_at);
+		self
+	}
+	
+	pub fn embed_url(&mut self, embed_url: String) -> &mut Self {
+		self.embed_url = Some(embed_url);
+		self
+	}
 }
 
 #[async_trait::async_trait]
@@ -40,9 +64,11 @@ async fn update_entries(conn: &DatabaseConnection, feed: feed::Model, fetch_id: 
 				new
 			};
 			
-			model.latest_fetch_id = Set(fetch_id);
+			model.latest_fetch_id = Set(Some(fetch_id));
+			model.name = Set(entry.title);
 			model.view_url = Set(entry.view_url);
 			model.embed_url = Set(entry.embed_url);
+			model.date = Set(entry.uploaded_at);
 			model.save(conn).await?;
 		}
 		
