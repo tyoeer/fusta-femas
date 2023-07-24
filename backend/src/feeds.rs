@@ -64,17 +64,17 @@ pub async fn fetch_one_feed(cx: Scope, id: i32) -> Result<i32, ServerFnError> {
 pub fn Feed(cx: Scope, fi: FeedInfo) -> impl IntoView {
 	let fetch_one = create_server_action::<FetchOne>(cx);
 	let button_name = move || {
-		match fetch_one.value().get() {
-			None => {
-				if fetch_one.pending().get() {
-					"fetching...".to_owned()
-				} else {
+		if fetch_one.pending().get() {
+			"fetching...".to_owned()
+		} else {
+			match fetch_one.value().get() {
+				None => {
 					"fetch".to_owned()
+				},
+				Some(res) => match res {
+					Ok(id) => format!("fetched: {id}"),
+					Err(err) => format!("server error: {err}"),
 				}
-			},
-			Some(res) => match res {
-				Ok(id) => format!("fetched: {id}"),
-				Err(err) => format!("server error: {err}"),
 			}
 		}
 	};
