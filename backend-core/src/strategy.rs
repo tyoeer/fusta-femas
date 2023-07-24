@@ -40,7 +40,8 @@ pub trait Strategy: Send + Sync {
 }
 
 fn error_to_string(err: anyhow::Error) -> String {
-	format!("{:?}", err)
+	tracing::error!("{err:?}");
+	format!("{err:?}")
 }
 
 async fn update_entries(conn: &DatabaseConnection, feed: feed::Model, fetch_id: i32, entries: Vec<EntryInfo>) -> anyhow::Result<()> {

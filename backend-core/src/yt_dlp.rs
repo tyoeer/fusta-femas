@@ -1,5 +1,6 @@
 use std::{ffi::OsString, process::Stdio};
 
+use anyhow::Context;
 use sea_entities::*;
 use sea_orm::*;
 use super::strategy::*;
@@ -144,7 +145,11 @@ impl Strategy for YtDlpStrategy {
 	
 	async fn parse(&self, data: &str) -> anyhow::Result<Vec<EntryInfo>> {
 		data.split('\n').map(|seg| -> anyhow::Result<EntryInfo> {
-			Ok(serde_json::from_str::<YtdlpVideoInfo>(seg)?.into())
+			let parse_res = serde_json::from_str::<YtdlpVideoInfo>(seg);
+			let context_res = parse_res.map_err(|e| {
+				anyhow::Error::from(e).context(format!("While parsing: \"{seg}\""))
+			});
+			context_res.map(|info| info.into())
 		}).collect()
 	}
 }
