@@ -1,6 +1,5 @@
 use std::{ffi::OsString, process::Stdio};
 
-use anyhow::Context;
 use sea_entities::*;
 use sea_orm::*;
 use super::strategy::*;
@@ -136,15 +135,15 @@ impl Strategy for YtDlpStrategy {
 		tracing::debug!(feed.id, ?cmd, "Running yt-dlp command to fetch");
 		
 		let out = cmd.output().await?;
-		if !out.status.success() {
-			anyhow::bail!("{}",out.status);
+		if !out.status.success() && !matches!(out.status.code(),Some(101))  {
+			anyhow::bail!("Process returned non-successful exit code: {}",out.status);
 		}
 		
 		Ok(String::from_utf8(out.stdout)?)
 	}
 	
 	async fn parse(&self, data: &str) -> anyhow::Result<Vec<EntryInfo>> {
-		data.split('\n').map(|seg| -> anyhow::Result<EntryInfo> {
+		data.trim().split('\n').map(|seg| -> anyhow::Result<EntryInfo> {
 			let parse_res = serde_json::from_str::<YtdlpVideoInfo>(seg);
 			let context_res = parse_res.map_err(|e| {
 				anyhow::Error::from(e).context(format!("While parsing: \"{seg}\""))
