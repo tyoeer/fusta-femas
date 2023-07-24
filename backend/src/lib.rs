@@ -19,6 +19,7 @@ pub fn layer(router: axum::routing::Router) -> axum::routing::Router {
 	
 	let mut list = StrategyList::new();
 	list.add(strategy::MockStrat);
+	list.add(yt_dlp::YtDlpStrategy::default());
 	router.layer(axum::Extension(list))
 }
 

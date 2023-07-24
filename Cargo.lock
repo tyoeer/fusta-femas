@@ -266,8 +266,12 @@ dependencies = [
  "async-trait",
  "sea-entities",
  "sea-orm",
+ "serde",
+ "serde_json",
  "thiserror",
  "time",
+ "tokio",
+ "tracing",
 ]
 
 [[package]]
