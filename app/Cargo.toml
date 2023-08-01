@@ -31,7 +31,7 @@ leptos_router = { workspace = true }
 cfg-if = "1"
 http = "0.2.8"
 serde = {workspace = true}
-thiserror = "1.0.38"
+thiserror = "1.0.44"
 tracing = {workspace = true}
 tracing-subscriber = {version="0.3.17", features=["env-filter"]}
 
