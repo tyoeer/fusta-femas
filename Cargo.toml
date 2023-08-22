@@ -20,7 +20,7 @@ async-trait = "0.1.73"
 axum = "0.6.20"
 leptos_axum = "0.4"
 tracing = "0.1.37"
-tokio = "1.31.0"
+tokio = "1.32.0"
 
 [[workspace.metadata.leptos]]
 name = "fusta-femas"
