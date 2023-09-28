@@ -11,7 +11,7 @@ cfg_if! { if #[cfg(feature = "ssr")] {
 	use tower::ServiceExt;
 	use tower_http::services::ServeDir;
 	use crate::app::*;
-
+	
 	pub async fn file_and_error_handler(uri: Uri, State(app_state): State<AppState>, req: Request<Body>) -> AxumResponse {
 		let root = app_state.leptos_options.site_root.clone();
 		let res = get_static_file(uri.clone(), &root).await.unwrap();
@@ -24,7 +24,7 @@ cfg_if! { if #[cfg(feature = "ssr")] {
 		}
 	}
 
-	async fn get_static_file(uri: Uri, root: &str) -> Result<Response<BoxBody>, (StatusCode, String)> {
+	pub async fn get_static_file(uri: Uri, root: &str) -> Result<Response<BoxBody>, (StatusCode, String)> {
 		let req = Request::builder().uri(uri.clone()).body(Body::empty()).unwrap();
 		// `ServeDir` implements `tower::Service` so we can call it with `tower::ServiceExt::oneshot`
 		// This path is relative to the cargo root
