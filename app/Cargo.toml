@@ -22,6 +22,7 @@ dotenvy = {version="0.15", optional = true}
 console_error_panic_hook = {version="0.1", optional=true}
 tracing-web = {version="0.1.2", optional=true}
 wasm-bindgen = {version="=0.2.87", optional=true}
+time = {workspace=true, optional = true}
 
 # shared
 backend = {path = "../backend", default-features = false}
@@ -42,6 +43,8 @@ hydrate = [
     "dep:tracing-web",
     "dep:wasm-bindgen",
     "tracing-subscriber/time",
+    "dep:time",
+    "time/wasm-bindgen", # make time work on WASM
     "leptos/hydrate",
     "leptos_meta/hydrate",
     "leptos_router/hydrate",

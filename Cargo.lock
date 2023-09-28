@@ -108,6 +108,7 @@ dependencies = [
  "sea-orm",
  "serde",
  "thiserror",
+ "time",
  "tokio",
  "tower",
  "tower-http",
@@ -3018,6 +3019,7 @@ checksum = "b0fdd63d58b18d663fbdf70e049f00a22c8e42be082203be7f26589213cd75ea"
 dependencies = [
  "deranged",
  "itoa",
+ "js-sys",
  "serde",
  "time-core",
  "time-macros",
