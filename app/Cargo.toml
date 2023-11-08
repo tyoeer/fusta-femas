@@ -10,15 +10,9 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 # server
 server-setup = {path = "../server-setup", optional = true}
-
-sea-entities = {path="../sea-entities", optional = true}
-sea-orm = {workspace = true, optional = true}
-axum = { workspace=true, optional = true }
-leptos_axum = { workspace=true, optional = true }
 tokio = { workspace=true, optional = true }
-tower = { version = "0.4.13", optional = true }
-tower-http = { version = "0.4", features = ["fs"], optional = true }
-dotenvy = {version="0.15", optional = true}
+
+leptos_axum = { workspace=true, optional = true }
 
 # client
 console_error_panic_hook = {version="0.1", optional=true}
@@ -35,7 +29,6 @@ cfg-if = "1"
 http = "0.2.8"
 serde = {workspace = true}
 thiserror = "1.0.49"
-tracing = {workspace = true}
 tracing-subscriber = {version="0.3.17", features=["env-filter"]}
 
 [features]
@@ -54,13 +47,7 @@ hydrate = [
 ]
 ssr = [
     "dep:server-setup",
-    "dep:sea-entities",
-    "dep:sea-orm",
-    "dep:dotenvy",
-    "dep:axum",
     "dep:tokio",
-    "dep:tower",
-    "dep:tower-http",
     "dep:leptos_axum",
     "leptos/ssr",
     "leptos_meta/ssr",

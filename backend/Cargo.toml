@@ -14,7 +14,6 @@ axum = {workspace=true, optional=true}
 leptos_axum = {workspace=true, optional=true}
 # shared
 leptos = { workspace = true }
-leptos_meta = { workspace = true }
 leptos_router = { workspace = true }
 serde = {workspace = true}
 tracing = {workspace = true}
@@ -23,7 +22,6 @@ tracing = {workspace = true}
 default = ["ssr","hydrate"]
 hydrate = [
 	"leptos/hydrate",
-	"leptos_meta/hydrate",
 	"leptos_router/hydrate"
 ]
 ssr = [
@@ -34,6 +32,5 @@ ssr = [
 	"dep:sea-orm",
 
 	"leptos/ssr",
-	"leptos_meta/ssr",
 	"leptos_router/ssr",
 ]
