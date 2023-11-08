@@ -8,6 +8,7 @@ members = [
 	"backend",
 	"backend-core",
 	"server-setup",
+	"server-entrypoint",
 ]
 
 [workspace.dependencies]
@@ -26,7 +27,7 @@ tracing-subscriber = "0.3.17"
 
 [[workspace.metadata.leptos]]
 name = "fusta-femas"
-bin-package = "app"
+bin-package = "server-entrypoint"
 lib-package = "app"
 # input
 style-file = "app/style/main.scss"
@@ -39,8 +40,8 @@ env = "DEV"
 site-addr = "127.0.0.1:3000"
 reload-port = 3001
 # server features
-bin-features = ["ssr"]
-bin-default-features = false
+# bin-features = ["ssr"]
+# bin-default-features = false
 # frontwasm features
 lib-features = ["hydrate"]
 lib-default-features = false

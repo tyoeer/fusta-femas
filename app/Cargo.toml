@@ -9,10 +9,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 # server
-server-setup = {path = "../server-setup", optional = true}
-tokio = { workspace=true, optional = true }
-
-leptos_axum = { workspace=true, optional = true } # Used in the erro template
+leptos_axum = { workspace=true, optional = true } # Used in the error template
 
 # client
 console_error_panic_hook = {version="0.1", optional=true}

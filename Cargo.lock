@@ -2824,6 +2824,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "server-entrypoint"
+version = "0.0.0"
+dependencies = [
+ "app",
+ "server-setup",
+ "tokio",
+]
+
+[[package]]
 name = "server-setup"
 version = "0.0.0"
 dependencies = [

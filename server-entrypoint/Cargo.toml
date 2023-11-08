@@ -1,0 +1,9 @@
+[package]
+name = "server-entrypoint"
+version = "0.0.0"
+edition = "2021"
+
+[dependencies]
+server-setup = {path = "../server-setup"}
+app = {path = "../app", default-features = false, features = ["ssr"]}
+tokio = {workspace = true, features = ["rt","macros"]}

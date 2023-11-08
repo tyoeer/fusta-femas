@@ -1,6 +1,8 @@
 use cfg_if::cfg_if;
 pub mod app;
 pub mod error_template;
+#[cfg(feature = "ssr")]
+pub use backend::layer as extend;
 
 cfg_if! { if #[cfg(feature = "hydrate")] {
 	use wasm_bindgen::prelude::wasm_bindgen;
