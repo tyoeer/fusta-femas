@@ -31,17 +31,6 @@ cfg_if! { if #[cfg(feature = "ssr")] {
 		).await
 	}
 	
-	async fn leptos_route_handler(State(state): State<AppState>, req: Request<Body>) -> Response {
-		let handler = leptos_axum::render_app_to_stream_with_context(
-			state.leptos_options,
-			move |cx| {
-				provide_context(cx, state.conn.clone());
-			},
-			App
-		);
-		handler(req).await.into_response()
-	}
-	
 	#[tokio::main]
 	async fn main() {
 		
@@ -71,11 +60,26 @@ cfg_if! { if #[cfg(feature = "ssr")] {
 		};
 		
 		/*
-			This can't be moved into it's own module because a function returning this would return
+			These can't be moved into their own module because a function returning one of these would return
 			impl Fn(Uri, State<AppState>, Request<Body>) -> impl Future<Output = AxumResponse>
 			which has a return-position impl trait in a Fn trait, which isn't allowed yet:
 			https://github.com/rust-lang/rust/issues/99697
 		*/
+		//Renders the leptos app
+		let leptos_route_handler = {
+			let app = App;
+			
+			move |State(state): State<AppState>, req: Request<Body>| async move {
+				let handler = leptos_axum::render_app_to_stream_with_context(
+					state.leptos_options,
+					move |cx| {
+						provide_context(cx, state.conn.clone());
+					},
+					app
+				);
+				handler(req).await.into_response()
+			}
+		};
 		//Returns the file at the uri if it exists, otherwise renders the app
 		let file_or_app_handler = {
 			//Explicitly mention it here because it gets captured by the closure,
