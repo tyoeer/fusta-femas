@@ -82,18 +82,15 @@ cfg_if! { if #[cfg(feature = "ssr")] {
 		};
 		//Returns the file at the uri if it exists, otherwise renders the app
 		let file_or_app_handler = {
-			//Explicitly mention it here because it gets captured by the closure,
-			// and to potentially add a .clone() later if it gets necessary
-			let leptos_options = leptos_options;
 			let app = App;
 			
-			move |uri: axum::http::Uri, req| async move {
-				let res = get_static_file(uri.clone(), &leptos_options.site_root).await.unwrap();
+			move |State(state): State<AppState>, uri: axum::http::Uri, req| async move {
+				let res = get_static_file(uri.clone(), &state.leptos_options.site_root).await.unwrap();
 
 				if res.status() == axum::http::StatusCode::OK {
 					res.into_response()
 				} else {
-					let handler = leptos_axum::render_app_to_stream(leptos_options, app);
+					let handler = leptos_axum::render_app_to_stream(state.leptos_options, app);
 					handler(req).await.into_response()
 				}
 			}
