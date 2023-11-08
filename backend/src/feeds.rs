@@ -34,8 +34,7 @@ impl From<feed::Model> for FeedInfo {
 
 #[server]
 pub async fn get_feeds() -> Result<Vec<FeedInfo>, ServerFnError> {
-	let conn = use_context::<DatabaseConnection>()
-		.ok_or_else(|| ServerFnError::ServerError("Missing DB connection pool".into()))?;
+	let conn = extractor::<Extension<DatabaseConnection>>().await.map(|ext| ext.0)?;
 	let feeds = feed::Entity::find().all(&conn).await?;
 	let urls = feeds.into_iter().map(|f| f.into()).collect();
 	Ok(urls)
