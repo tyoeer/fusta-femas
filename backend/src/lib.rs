@@ -27,12 +27,9 @@ pub fn layer(router: axum::routing::Router) -> axum::routing::Router {
 pub async fn get_strats() -> Result<backend_core::strategy_list::StrategyList, ServerFnError> {
 	use backend_core::strategy_list::StrategyList;
 	use axum::*;
+	use leptos_axum::extractor;
 	
-	leptos_axum::extract(|Extension(strats): Extension<StrategyList>| async move {
-		strats
-	}).await.map_err(|e| {
-		ServerFnError::ServerError(format!("{:?}",e))
-	})
+	extractor::<Extension<StrategyList>>().await.map(|ext| ext.0)
 }
 
 #[server]
