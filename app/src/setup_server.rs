@@ -4,7 +4,7 @@ use axum::{
 	http::{Uri, StatusCode, Request, header::HeaderMap},
 	extract::{Path, RawQuery, State},
 	body::{boxed, Body},
-	Router,
+	Router, Extension,
 };
 use leptos::*;
 use leptos_axum::{generate_route_list, handle_server_fns_with_context, LeptosRoutes};
@@ -70,7 +70,7 @@ pub async fn run<View>(app: fn() -> View) where
 	
 	let state = AppState {
 		leptos_options: leptos_options.clone(),
-		conn,
+		conn: conn.clone(),
 	};
 	
 	/*
@@ -109,6 +109,7 @@ pub async fn run<View>(app: fn() -> View) where
 		// .fallback(file_and_error_handler)
 		.fallback(file_or_app_handler)
 		.with_state(state)
+		.layer(Extension(conn))
 	;
 	let app = backend::layer(app);
 	

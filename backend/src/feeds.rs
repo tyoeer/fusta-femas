@@ -1,10 +1,14 @@
 use leptos::*;
 use leptos_router::ActionForm;
+use serde::*;
+#[cfg(feature="ssr")]
+use leptos_axum::extractor;
+#[cfg(feature="ssr")]
+use axum::Extension;
 #[cfg(feature="ssr")]
 use sea_entities::*;
 #[cfg(feature="ssr")]
 use sea_orm::*;
-use serde::*;
 
 #[derive(Debug,Clone, PartialEq,Eq, Serialize, Deserialize)]
 pub struct FeedInfo {
@@ -39,8 +43,7 @@ pub async fn get_feeds() -> Result<Vec<FeedInfo>, ServerFnError> {
 
 #[server]
 pub async fn fetch_one_feed(id: i32) -> Result<i32, ServerFnError> {
-	let conn = use_context::<DatabaseConnection>()
-		.ok_or_else(|| ServerFnError::ServerError("Missing DB connection pool".into()))?;
+	let conn = extractor::<Extension<DatabaseConnection>>().await.map(|ext| ext.0)?;
 	let strats = super::get_strats().await?;
 	
 	let feed = feed::Entity::find_by_id(id).one(&conn).await?;
