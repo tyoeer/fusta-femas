@@ -44,8 +44,6 @@ hydrate = [
     "backend/hydrate",
 ]
 ssr = [
-    "dep:server-setup",
-    "dep:tokio",
     "dep:leptos_axum",
     "leptos/ssr",
     "leptos_meta/ssr",
