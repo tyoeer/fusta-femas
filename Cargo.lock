@@ -2836,7 +2836,6 @@ name = "server-setup"
 version = "0.0.0"
 dependencies = [
  "axum",
- "backend",
  "dotenvy",
  "leptos",
  "leptos_axum",

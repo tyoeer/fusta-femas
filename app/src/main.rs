@@ -4,7 +4,9 @@ cfg_if! { if #[cfg(feature = "ssr")] {
 	#[tokio::main]
 	async fn main() {
 		let app = app::app::App;
-		server_setup::run(app).await;
+		server_setup::run(app, |router| {
+			backend::layer(router)
+		}).await;
 	}
 } else {
 	pub fn main() {

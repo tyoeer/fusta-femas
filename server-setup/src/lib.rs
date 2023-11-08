@@ -26,7 +26,7 @@ async fn get_static_file(uri: Uri, root: &str) -> Result<Response, (StatusCode, 
 }
 
 
-pub async fn run<View>(app: fn() -> View) where
+pub async fn run<View>(app: fn() -> View, extend: impl FnOnce(Router) -> Router) where
 	View: IntoView + 'static
 {
 	// let app = app::app::App;
@@ -78,7 +78,8 @@ pub async fn run<View>(app: fn() -> View) where
 		.with_state(leptos_options)
 		.layer(Extension(conn))
 	;
-	let app = backend::layer(app);
+	
+	let app = extend(app);
 	
 	// run our app with hyper
 	// `axum::Server` is a re-export of `hyper::Server`

@@ -13,5 +13,3 @@ tracing-subscriber = {version = "0.3.17", features = ["env-filter"]}
 tracing = {workspace = true}
 dotenvy = {version = "0.15"}
 sea-orm = {workspace = true}
-
-backend = {path = "../backend", default-features = false, features = ["ssr"]}
