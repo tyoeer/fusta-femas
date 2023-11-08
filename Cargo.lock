@@ -146,10 +146,8 @@ dependencies = [
  "leptos_meta",
  "leptos_router",
  "serde",
- "server-setup",
  "thiserror",
  "time",
- "tokio",
  "tracing-subscriber",
  "tracing-web",
  "wasm-bindgen",
@@ -629,6 +627,19 @@ name = "clap_lex"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "702fc72eb24e5a1e48ce58027a675bc24edd52096d5397d4aea7c6dd9eca0bd1"
+
+[[package]]
+name = "client-entrypoint"
+version = "0.0.0"
+dependencies = [
+ "app",
+ "console_error_panic_hook",
+ "leptos",
+ "time",
+ "tracing-subscriber",
+ "tracing-web",
+ "wasm-bindgen",
+]
 
 [[package]]
 name = "collection_literals"
