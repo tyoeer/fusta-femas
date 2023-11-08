@@ -28,7 +28,7 @@ impl From<feed::Model> for FeedInfo {
 	}
 }
 
-#[server(GetFeeds, "/api")]
+#[server]
 pub async fn get_feeds() -> Result<Vec<FeedInfo>, ServerFnError> {
 	let conn = use_context::<DatabaseConnection>()
 		.ok_or_else(|| ServerFnError::ServerError("Missing DB connection pool".into()))?;
@@ -37,7 +37,7 @@ pub async fn get_feeds() -> Result<Vec<FeedInfo>, ServerFnError> {
 	Ok(urls)
 }
 
-#[server(FetchOne, "/api")]
+#[server]
 pub async fn fetch_one_feed(id: i32) -> Result<i32, ServerFnError> {
 	let conn = use_context::<DatabaseConnection>()
 		.ok_or_else(|| ServerFnError::ServerError("Missing DB connection pool".into()))?;
@@ -62,7 +62,7 @@ pub async fn fetch_one_feed(id: i32) -> Result<i32, ServerFnError> {
 
 #[component]
 pub fn Feed(fi: FeedInfo) -> impl IntoView {
-	let fetch_one = create_server_action::<FetchOne>();
+	let fetch_one = create_server_action::<FetchOneFeed>();
 	let button_name = move || {
 		if fetch_one.pending().get() {
 			"fetching...".to_owned()

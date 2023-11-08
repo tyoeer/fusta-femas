@@ -35,7 +35,7 @@ pub async fn get_strats() -> Result<backend_core::strategy_list::StrategyList, S
 	})
 }
 
-#[server(GetStrats, "/api")]
+#[server]
 pub async fn get_strategies() -> Result<Vec<String>, ServerFnError> {	
 	let strats = get_strats().await?;
 	let list = strats.iter_strats().map(|s| s.name().to_owned()).collect::<Vec<String>>();
