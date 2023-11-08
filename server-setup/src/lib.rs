@@ -4,14 +4,13 @@ use axum::{
 	http::{Uri, StatusCode, Request},
 	extract::State,
 	body::{boxed, Body},
-	Router, Extension,
+	Router, Extension, Server,
 };
 use leptos::*;
 use leptos_axum::{generate_route_list, LeptosRoutes, handle_server_fns};
 use tower::ServiceExt;
 use tower_http::services::ServeDir;
-use tracing_subscriber::{*, prelude::*};
-
+use tracing_subscriber::{fmt, EnvFilter, registry, prelude::*};
 
 async fn get_static_file(uri: Uri, root: &str) -> Result<Response, (StatusCode, String)> {
 	let req = Request::builder().uri(uri.clone()).body(Body::empty()).unwrap();
@@ -54,12 +53,12 @@ pub async fn run<View>(app: fn() -> View) where
 	
 	/*
 		This can't be moved into it's own function because a function returning this would return
-		impl Fn(Uri, State<AppState>, Request<Body>) -> impl Future<Output = AxumResponse>
+		impl Fn(State<AppState>, Uri, Request<Body>) -> impl Future<Output = AxumResponse>
 		which has a return-position impl trait in a Fn trait, which isn't allowed yet:
 		https://github.com/rust-lang/rust/issues/99697
 	*/
 	//Returns the file at the uri if it exists, otherwise renders the app
-	let file_or_app_handler = move |State(state): State<LeptosOptions>, uri: axum::http::Uri, req| async move {
+	let file_or_app_handler = move |State(state): State<LeptosOptions>, uri: Uri, req: Request<Body>| async move {
 		let res = get_static_file(uri.clone(), &state.site_root).await.unwrap();
 
 		if res.status() == axum::http::StatusCode::OK {
@@ -84,7 +83,7 @@ pub async fn run<View>(app: fn() -> View) where
 	// run our app with hyper
 	// `axum::Server` is a re-export of `hyper::Server`
 	tracing::info!("listening on http://{}", &addr);
-	axum::Server::bind(&addr)
+	Server::bind(&addr)
 		.serve(app.into_make_service())
 		.await
 		.unwrap();

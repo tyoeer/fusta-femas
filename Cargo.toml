@@ -7,6 +7,7 @@ members = [
 	"app",
 	"backend",
 	"backend-core",
+	"server-setup",
 ]
 
 [workspace.dependencies]

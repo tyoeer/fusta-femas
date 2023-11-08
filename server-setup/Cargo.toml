@@ -1,0 +1,17 @@
+[package]
+name = "server-setup"
+version = "0.0.0"
+edition = "2021"
+
+[dependencies]
+axum = {workspace = true}
+leptos = {workspace = true, features = ["ssr"]}
+leptos_axum = {workspace = true}
+tower = {version = "0.4.13"}
+tower-http = {version = "0.4", features = ["fs"]}
+tracing-subscriber = {version = "0.3.17", features = ["env-filter"]}
+tracing = {workspace = true}
+dotenvy = {version = "0.15"}
+sea-orm = {workspace = true}
+
+backend = {path = "../backend", default-features = false, features = ["ssr"]}

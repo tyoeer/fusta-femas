@@ -1,12 +1,10 @@
 use cfg_if::cfg_if;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
-	mod setup_server;
-
 	#[tokio::main]
 	async fn main() {
 		let app = app::app::App;
-		setup_server::run(app).await;
+		server_setup::run(app).await;
 	}
 } else {
 	pub fn main() {

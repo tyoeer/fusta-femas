@@ -150,6 +150,7 @@ dependencies = [
  "sea-entities",
  "sea-orm",
  "serde",
+ "server-setup",
  "thiserror",
  "time",
  "tokio",
@@ -2828,6 +2829,22 @@ dependencies = [
  "itoa",
  "ryu",
  "serde",
+]
+
+[[package]]
+name = "server-setup"
+version = "0.0.0"
+dependencies = [
+ "axum",
+ "backend",
+ "dotenvy",
+ "leptos",
+ "leptos_axum",
+ "sea-orm",
+ "tower",
+ "tower-http",
+ "tracing",
+ "tracing-subscriber",
 ]
 
 [[package]]

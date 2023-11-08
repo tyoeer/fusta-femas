@@ -9,6 +9,8 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 # server
+server-setup = {path = "../server-setup", optional = true}
+
 sea-entities = {path="../sea-entities", optional = true}
 sea-orm = {workspace = true, optional = true}
 axum = { workspace=true, optional = true }
@@ -51,6 +53,7 @@ hydrate = [
     "backend/hydrate",
 ]
 ssr = [
+    "dep:server-setup",
     "dep:sea-entities",
     "dep:sea-orm",
     "dep:dotenvy",
