@@ -139,7 +139,6 @@ version = "0.1.0"
 dependencies = [
  "backend",
  "cfg-if",
- "console_error_panic_hook",
  "http",
  "leptos",
  "leptos_axum",
@@ -147,10 +146,6 @@ dependencies = [
  "leptos_router",
  "serde",
  "thiserror",
- "time",
- "tracing-subscriber",
- "tracing-web",
- "wasm-bindgen",
 ]
 
 [[package]]
