@@ -4,8 +4,8 @@ use leptos::*;
 pub mod feeds;
 
 #[component(transparent)]
-pub fn BackendRoutes(cx: Scope) -> impl IntoView {
-	view! { cx,
+pub fn BackendRoutes() -> impl IntoView {
+	view! {
 		<Route path="/backend" view=Outlet>
 			<Route path="/feeds" view=feeds::Feeds />
 			<Route path="/strats" view=Strategies />
@@ -24,11 +24,11 @@ pub fn layer(router: axum::routing::Router) -> axum::routing::Router {
 }
 
 #[cfg(feature="ssr")]
-pub async fn get_strats(cx: Scope) -> Result<backend_core::strategy_list::StrategyList, ServerFnError> {
+pub async fn get_strats() -> Result<backend_core::strategy_list::StrategyList, ServerFnError> {
 	use backend_core::strategy_list::StrategyList;
 	use axum::*;
 	
-	leptos_axum::extract(cx, |Extension(strats): Extension<StrategyList>| async move {
+	leptos_axum::extract(|Extension(strats): Extension<StrategyList>| async move {
 		strats
 	}).await.map_err(|e| {
 		ServerFnError::ServerError(format!("{:?}",e))
@@ -36,21 +36,21 @@ pub async fn get_strats(cx: Scope) -> Result<backend_core::strategy_list::Strate
 }
 
 #[server(GetStrats, "/api")]
-pub async fn get_strategies(cx: Scope) -> Result<Vec<String>, ServerFnError> {	
-	let strats = get_strats(cx).await?;
+pub async fn get_strategies() -> Result<Vec<String>, ServerFnError> {	
+	let strats = get_strats().await?;
 	let list = strats.iter_strats().map(|s| s.name().to_owned()).collect::<Vec<String>>();
 	Ok(list)
 }
 
 #[component]
-pub fn Strategies(cx: Scope) -> impl IntoView {
-	view! {cx,
-		<Await future=get_strategies bind:strats>
+pub fn Strategies() -> impl IntoView {
+	view! {
+		<Await future=get_strategies let:strats>
 			<ul>
 				{
 					strats.clone().map(|vec| {
 						vec.into_iter()
-							.map(|e| view! {cx, <li>{e}</li>})
+							.map(|e| view! {<li>{e}</li>})
 							.collect::<Vec<_>>()
 					})
 				}

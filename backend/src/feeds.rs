@@ -29,8 +29,8 @@ impl From<feed::Model> for FeedInfo {
 }
 
 #[server(GetFeeds, "/api")]
-pub async fn get_feeds(cx: Scope) -> Result<Vec<FeedInfo>, ServerFnError> {
-	let conn = use_context::<DatabaseConnection>(cx)
+pub async fn get_feeds() -> Result<Vec<FeedInfo>, ServerFnError> {
+	let conn = use_context::<DatabaseConnection>()
 		.ok_or_else(|| ServerFnError::ServerError("Missing DB connection pool".into()))?;
 	let feeds = feed::Entity::find().all(&conn).await?;
 	let urls = feeds.into_iter().map(|f| f.into()).collect();
@@ -38,10 +38,10 @@ pub async fn get_feeds(cx: Scope) -> Result<Vec<FeedInfo>, ServerFnError> {
 }
 
 #[server(FetchOne, "/api")]
-pub async fn fetch_one_feed(cx: Scope, id: i32) -> Result<i32, ServerFnError> {
-	let conn = use_context::<DatabaseConnection>(cx)
+pub async fn fetch_one_feed(id: i32) -> Result<i32, ServerFnError> {
+	let conn = use_context::<DatabaseConnection>()
 		.ok_or_else(|| ServerFnError::ServerError("Missing DB connection pool".into()))?;
-	let strats = super::get_strats(cx).await?;
+	let strats = super::get_strats().await?;
 	
 	let feed = feed::Entity::find_by_id(id).one(&conn).await?;
 	let Some(feed) = feed else {
@@ -61,8 +61,8 @@ pub async fn fetch_one_feed(cx: Scope, id: i32) -> Result<i32, ServerFnError> {
 }
 
 #[component]
-pub fn Feed(cx: Scope, fi: FeedInfo) -> impl IntoView {
-	let fetch_one = create_server_action::<FetchOne>(cx);
+pub fn Feed(fi: FeedInfo) -> impl IntoView {
+	let fetch_one = create_server_action::<FetchOne>();
 	let button_name = move || {
 		if fetch_one.pending().get() {
 			"fetching...".to_owned()
@@ -78,7 +78,7 @@ pub fn Feed(cx: Scope, fi: FeedInfo) -> impl IntoView {
 			}
 		}
 	};
-	view! {cx,
+	view! {
 		<span class="table_cell">{fi.name}</span>
 		<span class="table_cell"><a href=&fi.url target="_blank">{fi.url}</a></span>
 		<span class="table_cell">
@@ -91,14 +91,14 @@ pub fn Feed(cx: Scope, fi: FeedInfo) -> impl IntoView {
 }
 
 #[component]
-pub fn Feeds(cx: Scope) -> impl IntoView {
-	view! {cx,
-		<Await future=get_feeds bind:feeds>
+pub fn Feeds() -> impl IntoView {
+	view! {
+		<Await future=get_feeds let:feeds>
 			<ul class="table">
 				{
 					feeds.clone().map(|vec| {
 						vec.into_iter()
-							.map(|e| view! {cx, <li class="table_row"><Feed fi=e/></li>})
+							.map(|e| view! {<li class="table_row"><Feed fi=e/></li>})
 							.collect::<Vec<_>>()
 					})
 				}

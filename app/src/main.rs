@@ -25,8 +25,8 @@ cfg_if! { if #[cfg(feature = "ssr")] {
 	) -> impl IntoResponse {
 		handle_server_fns_with_context(
 			path, headers, raw_query,
-			move |cx| {
-				provide_context(cx, state.conn.clone())
+			move || {
+				provide_context(state.conn.clone())
 			},
 			req
 		).await
@@ -71,8 +71,8 @@ cfg_if! { if #[cfg(feature = "ssr")] {
 		let leptos_route_handler = move |State(state): State<AppState>, req: Request<Body>| async move {
 			let handler = leptos_axum::render_app_to_stream_with_context(
 				state.leptos_options,
-				move |cx| {
-					provide_context(cx, state.conn.clone());
+				move || {
+					provide_context(state.conn.clone());
 				},
 				app
 			);
@@ -93,7 +93,7 @@ cfg_if! { if #[cfg(feature = "ssr")] {
 		// build our application with a route
 		let app = Router::new()
 			.route("/api/*fn_name", get(leptos_server_fn_handler).post(leptos_server_fn_handler))
-			.leptos_routes_with_handler(generate_route_list(app).await, get(leptos_route_handler))
+			.leptos_routes_with_handler(generate_route_list(app), get(leptos_route_handler))
 			// .fallback(file_and_error_handler)
 			.fallback(file_or_app_handler)
 			.with_state(state)
@@ -102,7 +102,7 @@ cfg_if! { if #[cfg(feature = "ssr")] {
 		
 		// run our app with hyper
 		// `axum::Server` is a re-export of `hyper::Server`
-		log!("listening on http://{}", &addr);
+		tracing::info!("listening on http://{}", &addr);
 		axum::Server::bind(&addr)
 			.serve(app.into_make_service())
 			.await

@@ -21,25 +21,24 @@ cfg_if! { if #[cfg(feature = "ssr")] {
 }}
 
 #[component]
-pub fn App(cx: Scope) -> impl IntoView {
+pub fn App() -> impl IntoView {
 	// Provides context that manages stylesheets, titles, meta tags, etc.
-	provide_meta_context(cx);
-	let (_is_routing, set_is_routing) = create_signal(cx, false);
+	provide_meta_context();
+	let (_is_routing, set_is_routing) = create_signal(false);
 	
 	view! {
-		cx,
 		// id=leptos means cargo-leptos will hot-reload this stylesheet
 		<Stylesheet id="leptos" href="/pkg/fusta-femas.css"/>
 		<Title text="Fusta Femas"/>
 		
 		// content for this welcome page
-		<Router set_is_routing fallback=|cx| {
+		<Router set_is_routing fallback=|| {
 			let mut outside_errors = Errors::default();
 			outside_errors.insert_with_default_key(AppError::NotFound);
-			view! { cx,
+			view! {
 				<ErrorTemplate outside_errors/>
 			}
-			.into_view(cx)
+			.into_view()
 		}>
 			// Default style makes it very quickyl move the page up and down
 			// <RoutingProgress _is_routing />
@@ -55,8 +54,8 @@ pub fn App(cx: Scope) -> impl IntoView {
 }
 
 #[component]
-fn Nav(cx: Scope) -> impl IntoView {
-	view! {cx,
+fn Nav() -> impl IntoView {
+	view! {
 		<nav>
 			<A href="">Home</A>
 			<A href="backend/feeds">Feeds</A>
@@ -67,12 +66,12 @@ fn Nav(cx: Scope) -> impl IntoView {
 
 /// Renders the template home page
 #[component]
-fn HomePage(cx: Scope) -> impl IntoView {
+fn HomePage() -> impl IntoView {
 	// Creates a reactive value to update the button
-	let (count, set_count) = create_signal(cx, 0);
+	let (count, set_count) = create_signal(0);
 	let on_click = move |_| set_count.update(|count| *count += 1);
 
-	view! { cx,
+	view! {
 		<h1>"Welcome to Leptos!"</h1>
 		<button on:click=on_click>"Click Me: " {count}</button>
 	}
