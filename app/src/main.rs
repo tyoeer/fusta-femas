@@ -9,11 +9,12 @@ cfg_if! { if #[cfg(feature = "ssr")] {
 		body::Body,
 		Router,
 	};
-	use app::app::*;
 	use app::fileserve::get_static_file;
 	use leptos::*;
 	use leptos_axum::{generate_route_list, handle_server_fns_with_context, LeptosRoutes};
 	use tracing_subscriber::{*, prelude::*};
+	
+	use app::app::AppState;
 	
 	async fn leptos_server_fn_handler(
 		path: Path<String>,
@@ -33,6 +34,7 @@ cfg_if! { if #[cfg(feature = "ssr")] {
 	
 	#[tokio::main]
 	async fn main() {
+		let app = app::app::App;
 		
 		dotenvy::dotenv().ok();
 		
@@ -66,40 +68,32 @@ cfg_if! { if #[cfg(feature = "ssr")] {
 			https://github.com/rust-lang/rust/issues/99697
 		*/
 		//Renders the leptos app
-		let leptos_route_handler = {
-			let app = App;
-			
-			move |State(state): State<AppState>, req: Request<Body>| async move {
-				let handler = leptos_axum::render_app_to_stream_with_context(
-					state.leptos_options,
-					move |cx| {
-						provide_context(cx, state.conn.clone());
-					},
-					app
-				);
-				handler(req).await.into_response()
-			}
+		let leptos_route_handler = move |State(state): State<AppState>, req: Request<Body>| async move {
+			let handler = leptos_axum::render_app_to_stream_with_context(
+				state.leptos_options,
+				move |cx| {
+					provide_context(cx, state.conn.clone());
+				},
+				app
+			);
+			handler(req).await.into_response()
 		};
 		//Returns the file at the uri if it exists, otherwise renders the app
-		let file_or_app_handler = {
-			let app = App;
-			
-			move |State(state): State<AppState>, uri: axum::http::Uri, req| async move {
-				let res = get_static_file(uri.clone(), &state.leptos_options.site_root).await.unwrap();
+		let file_or_app_handler = move |State(state): State<AppState>, uri: axum::http::Uri, req| async move {
+			let res = get_static_file(uri.clone(), &state.leptos_options.site_root).await.unwrap();
 
-				if res.status() == axum::http::StatusCode::OK {
-					res.into_response()
-				} else {
-					let handler = leptos_axum::render_app_to_stream(state.leptos_options, app);
-					handler(req).await.into_response()
-				}
+			if res.status() == axum::http::StatusCode::OK {
+				res.into_response()
+			} else {
+				let handler = leptos_axum::render_app_to_stream(state.leptos_options, app);
+				handler(req).await.into_response()
 			}
 		};
 		
 		// build our application with a route
 		let app = Router::new()
 			.route("/api/*fn_name", get(leptos_server_fn_handler).post(leptos_server_fn_handler))
-			.leptos_routes_with_handler(generate_route_list(App).await, get(leptos_route_handler))
+			.leptos_routes_with_handler(generate_route_list(app).await, get(leptos_route_handler))
 			// .fallback(file_and_error_handler)
 			.fallback(file_or_app_handler)
 			.with_state(state)
