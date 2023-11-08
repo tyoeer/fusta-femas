@@ -1,24 +1,9 @@
-use cfg_if::cfg_if;
 use crate::error_template::{AppError, ErrorTemplate};
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
 
 use backend::BackendRoutes;
-
-cfg_if! { if #[cfg(feature = "ssr")] {
-	#[derive(Clone)]
-	pub struct AppState {
-		pub leptos_options: leptos::LeptosOptions,
-		pub conn: sea_orm::DatabaseConnection,
-	}
-
-	impl axum::extract::FromRef<AppState> for LeptosOptions {
-		fn from_ref(app_state: &AppState) -> LeptosOptions {
-			app_state.leptos_options.clone()
-		}
-	}
-}}
 
 #[component]
 pub fn App() -> impl IntoView {
