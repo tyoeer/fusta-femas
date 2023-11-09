@@ -3,7 +3,7 @@ use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
 
-use backend::BackendRoutes;
+use crate::backend::BackendRoutes;
 
 #[component]
 pub fn App() -> impl IntoView {

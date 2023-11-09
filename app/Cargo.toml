@@ -6,15 +6,21 @@ edition = "2021"
 [dependencies]
 # server
 leptos_axum = { workspace=true, optional = true } # Used in the error template
+backend-core = {path = "../backend-core", optional = true}
+sea-entities = {path = "../sea-entities", optional = true}
+sea-orm = {workspace = true, optional = true}
+axum = {workspace = true, optional = true}
 
 # shared
-backend = {path = "../backend", default-features = false}
+# backend = {path = "../backend", default-features = false}
 leptos = { workspace = true }
 leptos_meta = { workspace = true }
 leptos_router = { workspace = true }
 cfg-if = "1"
 http = "0.2.8" # Used in the error_template
 thiserror = "1.0.49" # Used in the error_template
+serde = {workspace = true}
+tracing = {workspace = true}
 
 [features]
 default = ["ssr","hydrate"]
@@ -22,14 +28,18 @@ hydrate = [
 	"leptos/hydrate",
 	"leptos_meta/hydrate",
 	"leptos_router/hydrate",
-	"backend/hydrate",
+	# "backend/hydrate",
 ]
 ssr = [
 	"dep:leptos_axum",
 	"leptos/ssr",
 	"leptos_meta/ssr",
 	"leptos_router/ssr",
-	"backend/ssr",
+	# "backend/ssr",
+	"dep:backend-core",
+	"dep:axum",
+	"dep:sea-entities",
+	"dep:sea-orm",
 ]
 
 [package.metadata.cargo-all-features]

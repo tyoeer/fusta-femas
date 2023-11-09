@@ -137,14 +137,19 @@ dependencies = [
 name = "app"
 version = "0.1.0"
 dependencies = [
- "backend",
+ "axum",
+ "backend-core",
  "cfg-if",
  "http",
  "leptos",
  "leptos_axum",
  "leptos_meta",
  "leptos_router",
+ "sea-entities",
+ "sea-orm",
+ "serde",
  "thiserror",
+ "tracing",
 ]
 
 [[package]]
