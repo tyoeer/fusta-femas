@@ -1,0 +1,154 @@
+use std::{ffi::OsString, process::Stdio};
+
+use sea_entities::*;
+use sea_orm::*;
+use super::strategy::*;
+
+/*
+--dateafter does not appear to work with flat-playlist
+This works to select a subset.
+yt-dlp --break-on-reject --skip-download --dateafter 20230101 --dump-json https://www.youtube.com/@NevasBuildings >test.json
+yt-dlp --verbose --break-on-reject --skip-download --playlist-end 10 --dump-json https://www.youtube.com/@NevasBuildings >test.json
+*/
+
+pub const YTDLP_DATE_FORMAT: &[time::format_description::FormatItem<'_>] = time::macros::format_description!("[year padding:zero][month padding:zero][day padding:zero]");
+
+time::serde::format_description!(ytdlp_serde_format, Date, YTDLP_DATE_FORMAT);
+
+struct YtdlpCommand {
+	date_after: Option<time::Date>,
+	playlist_end: Option<u16>,
+	url: String,
+	verbose: bool
+}
+
+impl YtdlpCommand {
+	pub fn new(url: String) -> Self {
+		Self {
+			date_after: None,
+			playlist_end: None,
+			url,
+			verbose: false,
+		}
+	}
+	
+	pub fn date_after(&mut self, date_after: time::Date) {
+		self.date_after = Some(date_after);
+	}
+	
+	pub fn playlist_end(&mut self, playlist_end: u16) {
+		self.playlist_end = Some(playlist_end);
+	}
+	
+	pub fn verbose(&mut self, verbose: bool) {
+		self.verbose = verbose;
+	}
+	
+	pub fn get_args(&self) -> Result<Vec<OsString>,time::error::Format> {
+		let mut out: Vec<OsString> = vec![
+			"--break-on-reject".into(),
+			"--simulate".into(),
+			"--dump-json".into(),
+		];
+		
+		if self.verbose {
+			out.push("--verbose".into());
+		}
+		if let Some(date) = self.date_after {
+			out.push("--dateafter".into());
+			out.push(date.format(YTDLP_DATE_FORMAT)?.into());
+		}
+		if let Some(end) = self.playlist_end {
+			out.push("--playlist-end".into());
+			out.push(format!("{end}").into());
+		}
+		
+		out.push(self.url.clone().into());
+		
+		Ok(out)
+	}
+}
+
+
+#[derive(Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+struct YtdlpVideoInfo {
+	id: String,
+	title: String,
+	webpage_url: String,
+	#[serde(with = "ytdlp_serde_format")]
+	upload_date: time::Date,
+	playable_in_embed: bool,
+}
+
+impl From<YtdlpVideoInfo> for EntryInfo {
+	fn from(info: YtdlpVideoInfo) -> EntryInfo {
+		let mut entry = EntryInfo::new(info.id.clone(), info.title, info.webpage_url);
+		entry.uploaded_at(info.upload_date.midnight());
+		if info.playable_in_embed {
+			entry.embed_url(format!("www.youtube-nocookie.com/embed/{}",info.id));
+		}
+		entry
+	}
+}
+
+#[derive(Clone,PartialEq,Eq)]
+pub struct YtDlpStrategy {
+	command: String,
+	fetch_amount_if_no_date: u16,
+}
+
+impl Default for YtDlpStrategy {
+	fn default() -> Self {
+		Self {
+			command: "yt-dlp".into(),
+			fetch_amount_if_no_date: 10,
+		}
+	}
+}
+
+#[async_trait::async_trait]
+impl Strategy for YtDlpStrategy {
+	fn name(&self) -> &'static str {
+		"yt-dlp"
+	}
+	
+	async fn fetch(&self, conn: &DatabaseConnection, feed: &feed::Model) -> anyhow::Result<String> {
+		let last = feed.find_related(entry::Entity)
+			.order_by_desc(entry::Column::Date)
+			.one(conn).await?;
+		
+		let mut cmd_args = YtdlpCommand::new(feed.url.clone());
+		
+		if let Some(datetime) = last.and_then(|e| e.date) {
+			cmd_args.date_after(datetime.date());
+		} else {
+			cmd_args.playlist_end(self.fetch_amount_if_no_date);
+		};
+		
+		let mut cmd = tokio::process::Command::new(self.command.clone());
+		cmd
+			.args(cmd_args.get_args()?)
+			.kill_on_drop(true)
+			.stdout(Stdio::piped())
+		;
+		
+		tracing::debug!(feed.id, ?cmd, "Running yt-dlp command to fetch");
+		
+		let out = cmd.output().await?;
+		if !out.status.success() && !matches!(out.status.code(),Some(101))  {
+			anyhow::bail!("Process returned non-successful exit code: {}",out.status);
+		}
+		
+		Ok(String::from_utf8(out.stdout)?)
+	}
+	
+	async fn parse(&self, data: &str) -> anyhow::Result<Vec<EntryInfo>> {
+		data.trim().split('\n').map(|seg| -> anyhow::Result<EntryInfo> {
+			let parse_res = serde_json::from_str::<YtdlpVideoInfo>(seg);
+			let context_res = parse_res.map_err(|e| {
+				anyhow::Error::from(e).context(format!("While parsing: \"{seg}\""))
+			});
+			context_res.map(|info| info.into())
+		}).collect()
+	}
+}

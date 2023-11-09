@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 # server
 leptos_axum = { workspace=true, optional = true } # Used in the error template
-backend-core = {path = "../backend-core", optional = true}
+acquire = {path = "../acquire", optional = true}
 sea-entities = {path = "../sea-entities", optional = true}
 sea-orm = {workspace = true, optional = true}
 axum = {workspace = true, optional = true}
@@ -34,7 +34,7 @@ ssr = [
 	"leptos_router/ssr",
 	"dep:leptos_axum",
 	"dep:axum",
-	"dep:backend-core",
+	"dep:acquire",
 	"dep:sea-entities",
 	"dep:sea-orm",
 ]

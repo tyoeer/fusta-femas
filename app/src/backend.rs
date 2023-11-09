@@ -15,7 +15,7 @@ pub fn BackendRoutes() -> impl IntoView {
 
 #[cfg(feature="ssr")]
 pub fn layer(router: axum::routing::Router) -> axum::routing::Router {
-	use backend_core::*;
+	use acquire::*;
 	
 	let mut list = StrategyList::new();
 	list.add(strategy::MockStrat);
@@ -24,8 +24,8 @@ pub fn layer(router: axum::routing::Router) -> axum::routing::Router {
 }
 
 #[cfg(feature="ssr")]
-pub async fn get_strats() -> Result<backend_core::strategy_list::StrategyList, ServerFnError> {
-	use backend_core::strategy_list::StrategyList;
+pub async fn get_strats() -> Result<acquire::strategy_list::StrategyList, ServerFnError> {
+	use acquire::strategy_list::StrategyList;
 	use axum::*;
 	use leptos_axum::extractor;
 	
