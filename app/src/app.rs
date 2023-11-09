@@ -7,7 +7,7 @@ use backend::BackendRoutes;
 
 #[component]
 pub fn App() -> impl IntoView {
-	// Provides context that manages stylesheets, titles, meta tags, etc.
+	// Needed for stylesheet, title, etc.
 	provide_meta_context();
 	let (_is_routing, set_is_routing) = create_signal(false);
 	
@@ -16,7 +16,6 @@ pub fn App() -> impl IntoView {
 		<Stylesheet id="leptos" href="/pkg/fusta-femas.css"/>
 		<Title text="Fusta Femas"/>
 		
-		// content for this welcome page
 		<Router set_is_routing fallback=|| {
 			let mut outside_errors = Errors::default();
 			outside_errors.insert_with_default_key(AppError::NotFound);
@@ -25,7 +24,7 @@ pub fn App() -> impl IntoView {
 			}
 			.into_view()
 		}>
-			// Default style makes it very quickyl move the page up and down
+			// Default style makes it very quickly move the page up and down
 			// <RoutingProgress _is_routing />
 			<Nav/>
 			<main>
