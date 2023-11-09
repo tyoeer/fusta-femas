@@ -1,8 +1,26 @@
 # Fusta Femas
 
-Full Stack Feed Management System
+A very very WIP Full Stack Feed Management System prototype.
 
-Aims to not only collect feeds into a database, but also provide convenient ways to consume/read them.
+## Goals
+
+### Novelty
+
+- Streamlined consumption
+	- In-browser system with easy next button
+		- With all your addons and configuration
+		- Preloading
+	- Custom filtering and sorting
+	- The ability to have different consumption feeds
+- Reporting
+	- Make it easy to figure out what went wrong when a fetch failed
+	- Supply an overview of feeds that stopped producing content / slowed down
+	- Report how much content is produced and consumed
+
+### Basics
+
+- Desktop program
+- Acquire feeds from different types of sources
 
 ## Getting started
 
