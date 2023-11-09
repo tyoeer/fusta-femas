@@ -12,15 +12,14 @@ sea-orm = {workspace = true, optional = true}
 axum = {workspace = true, optional = true}
 
 # shared
-# backend = {path = "../backend", default-features = false}
 leptos = { workspace = true }
 leptos_meta = { workspace = true }
 leptos_router = { workspace = true }
+serde = {workspace = true}
+tracing = {workspace = true}
 cfg-if = "1"
 http = "0.2.8" # Used in the error_template
 thiserror = "1.0.49" # Used in the error_template
-serde = {workspace = true}
-tracing = {workspace = true}
 
 [features]
 default = ["ssr","hydrate"]
@@ -28,16 +27,14 @@ hydrate = [
 	"leptos/hydrate",
 	"leptos_meta/hydrate",
 	"leptos_router/hydrate",
-	# "backend/hydrate",
 ]
 ssr = [
-	"dep:leptos_axum",
 	"leptos/ssr",
 	"leptos_meta/ssr",
 	"leptos_router/ssr",
-	# "backend/ssr",
-	"dep:backend-core",
+	"dep:leptos_axum",
 	"dep:axum",
+	"dep:backend-core",
 	"dep:sea-entities",
 	"dep:sea-orm",
 ]

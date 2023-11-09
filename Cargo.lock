@@ -308,21 +308,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "backend"
-version = "0.0.0"
-dependencies = [
- "axum",
- "backend-core",
- "leptos",
- "leptos_axum",
- "leptos_router",
- "sea-entities",
- "sea-orm",
- "serde",
- "tracing",
-]
-
-[[package]]
 name = "backend-core"
 version = "0.0.0"
 dependencies = [
