@@ -10,7 +10,7 @@ crate-type = ["cdylib"]
 app = {path = "../app", default-features = false, features = ["hydrate"]}
 console_error_panic_hook = {version = "0.1"}
 tracing-web = {version = "0.1.2"}
-wasm-bindgen = {version = "0.2.87"}
+wasm-bindgen = {version = "0.2.88"}
 time = {workspace = true, features = ["wasm-bindgen"]} # needs to have a feature configured to work on WASM
 tracing-subscriber = {workspace = true, features = ["time"]}
 leptos = {workspace = true}
