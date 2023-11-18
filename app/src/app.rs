@@ -3,7 +3,6 @@ use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
 
-use crate::backend::BackendRoutes;
 
 #[component]
 pub fn App() -> impl IntoView {
@@ -30,7 +29,10 @@ pub fn App() -> impl IntoView {
 			<main>
 				<Routes>
 					<Route path="" view=HomePage />
-					<BackendRoutes/>
+					<Route path="/backend" view=Outlet>
+						<Route path="/feeds" view=crate::feeds::Feeds />
+						<Route path="/strats" view=crate::backend::Strategies />
+					</Route>
 				</Routes>
 			</main>
 		</Router>
