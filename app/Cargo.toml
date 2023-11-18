@@ -19,7 +19,7 @@ serde = {workspace = true}
 tracing = {workspace = true}
 cfg-if = "1"
 http = "0.2.8" # Used in the error_template
-thiserror = "1.0.49" # Used in the error_template
+thiserror = "1.0.50" # Used in the error_template
 
 [features]
 default = ["ssr","hydrate"]
