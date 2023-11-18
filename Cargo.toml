@@ -19,7 +19,7 @@ leptos_axum = "0.5"
 sea-orm = {version = "0.12", features = ["runtime-tokio-rustls","sqlx-sqlite","with-time"]}
 serde = {version="1", features=["derive"]}
 time = "0.3"
-async-trait = "0.1.73"
+async-trait = "0.1.74"
 axum = "0.6.20"
 tracing = "0.1.37"
 tokio = "1.32.0"
