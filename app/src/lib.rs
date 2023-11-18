@@ -1,6 +1,6 @@
 pub mod app;
 pub mod error_template;
-mod backend;
+mod strategies;
 mod feeds;
 
 #[cfg(feature="ssr")]

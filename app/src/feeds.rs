@@ -43,7 +43,7 @@ pub async fn get_feeds() -> Result<Vec<FeedInfo>, ServerFnError> {
 #[server]
 pub async fn fetch_one_feed(id: i32) -> Result<i32, ServerFnError> {
 	let conn = extractor::<Extension<DatabaseConnection>>().await.map(|ext| ext.0)?;
-	let strats = super::backend::get_strats().await?;
+	let strats = super::strategies::get_strats().await?;
 	
 	let feed = feed::Entity::find_by_id(id).one(&conn).await?;
 	let Some(feed) = feed else {
