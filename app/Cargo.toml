@@ -36,6 +36,7 @@ ssr = [
 	"dep:axum",
 	"dep:acquire",
 	"dep:entities",
+	"entities/server",
 	"dep:sea-orm",
 ]
 
