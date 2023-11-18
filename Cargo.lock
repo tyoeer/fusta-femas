@@ -8,7 +8,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "async-trait",
- "sea-entities",
+ "entities",
  "sea-orm",
  "serde",
  "serde_json",
@@ -156,12 +156,12 @@ dependencies = [
  "acquire",
  "axum",
  "cfg-if",
+ "entities",
  "http",
  "leptos",
  "leptos_axum",
  "leptos_meta",
  "leptos_router",
- "sea-entities",
  "sea-orm",
  "serde",
  "thiserror",
@@ -878,6 +878,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "071a31f4ee85403370b58aca746f01041ede6f0da2730960ad001edc2b71b394"
 dependencies = [
  "cfg-if",
+]
+
+[[package]]
+name = "entities"
+version = "0.1.0"
+dependencies = [
+ "sea-orm",
+ "serde",
+ "time",
 ]
 
 [[package]]
@@ -2556,15 +2565,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.26",
-]
-
-[[package]]
-name = "sea-entities"
-version = "0.1.0"
-dependencies = [
- "sea-orm",
- "serde",
- "time",
 ]
 
 [[package]]

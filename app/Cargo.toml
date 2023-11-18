@@ -7,7 +7,7 @@ edition = "2021"
 # server
 leptos_axum = { workspace=true, optional = true } # Used in the error template
 acquire = {path = "../acquire", optional = true}
-sea-entities = {path = "../sea-entities", optional = true}
+entities = {path = "../entities", optional = true}
 sea-orm = {workspace = true, optional = true}
 axum = {workspace = true, optional = true}
 
@@ -35,7 +35,7 @@ ssr = [
 	"dep:leptos_axum",
 	"dep:axum",
 	"dep:acquire",
-	"dep:sea-entities",
+	"dep:entities",
 	"dep:sea-orm",
 ]
 

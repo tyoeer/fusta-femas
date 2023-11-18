@@ -1,4 +1,4 @@
-use sea_entities::*;
+use entities::*;
 use sea_orm::*;
 
 pub struct EntryInfo {

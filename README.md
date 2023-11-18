@@ -34,7 +34,7 @@ A very very WIP Full Stack Feed Management System prototype.
 
 - Set up a development database with `sea migrate -d sea-migration fresh`
 - Update entities:
-	- `sea generate entity --lib -o sea-entities/src --with-serde both`
+	- `sea generate entity --lib -o entities/src --with-serde both`
 		- https://github.com/SeaQL/sea-orm/issues/924
 	- Then manually set `TimeDateTime` and enums
 

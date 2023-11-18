@@ -6,7 +6,7 @@ use leptos_axum::extractor;
 #[cfg(feature="ssr")]
 use axum::Extension;
 #[cfg(feature="ssr")]
-use sea_entities::*;
+use entities::*;
 #[cfg(feature="ssr")]
 use sea_orm::*;
 

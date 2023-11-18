@@ -3,7 +3,7 @@ resolver = "2"
 
 members = [
 	"sea-migration",
-	"sea-entities",
+	"entities",
 	"app",
 	"acquire",
 	"client-entrypoint",

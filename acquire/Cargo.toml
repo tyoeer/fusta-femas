@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-sea-entities = {path="../sea-entities"}
+entities = {path="../entities"}
 sea-orm = {workspace = true}
 async-trait = {workspace = true}
 time = {workspace = true, features = ["formatting","macros","serde"]}
