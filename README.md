@@ -34,9 +34,14 @@ A very very WIP Full Stack Feed Management System prototype.
 
 - Set up a development database with `sea migrate -d sea-migration fresh`
 - Update entities:
-	- `sea generate entity --lib -o entities/src --with-serde both`
-		- https://github.com/SeaQL/sea-orm/issues/924
-	- Then manually set `time::PrimitiveDateTime` and enums
+	- Update model in [`entities`](/entities/)
+	- Add migration in [`sea-migration`](/sea-migration/)
+	- You could use the following command to check if the models about match
+		- `sea generate entity --lib -o entities/src --with-serde both`
+		- It loses a lot of type information though
+			- `time::PrimitveDateTime`
+			- enums
+			- https://github.com/SeaQL/sea-orm/issues/924
 
 ## Useful links
 
