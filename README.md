@@ -36,7 +36,7 @@ A very very WIP Full Stack Feed Management System prototype.
 - Update entities:
 	- `sea generate entity --lib -o entities/src --with-serde both`
 		- https://github.com/SeaQL/sea-orm/issues/924
-	- Then manually set `TimeDateTime` and enums
+	- Then manually set `time::PrimitiveDateTime` and enums
 
 ## Useful links
 

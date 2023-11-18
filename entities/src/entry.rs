@@ -13,11 +13,11 @@ pub struct Model {
 	pub feed_entry_id: String,
 	pub feed_id: i32,
 	pub latest_fetch_id: Option<i32>,
-	pub date: Option<TimeDateTime>,
+	pub date: Option<time::PrimitiveDateTime>,
 	#[sea_orm(primary_key)]
 	pub id: i32,
-	pub created_at: TimeDateTime,
-	pub updated_at: TimeDateTime,
+	pub created_at: time::PrimitiveDateTime,
+	pub updated_at: time::PrimitiveDateTime,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

@@ -11,8 +11,8 @@ pub struct Model {
 	pub strategy: String,
 	#[sea_orm(primary_key)]
 	pub id: i32,
-	pub created_at: TimeDateTime,
-	pub updated_at: TimeDateTime,
+	pub created_at: time::PrimitiveDateTime,
+	pub updated_at: time::PrimitiveDateTime,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
