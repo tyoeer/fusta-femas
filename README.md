@@ -29,7 +29,6 @@ A very very WIP Full Stack Feed Management System prototype.
 - `cargo install`
 	- `sea-orm-cli`
 	- `cargo-leptos`
-		- https://github.com/leptos-rs/cargo-leptos/pull/159
 
 ### Database management
 
