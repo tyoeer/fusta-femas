@@ -2,6 +2,7 @@ pub mod app;
 pub mod error_template;
 mod strategies;
 mod feeds;
+mod table;
 
 #[cfg(feature="ssr")]
 pub fn extend(router: axum::routing::Router) -> axum::routing::Router {
