@@ -33,6 +33,12 @@ pub fn App() -> impl IntoView {
 						<Route path="/feeds" view=Outlet>
 							<Route path="" view=crate::feeds::Feeds />
 							<Route path="/new" view=crate::feeds::FeedCreator />
+							<Route path="/:id" view=|| {
+								let id_res_memo = use_params::<crate::IdParam>();
+								id_res_memo.get().map(|id| view! {
+									<crate::feeds::FeedInfo id = id.id.unwrap() />
+								})
+							}/>
 						</Route>
 						<Route path="/strats" view=crate::strategies::Strategies />
 					</Route>

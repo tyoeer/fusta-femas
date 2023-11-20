@@ -61,6 +61,32 @@ pub fn FetchFeedButton(id: i32) -> impl IntoView {
 	}
 }
 
+#[server]
+pub async fn get_feed(id: i32) -> Result<feed::Model, ServerFnError> {
+	let conn = extractor::<Extension<DatabaseConnection>>().await.map(|ext| ext.0)?;
+	feed::Entity::find_by_id(id)
+		.one(&conn)
+		.await?
+		.ok_or(
+			ServerFnError::ServerError("No such feed".into())
+		)
+}
+
+#[component]
+pub fn FeedInfo(id: i32) -> impl IntoView {
+	view! {
+		<Await future=move || get_feed(id) let:feed>
+			{
+				feed.clone().map(|feed| view! {
+					<TableRow item=&feed />
+					<a href=&feed.url target="_blank">{feed.url}</a>
+				})
+			}
+		</Await>
+		<FetchFeedButton id />
+	}
+}
+
 
 // CREATION
 
@@ -134,15 +160,12 @@ pub async fn get_feeds() -> Result<Vec<feed::Model>, ServerFnError> {
 }
 
 #[component]
-pub fn Feed(feed: feed::Model) -> impl IntoView {
+pub fn FeedRow(feed: feed::Model) -> impl IntoView {
+	let id_string = feed.id.to_string();
 	view! {
-		<TableRow item=&feed/>
-		<span class="table_cell">
-			<a href=&feed.url target="_blank">{feed.url}</a>
-		</span>
-		<span class="table_cell">
-			<FetchFeedButton id=feed.id />
-		</span>
+		<A href=id_string class="table_row">
+			<TableRow item=&feed/>
+		</A>
 	}
 }
 
@@ -155,7 +178,7 @@ pub fn Feeds() -> impl IntoView {
 				{
 					feeds.clone().map(|vec| {
 						vec.into_iter()
-							.map(|feed| view! {<li class="table_row"><Feed feed=feed/></li>})
+							.map(|feed| view! {<FeedRow feed/>})
 							.collect::<Vec<_>>()
 					})
 				}
