@@ -4,7 +4,8 @@
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, bevy_reflect::Reflect)]
+#[reflect(from_reflect = false)]
 #[cfg_attr(feature="orm", derive(DeriveEntityModel) )]
 #[cfg_attr(feature="orm", sea_orm(table_name = "entry") )]
 pub struct Model {
@@ -15,10 +16,13 @@ pub struct Model {
 	pub feed_entry_id: String,
 	pub feed_id: i32,
 	pub latest_fetch_id: Option<i32>,
+	#[reflect(ignore)]
 	pub date: Option<time::PrimitiveDateTime>,
 	#[cfg_attr(feature="orm", sea_orm(primary_key) )]
 	pub id: i32,
+	#[reflect(ignore)]
 	pub created_at: time::PrimitiveDateTime,
+	#[reflect(ignore)]
 	pub updated_at: time::PrimitiveDateTime,
 }
 

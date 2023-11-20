@@ -4,7 +4,8 @@
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, bevy_reflect::Reflect)]
+#[reflect(from_reflect = false)]
 #[cfg_attr(feature="orm", derive(EnumIter, DeriveActiveEnum) )]
 #[cfg_attr(feature="orm", sea_orm(rs_type = "String", db_type = "String(Some(20))") )]
 pub enum Status {
@@ -18,7 +19,8 @@ pub enum Status {
 	EntryUpdateError,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, bevy_reflect::Reflect)]
+#[reflect(from_reflect = false)]
 #[cfg_attr(feature="orm", derive(DeriveEntityModel) )]
 #[cfg_attr(feature="orm", sea_orm(table_name = "fetch") )]
 pub struct Model {
@@ -30,7 +32,9 @@ pub struct Model {
 	pub feed_id: i32,
 	#[cfg_attr(feature="orm", sea_orm(primary_key) )]
 	pub id: i32,
+	#[reflect(ignore)]
 	pub created_at: time::PrimitiveDateTime,
+	#[reflect(ignore)]
 	pub updated_at: time::PrimitiveDateTime,
 }
 
