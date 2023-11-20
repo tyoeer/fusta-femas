@@ -1,6 +1,10 @@
 use leptos::*;
 use leptos_router::{ActionForm, A};
 use entities::*;
+use bevy_reflect::{
+	prelude::*,
+	Typed, TypeInfo,
+};
 #[cfg(feature="ssr")]
 use leptos_axum::extractor;
 #[cfg(feature="ssr")]
@@ -40,6 +44,17 @@ pub async fn fetch_one_feed(id: i32) -> Result<i32, ServerFnError> {
 }
 
 #[component]
+pub fn Reflected<'a>(value: &'a dyn Reflect) -> impl IntoView {
+	if let Some(str) = value.downcast_ref::<String>() {
+		 str.clone()
+	} else if let Some(i) = value.downcast_ref::<i32>() {
+		 format!("{i}")
+	} else {
+		"🤷".to_owned()
+	}
+}
+
+#[component]
 pub fn Feed(feed: feed::Model) -> impl IntoView {
 	let fetch_one = create_server_action::<FetchOneFeed>();
 	let button_name = move || {
@@ -58,8 +73,16 @@ pub fn Feed(feed: feed::Model) -> impl IntoView {
 		}
 	};
 	view! {
-		<span class="table_cell">{feed.name}</span>
-		<span class="table_cell"><a href=&feed.url target="_blank">{feed.url}</a></span>
+		{
+			feed.iter_fields().map(|field| {
+				view! {
+					<span class="table_cell"><Reflected value=field/></span>
+				}
+			}).collect::<Vec<_>>()
+		}	
+		<span class="table_cell">
+			<a href=&feed.url target="_blank">{feed.url}</a>
+		</span>
 		<span class="table_cell">
 			<ActionForm action=fetch_one>
 				<input type="hidden" name="id" value=feed.id/>
@@ -131,6 +154,17 @@ pub fn Feeds() -> impl IntoView {
 	view! {
 		<Await future=get_feeds let:feeds>
 			<ul class="table">
+				<li class="table_row">
+					{
+						if let TypeInfo::Struct(si) = feed::Model::type_info() {
+							si.field_names().iter().map(|name| {
+								view! {<span class="table_cell">{*name}</span>}
+							}).collect::<Vec<_>>()
+						} else {
+							panic!("Feed is not a struct!");
+						}
+					}
+				</li>
 				{
 					feeds.clone().map(|vec| {
 						vec.into_iter()

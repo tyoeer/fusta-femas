@@ -156,6 +156,7 @@ version = "0.1.0"
 dependencies = [
  "acquire",
  "axum",
+ "bevy_reflect",
  "cfg-if",
  "entities",
  "http",
