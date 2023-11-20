@@ -10,13 +10,8 @@ use axum::Extension;
 use sea_orm::*;
 
 
+// ACTIONS
 
-#[server]
-pub async fn get_feeds() -> Result<Vec<feed::Model>, ServerFnError> {
-	let conn = extractor::<Extension<DatabaseConnection>>().await.map(|ext| ext.0)?;
-	let feeds = feed::Entity::find().all(&conn).await?;
-	Ok(feeds)
-}
 
 #[server]
 pub async fn fetch_one_feed(id: i32) -> Result<i32, ServerFnError> {
@@ -40,10 +35,8 @@ pub async fn fetch_one_feed(id: i32) -> Result<i32, ServerFnError> {
 	Ok(fetch.id)
 }
 
-
-
 #[component]
-pub fn Feed(feed: feed::Model) -> impl IntoView {
+pub fn FetchFeedButton(id: i32) -> impl IntoView {
 	let fetch_one = create_server_action::<FetchOneFeed>();
 	let button_name = move || {
 		if fetch_one.pending().get() {
@@ -61,18 +54,16 @@ pub fn Feed(feed: feed::Model) -> impl IntoView {
 		}
 	};
 	view! {
-		<TableRow item=&feed/>
-		<span class="table_cell">
-			<a href=&feed.url target="_blank">{feed.url}</a>
-		</span>
-		<span class="table_cell">
-			<ActionForm action=fetch_one>
-				<input type="hidden" name="id" value=feed.id/>
-				<input type="submit" value=button_name/>
-			</ActionForm>
-		</span>
+		<ActionForm action=fetch_one>
+			<input type="hidden" name="id" value=id/>
+			<input type="submit" value=button_name/>
+		</ActionForm>
 	}
 }
+
+
+// CREATION
+
 
 #[server]
 pub async fn new_feed(name: String, url: String, strategy: String) -> Result<i32, ServerFnError> {
@@ -128,6 +119,30 @@ pub fn FeedCreator() -> impl IntoView {
 			</select>
 			<input type="submit" value=button_name/>
 		</ActionForm>
+	}
+}
+
+
+// LIST
+
+
+#[server]
+pub async fn get_feeds() -> Result<Vec<feed::Model>, ServerFnError> {
+	let conn = extractor::<Extension<DatabaseConnection>>().await.map(|ext| ext.0)?;
+	let feeds = feed::Entity::find().all(&conn).await?;
+	Ok(feeds)
+}
+
+#[component]
+pub fn Feed(feed: feed::Model) -> impl IntoView {
+	view! {
+		<TableRow item=&feed/>
+		<span class="table_cell">
+			<a href=&feed.url target="_blank">{feed.url}</a>
+		</span>
+		<span class="table_cell">
+			<FetchFeedButton id=feed.id />
+		</span>
 	}
 }
 
