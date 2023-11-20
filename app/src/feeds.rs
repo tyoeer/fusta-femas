@@ -1,43 +1,20 @@
 use leptos::*;
 use leptos_router::{ActionForm, A};
-use serde::*;
+use entities::*;
 #[cfg(feature="ssr")]
 use leptos_axum::extractor;
 #[cfg(feature="ssr")]
 use axum::Extension;
 #[cfg(feature="ssr")]
-use entities::*;
-#[cfg(feature="ssr")]
 use sea_orm::*;
 
-#[derive(Debug,Clone, PartialEq,Eq, Serialize, Deserialize)]
-pub struct FeedInfo {
-	id: i32,
-	name: String,
-	url: String,
-}
 
-#[cfg(feature="ssr")]
-impl From<feed::Model> for FeedInfo {
-	fn from(model: feed::Model) -> Self {
-		let mut url = model.url;
-		if !url.contains("://") {
-			url = format!("https://{}",url);
-		}
-		Self {
-			id: model.id,
-			name: model.name,
-			url,
-		}
-	}
-}
 
 #[server]
-pub async fn get_feeds() -> Result<Vec<FeedInfo>, ServerFnError> {
+pub async fn get_feeds() -> Result<Vec<feed::Model>, ServerFnError> {
 	let conn = extractor::<Extension<DatabaseConnection>>().await.map(|ext| ext.0)?;
 	let feeds = feed::Entity::find().all(&conn).await?;
-	let urls = feeds.into_iter().map(|f| f.into()).collect();
-	Ok(urls)
+	Ok(feeds)
 }
 
 #[server]
@@ -63,7 +40,7 @@ pub async fn fetch_one_feed(id: i32) -> Result<i32, ServerFnError> {
 }
 
 #[component]
-pub fn Feed(fi: FeedInfo) -> impl IntoView {
+pub fn Feed(feed: feed::Model) -> impl IntoView {
 	let fetch_one = create_server_action::<FetchOneFeed>();
 	let button_name = move || {
 		if fetch_one.pending().get() {
@@ -81,11 +58,11 @@ pub fn Feed(fi: FeedInfo) -> impl IntoView {
 		}
 	};
 	view! {
-		<span class="table_cell">{fi.name}</span>
-		<span class="table_cell"><a href=&fi.url target="_blank">{fi.url}</a></span>
+		<span class="table_cell">{feed.name}</span>
+		<span class="table_cell"><a href=&feed.url target="_blank">{feed.url}</a></span>
 		<span class="table_cell">
 			<ActionForm action=fetch_one>
-				<input type="hidden" name="id" value=fi.id/>
+				<input type="hidden" name="id" value=feed.id/>
 				<input type="submit" value=button_name/>
 			</ActionForm>
 		</span>
@@ -157,7 +134,7 @@ pub fn Feeds() -> impl IntoView {
 				{
 					feeds.clone().map(|vec| {
 						vec.into_iter()
-							.map(|e| view! {<li class="table_row"><Feed fi=e/></li>})
+							.map(|feed| view! {<li class="table_row"><Feed feed=feed/></li>})
 							.collect::<Vec<_>>()
 					})
 				}
