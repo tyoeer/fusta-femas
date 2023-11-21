@@ -1,4 +1,5 @@
 use leptos::*;
+use leptos_router::A;
 use bevy_reflect::{
 	prelude::*,
 	Typed, TypeInfo, StructInfo,
@@ -37,7 +38,7 @@ pub fn TableHeader(struct_info: &'static StructInfo) -> impl IntoView {
 }
 
 #[component]
-pub fn TableRow<Item: Struct, 'item>(item: &'item Item) -> impl IntoView {
+pub fn StructFields<Item: Struct, 'item>(item: &'item Item) -> impl IntoView {
 	item.iter_fields().map(|field| {
 		view! {
 			<span class="table_cell"><Reflected value=field/></span>
@@ -45,3 +46,20 @@ pub fn TableRow<Item: Struct, 'item>(item: &'item Item) -> impl IntoView {
 	}).collect::<Vec<_>>()
 }
 
+#[component]
+pub fn Table<Item: Struct + Typed + Clone>(#[prop(into)] items: MaybeSignal<Vec<Item>>, get_id: fn(&Item)->i32) -> impl IntoView {
+	view! {
+		<ul class="table">
+			<TableHeader struct_info={struct_info::<Item>()} />
+			<For
+				each = move || items.get().into_iter()
+				key = get_id
+				let:item
+			>
+				<A class="table_row" href={get_id(&item).to_string()}>
+					<StructFields item = &item/>
+				</A>
+			</For>
+		</ul>
+	}
+}

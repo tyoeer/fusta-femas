@@ -78,7 +78,7 @@ pub fn FeedInfo(id: i32) -> impl IntoView {
 		<Await future=move || get_feed(id) let:feed>
 			{
 				feed.clone().map(|feed| view! {
-					<TableRow item=&feed />
+					<StructFields item=&feed />
 					<a href=&feed.url target="_blank">{feed.url}</a>
 				})
 			}
@@ -160,29 +160,14 @@ pub async fn get_feeds() -> Result<Vec<feed::Model>, ServerFnError> {
 }
 
 #[component]
-pub fn FeedRow(feed: feed::Model) -> impl IntoView {
-	let id_string = feed.id.to_string();
-	view! {
-		<A href=id_string class="table_row">
-			<TableRow item=&feed/>
-		</A>
-	}
-}
-
-#[component]
 pub fn Feeds() -> impl IntoView {
 	view! {
-		<Await future=get_feeds let:feeds>
-			<ul class="table">
-				<TableHeader struct_info={struct_info::<feed::Model>()} />
-				{
-					feeds.clone().map(|vec| {
-						vec.into_iter()
-							.map(|feed| view! {<FeedRow feed/>})
-							.collect::<Vec<_>>()
-					})
-				}
-			</ul>
+		<Await future=get_feeds let:feeds_res>
+			{
+				feeds_res.clone().map(|feeds| view! {
+					<Table items = feeds get_id = |feed| feed.id/>
+				})
+			}
 		</Await>
 		<A href="new">Create new feed</A>
 	}
