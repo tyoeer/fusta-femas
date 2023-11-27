@@ -3,10 +3,8 @@ use leptos::*;
 #[cfg(feature="ssr")]
 pub async fn get_strats() -> Result<acquire::strategy_list::StrategyList, ServerFnError> {
 	use acquire::strategy_list::StrategyList;
-	use axum::*;
-	use leptos_axum::extractor;
 	
-	extractor::<Extension<StrategyList>>().await.map(|ext| ext.0)
+	Ok(crate::extension!(StrategyList))
 }
 
 #[server]

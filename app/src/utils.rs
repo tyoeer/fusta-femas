@@ -18,3 +18,21 @@ pub fn with_id_param<Mapped>(callback: impl Fn(i32) -> Mapped) -> Result<Mapped,
 	}
 	
 }
+
+/**
+Extracts an <axum::Extension> of the type given as argument.
+Errors get propagated up with `?`.
+
+# Example
+
+```
+let conn = extension!(DatabaseConnection);
+```
+
+*/
+#[macro_export]
+macro_rules! extension {
+	($extension:ty) => {
+		leptos_axum::extractor::<axum::Extension<$extension>>().await?.0
+	};
+}

@@ -3,10 +3,6 @@ use leptos_router::{ActionForm, A};
 use entities::*;
 use crate::table::*;
 #[cfg(feature="ssr")]
-use leptos_axum::extractor;
-#[cfg(feature="ssr")]
-use axum::Extension;
-#[cfg(feature="ssr")]
 use sea_orm::*;
 
 
@@ -15,7 +11,7 @@ use sea_orm::*;
 
 #[server]
 pub async fn fetch_one_feed(id: i32) -> Result<i32, ServerFnError> {
-	let conn = extractor::<Extension<DatabaseConnection>>().await.map(|ext| ext.0)?;
+	let conn = crate::extension!(DatabaseConnection);
 	let strats = super::strategies::get_strats().await?;
 	
 	let feed = feed::Entity::find_by_id(id).one(&conn).await?;
@@ -63,7 +59,7 @@ pub fn FetchFeedButton(id: i32) -> impl IntoView {
 
 #[server]
 pub async fn get_feed(id: i32) -> Result<feed::Model, ServerFnError> {
-	let conn = extractor::<Extension<DatabaseConnection>>().await.map(|ext| ext.0)?;
+	let conn = crate::extension!(DatabaseConnection);
 	feed::Entity::find_by_id(id)
 		.one(&conn)
 		.await?
@@ -93,7 +89,7 @@ pub fn FeedInfo(id: i32) -> impl IntoView {
 
 #[server]
 pub async fn new_feed(name: String, url: String, strategy: String) -> Result<i32, ServerFnError> {
-	let conn = extractor::<Extension<DatabaseConnection>>().await.map(|ext| ext.0)?;
+	let conn = crate::extension!(DatabaseConnection);
 	let mut new = feed::ActiveModel::new();
 	new.name = Set(name);
 	new.url = Set(url);
@@ -154,7 +150,7 @@ pub fn FeedCreator() -> impl IntoView {
 
 #[server]
 pub async fn get_feeds() -> Result<Vec<feed::Model>, ServerFnError> {
-	let conn = extractor::<Extension<DatabaseConnection>>().await.map(|ext| ext.0)?;
+	let conn = crate::extension!(DatabaseConnection);
 	let feeds = feed::Entity::find().all(&conn).await?;
 	Ok(feeds)
 }
