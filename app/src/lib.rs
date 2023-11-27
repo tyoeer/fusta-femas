@@ -2,13 +2,10 @@ pub mod app;
 pub mod error_template;
 mod strategies;
 mod feeds;
-mod table;
 
-use leptos_router::{Params, IntoParam};
-#[derive(leptos::Params, Clone, PartialEq, Eq)]
-pub struct IdParam {
-	pub id: Option<i32>,
-}
+mod table;
+mod utils;
+
 
 #[cfg(feature="ssr")]
 pub fn extend(router: axum::routing::Router) -> axum::routing::Router {
