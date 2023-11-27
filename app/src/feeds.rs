@@ -74,7 +74,7 @@ pub fn FeedInfo(id: i32) -> impl IntoView {
 		<Await future=move || get_feed(id) let:feed>
 			{
 				feed.clone().map(|feed| view! {
-					<StructFields item=&feed />
+					<ObjectValues item=&feed />
 					<a href=&feed.url target="_blank">{feed.url}</a>
 				})
 			}
@@ -161,7 +161,7 @@ pub fn Feeds() -> impl IntoView {
 		<Await future=get_feeds let:feeds_res>
 			{
 				feeds_res.clone().map(|feeds| view! {
-					<Table items = feeds get_id = |feed| feed.id/>
+					<ObjectTable items = feeds get_id = |feed| feed.id/>
 				})
 			}
 		</Await>

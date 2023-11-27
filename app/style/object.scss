@@ -1,0 +1,13 @@
+@use "table";
+
+.object_table.object_list {
+	@extend %table;
+}
+.object_table {
+	.object_field_list, .object_value_list {
+		@extend %table_row;
+	}
+	.object_field, .object_value {
+		@extend %table_cell;
+	}
+}

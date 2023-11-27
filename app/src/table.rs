@@ -25,12 +25,12 @@ pub fn Reflected<'a>(value: &'a dyn Reflect) -> impl IntoView {
 }
 
 #[component]
-pub fn TableHeader(struct_info: &'static StructInfo) -> impl IntoView {
+pub fn ObjectFields(struct_info: &'static StructInfo) -> impl IntoView {
 	view! {
-		<li class="table_row">
+		<li class="object_field_list">
 			{
 				struct_info.field_names().iter().map(|name| {
-					view! {<span class="table_cell">{*name}</span>}
+					view! {<span class="object_field">{*name}</span>}
 				}).collect::<Vec<_>>()
 			}
 		</li>
@@ -38,28 +38,41 @@ pub fn TableHeader(struct_info: &'static StructInfo) -> impl IntoView {
 }
 
 #[component]
-pub fn StructFields<Item: Struct, 'item>(item: &'item Item) -> impl IntoView {
+pub fn ObjectValues<Item: Struct, 'item>(item: &'item Item) -> impl IntoView {
 	item.iter_fields().map(|field| {
 		view! {
-			<span class="table_cell"><Reflected value=field/></span>
+			<span class="object_value"><Reflected value=field/></span>
 		}
 	}).collect::<Vec<_>>()
 }
 
 #[component]
-pub fn Table<Item: Struct + Typed + Clone>(#[prop(into)] items: MaybeSignal<Vec<Item>>, get_id: fn(&Item)->i32) -> impl IntoView {
+pub fn ObjectList<Item: Struct + Typed + Clone, Str: AsRef<str>>(
+	#[prop(into)] items: MaybeSignal<Vec<Item>>,
+	get_id: fn(&Item)->i32,
+	list_class: Str
+) -> impl IntoView {
 	view! {
-		<ul class="table">
-			<TableHeader struct_info={struct_info::<Item>()} />
+		<ul class={format!("object_list {}", list_class.as_ref())}>
+			<ObjectFields struct_info={struct_info::<Item>()} />
 			<For
 				each = move || items.get().into_iter()
 				key = get_id
 				let:item
 			>
-				<A class="table_row" href={get_id(&item).to_string()}>
-					<StructFields item = &item/>
+				<A class="object_value_list" href={get_id(&item).to_string()}>
+					<ObjectValues item = &item/>
 				</A>
 			</For>
 		</ul>
 	}
+}
+
+///An <ObjectList> styled to be a table
+#[component]
+pub fn ObjectTable<Item: Struct + Typed + Clone>(
+	#[prop(into)] items: MaybeSignal<Vec<Item>>,
+	get_id: fn(&Item)->i32
+) -> impl IntoView {
+	view! { <ObjectList items get_id list_class="object_table" /> }
 }
