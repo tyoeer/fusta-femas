@@ -1,3 +1,15 @@
+/*!
+
+Components for displaying stuff that implements [`bevy_reflect::Reflect`], usually structs.
+
+Terminology:
+- Object: A displayable struct
+- Fields: the names of the object's struct fields
+- Values: the actual runtime values in the object
+- List: When an enclosing component is also rendered
+
+*/
+
 use leptos::*;
 use leptos_router::A;
 use bevy_reflect::{
@@ -13,6 +25,15 @@ pub fn struct_info<Type: Struct + Typed>() -> &'static StructInfo {
 	}
 }
 
+/**
+Displays a reflected value.
+
+## Supported values
+
+- [`String`](std::string::String)
+- [`i32`](std::i32)
+
+*/
 #[component]
 pub fn Reflected<'a>(value: &'a dyn Reflect) -> impl IntoView {
 	if let Some(str) = value.downcast_ref::<String>() {
@@ -25,7 +46,7 @@ pub fn Reflected<'a>(value: &'a dyn Reflect) -> impl IntoView {
 }
 
 #[component]
-pub fn ObjectFields(struct_info: &'static StructInfo) -> impl IntoView {
+pub fn ObjectFieldList(struct_info: &'static StructInfo) -> impl IntoView {
 	view! {
 		<li class="object_field_list">
 			{
@@ -38,7 +59,7 @@ pub fn ObjectFields(struct_info: &'static StructInfo) -> impl IntoView {
 }
 
 #[component]
-pub fn ObjectValues<Item: Struct, 'item>(item: &'item Item) -> impl IntoView {
+pub fn ObjectValues<Object: Struct, 'object>(item: &'object Object) -> impl IntoView {
 	item.iter_fields().map(|field| {
 		view! {
 			<span class="object_value"><Reflected value=field/></span>
@@ -47,14 +68,14 @@ pub fn ObjectValues<Item: Struct, 'item>(item: &'item Item) -> impl IntoView {
 }
 
 #[component]
-pub fn ObjectList<Item: Struct + Typed + Clone, Str: AsRef<str>>(
-	#[prop(into)] items: MaybeSignal<Vec<Item>>,
-	get_id: fn(&Item)->i32,
+pub fn ObjectList<Object: Struct + Typed + Clone, Str: AsRef<str>>(
+	#[prop(into)] items: MaybeSignal<Vec<Object>>,
+	get_id: fn(&Object)->i32,
 	list_class: Str
 ) -> impl IntoView {
 	view! {
 		<ul class={format!("object_list {}", list_class.as_ref())}>
-			<ObjectFields struct_info={struct_info::<Item>()} />
+			<ObjectFieldList struct_info={struct_info::<Object>()} />
 			<For
 				each = move || items.get().into_iter()
 				key = get_id
@@ -68,11 +89,11 @@ pub fn ObjectList<Item: Struct + Typed + Clone, Str: AsRef<str>>(
 	}
 }
 
-///An <ObjectList> styled to be a table
+///An [`ObjectList`] styled to be a table
 #[component]
-pub fn ObjectTable<Item: Struct + Typed + Clone>(
-	#[prop(into)] items: MaybeSignal<Vec<Item>>,
-	get_id: fn(&Item)->i32
+pub fn ObjectTable<Object: Struct + Typed + Clone>(
+	#[prop(into)] items: MaybeSignal<Vec<Object>>,
+	get_id: fn(&Object)->i32
 ) -> impl IntoView {
 	view! { <ObjectList items get_id list_class="object_table" /> }
 }
