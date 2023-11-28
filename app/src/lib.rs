@@ -1,10 +1,10 @@
 pub mod app;
 pub mod error_template;
-mod strategies;
-mod feeds;
+pub mod strategies;
+pub mod feeds;
 
-mod table;
-mod utils;
+pub mod table;
+pub mod utils;
 
 
 #[cfg(feature="ssr")]
