@@ -11,3 +11,12 @@
 		@extend %table_cell;
 	}
 }
+.object_fieldvalue_list {
+	@extend %table;
+	.object_fieldvalue {
+		@extend %table_row;
+		> * {
+			@extend %table_cell;
+		}
+	}
+}

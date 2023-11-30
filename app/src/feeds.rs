@@ -74,7 +74,9 @@ pub fn FeedInfo(id: i32) -> impl IntoView {
 		<Await future=move || get_feed(id) let:feed>
 			{
 				feed.clone().map(|feed| view! {
-					<ObjectValues item=&feed />
+					<ul class="object_fieldvalue_list">
+						<ObjectFieldValues object=&feed />
+					</ul>
 					<a href=&feed.url target="_blank">{feed.url}</a>
 				})
 			}
@@ -84,7 +86,7 @@ pub fn FeedInfo(id: i32) -> impl IntoView {
 }
 
 
-// CREATION
+// CREATION--
 
 
 #[server]

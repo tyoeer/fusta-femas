@@ -68,6 +68,19 @@ pub fn ObjectValues<Object: Struct, 'object>(item: &'object Object) -> impl Into
 }
 
 #[component]
+pub fn ObjectFieldValues<Object: Struct + Typed, 'object>(object: &'object Object) -> impl IntoView {
+	let struct_info = struct_info::<Object>();
+	object.iter_fields().zip(struct_info.field_names()).map(|(value, field)| {
+		view! {
+			<li class="object_fieldvalue">
+				<span class="object_field"> {*field} </span>
+				<span class="object_value"> <Reflected value/> </span>
+			</li>
+		}
+	}).collect::<Vec<_>>()
+}
+
+#[component]
 pub fn ObjectList<Object: Struct + Typed + Clone, Str: AsRef<str>>(
 	#[prop(into)] items: MaybeSignal<Vec<Object>>,
 	get_id: fn(&Object)->i32,
