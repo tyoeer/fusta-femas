@@ -59,8 +59,8 @@ pub fn ObjectFieldList(struct_info: &'static StructInfo) -> impl IntoView {
 }
 
 #[component]
-pub fn ObjectValues<Object: Struct, 'object>(item: &'object Object) -> impl IntoView {
-	item.iter_fields().map(|field| {
+pub fn ObjectValues<Object: Struct, 'object>(object: &'object Object) -> impl IntoView {
+	object.iter_fields().map(|field| {
 		view! {
 			<span class="object_value"><Reflected value=field/></span>
 		}
@@ -92,10 +92,10 @@ pub fn ObjectList<Object: Struct + Typed + Clone, Str: AsRef<str>>(
 			<For
 				each = move || items.get().into_iter()
 				key = get_id
-				let:item
+				let:object
 			>
-				<A class="object_value_list" href={get_id(&item).to_string()}>
-					<ObjectValues item = &item/>
+				<A class="object_value_list" href={get_id(&object).to_string()}>
+					<ObjectValues object = &object/>
 				</A>
 			</For>
 		</ul>
