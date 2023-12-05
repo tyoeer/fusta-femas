@@ -81,6 +81,15 @@ pub fn ObjectFieldValues<Object: Struct + Typed, 'object>(object: &'object Objec
 }
 
 #[component]
+pub fn ObjectFieldValueList<Object: Struct + Typed, 'object>(object: &'object Object) -> impl IntoView {
+	view! {
+		<ul class="object_fieldvalue_list">
+			<ObjectFieldValues object />
+		</ul>
+	}
+}
+
+#[component]
 pub fn ObjectList<Object: Struct + Typed + Clone, Str: AsRef<str>>(
 	#[prop(into)] items: MaybeSignal<Vec<Object>>,
 	get_id: fn(&Object)->i32,
