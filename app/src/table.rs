@@ -90,32 +90,33 @@ pub fn ObjectFieldValueList<Object: Struct + Typed, 'object>(object: &'object Ob
 }
 
 #[component]
-pub fn ObjectList<Object: Struct + Typed + Clone, Str: AsRef<str>>(
+pub fn ObjectLinkValues<Object: Struct + Typed + Clone>(
 	#[prop(into)] items: MaybeSignal<Vec<Object>>,
 	get_id: fn(&Object)->i32,
-	list_class: Str
 ) -> impl IntoView {
 	view! {
-		<ul class={format!("object_list {}", list_class.as_ref())}>
-			<ObjectFieldList struct_info={struct_info::<Object>()} />
-			<For
-				each = move || items.get().into_iter()
-				key = get_id
-				let:object
-			>
-				<A class="object_value_list" href={get_id(&object).to_string()}>
-					<ObjectValues object = &object/>
-				</A>
-			</For>
-		</ul>
+		<For
+			each = move || items.get().into_iter()
+			key = get_id
+			let:object
+		>
+			<A class="object_value_list" href={get_id(&object).to_string()}>
+				<ObjectValues object = &object/>
+			</A>
+		</For>
 	}
 }
 
-///An [`ObjectList`] styled to be a table
+///A table of objects where each row is a link
 #[component]
 pub fn ObjectTable<Object: Struct + Typed + Clone>(
 	#[prop(into)] items: MaybeSignal<Vec<Object>>,
 	get_id: fn(&Object)->i32
 ) -> impl IntoView {
-	view! { <ObjectList items get_id list_class="object_table" /> }
+	view! {
+		<ul class="object_list object_table">
+			<ObjectFieldList struct_info={struct_info::<Object>()} />
+			<ObjectLinkValues items get_id/>
+		</ul>
+	}
 }
