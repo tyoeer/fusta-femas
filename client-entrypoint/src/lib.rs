@@ -7,7 +7,8 @@ pub fn hydrate() {
 	let fmt_layer = fmt::layer()
 		.with_ansi(false)
 		.with_timer(fmt::time::UtcTime::rfc_3339())
-		.with_writer(tracing_web::MakeConsoleWriter);
+		.with_level(false)
+		.with_writer(tracing_web::MakeWebConsoleWriter::new().with_pretty_level());
 	registry()
 		.with(fmt_layer)
 		.init();
