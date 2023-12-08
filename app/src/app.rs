@@ -29,27 +29,25 @@ pub fn App() -> impl IntoView {
 			<div class="global_section">
 				<Routes>
 					<Route path="" view=HomePage />
-					<Route path="/backend" view=Outlet>
-						<Route path="/feeds" view=Outlet>
-							<Route path="" view= || view! {
-								<main>
-									<Outlet/>
-								</main>
-							}>
-								<Route path="" view=crate::feeds::Feeds />
-								<Route path="/new" view=crate::feeds::FeedCreator />
-							</Route>
-							<Route path="/:id" view=crate::feeds::FeedOverview>
-								<Route path="" view=|| view! { <Redirect path="about"/> }/>
-								<Route path="about" view = || {
-									crate::utils::with_id_param(|id| view! {
-										<crate::feeds::FeedInfo id />
-									})
-								} />
-							</Route>
+					<Route path="/feeds" view=Outlet>
+						<Route path="" view= || view! {
+							<main>
+								<Outlet/>
+							</main>
+						}>
+							<Route path="" view=crate::feeds::Feeds />
+							<Route path="/new" view=crate::feeds::FeedCreator />
 						</Route>
-						<Route path="/strats" view=crate::strategies::Strategies />
+						<Route path="/:id" view=crate::feeds::FeedOverview>
+							<Route path="" view=|| view! { <Redirect path="about"/> }/>
+							<Route path="about" view = || {
+								crate::utils::with_id_param(|id| view! {
+									<crate::feeds::FeedInfo id />
+								})
+							} />
+						</Route>
 					</Route>
+					<Route path="/strats" view=crate::strategies::Strategies />
 				</Routes>
 			</div>
 		</Router>
@@ -61,8 +59,8 @@ fn Nav() -> impl IntoView {
 	view! {
 		<nav class="global">
 			<A href="">Home</A>
-			<A href="backend/feeds">Feeds</A>
-			<A href="backend/strats">Strategies</A>
+			<A href="feeds">Feeds</A>
+			<A href="strats">Strategies</A>
 		</nav>
 	}
 }
