@@ -1,15 +1,8 @@
 use leptos::*;
 
-#[cfg(feature="ssr")]
-pub async fn get_strats() -> Result<acquire::strategy_list::StrategyList, ServerFnError> {
-	use acquire::strategy_list::StrategyList;
-	
-	Ok(crate::extension!(StrategyList))
-}
-
 #[server]
 pub async fn get_strategies() -> Result<Vec<String>, ServerFnError> {	
-	let strats = get_strats().await?;
+	let strats = crate::extension!(acquire::strategy_list::StrategyList);
 	let list = strats.iter_strats().map(|s| s.name().to_owned()).collect::<Vec<String>>();
 	Ok(list)
 }
