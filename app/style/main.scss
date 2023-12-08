@@ -8,16 +8,30 @@ body {
 	flex-direction: column;
 	margin: 0;
 }
+
+.global_section {
+	display: flex;
+}
+
 main {
 	margin: 0 auto;
 	display: flex;
 	flex-direction: column;
 }
+
 nav {
 	overflow: hidden;
 	display: flex;
 	justify-content: center;
+}
+nav.global {
+	flex-direction: row;
 	border-bottom: 1px solid black;
+}
+nav.sidebar {
+	position: absolute;
+	flex-direction: column;
+	border-right: 1px solid black;
 }
 nav * {
 	padding: 1em;

@@ -1,12 +1,12 @@
 use leptos::*;
-use leptos_router::{ActionForm, A};
+use leptos_router::{ActionForm, A, Outlet};
 use entities::*;
 use crate::table::*;
 #[cfg(feature="ssr")]
 use sea_orm::*;
 
 
-// ACTIONS
+// FEED INFO
 
 
 #[server]
@@ -83,8 +83,24 @@ pub fn FeedInfo(id: i32) -> impl IntoView {
 	}
 }
 
+#[component]
+pub fn FeedOverview() -> impl IntoView {
+	view! {
+		<nav class="sidebar">
+			<ul>
+				<li>
+					<A href="about">About</A>
+				</li>
+			</ul>
+		</nav>
+		<main>
+			<Outlet/>
+		</main>
+	}
+}
 
-// CREATION--
+
+// CREATION
 
 
 #[server]

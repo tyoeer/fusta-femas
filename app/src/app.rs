@@ -26,23 +26,32 @@ pub fn App() -> impl IntoView {
 			// Default style makes it very quickly move the page up and down
 			// <RoutingProgress _is_routing />
 			<Nav/>
-			<main>
+			<div class="global_section">
 				<Routes>
 					<Route path="" view=HomePage />
 					<Route path="/backend" view=Outlet>
 						<Route path="/feeds" view=Outlet>
-							<Route path="" view=crate::feeds::Feeds />
-							<Route path="/new" view=crate::feeds::FeedCreator />
-							<Route path="/:id" view=|| {
-								crate::utils::with_id_param(|id| view! {
-									<crate::feeds::FeedInfo id />
-								})
-							}/>
+							<Route path="" view= || view! {
+								<main>
+									<Outlet/>
+								</main>
+							}>
+								<Route path="" view=crate::feeds::Feeds />
+								<Route path="/new" view=crate::feeds::FeedCreator />
+							</Route>
+							<Route path="/:id" view=crate::feeds::FeedOverview>
+								<Route path="" view=|| view! { <Redirect path="about"/> }/>
+								<Route path="about" view = || {
+									crate::utils::with_id_param(|id| view! {
+										<crate::feeds::FeedInfo id />
+									})
+								} />
+							</Route>
 						</Route>
 						<Route path="/strats" view=crate::strategies::Strategies />
 					</Route>
 				</Routes>
-			</main>
+			</div>
 		</Router>
 	}
 }
@@ -50,7 +59,7 @@ pub fn App() -> impl IntoView {
 #[component]
 fn Nav() -> impl IntoView {
 	view! {
-		<nav>
+		<nav class="global">
 			<A href="">Home</A>
 			<A href="backend/feeds">Feeds</A>
 			<A href="backend/strats">Strategies</A>
