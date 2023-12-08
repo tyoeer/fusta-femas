@@ -11,7 +11,7 @@ time = {workspace = true, features = ["serde"]}
 serde = {workspace = true}
 
 sea-orm = {workspace = true, optional = true}
-bevy_reflect = "0.12.0"
+bevy_reflect = "0.12.1"
 
 [features]
 default = []
