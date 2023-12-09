@@ -97,13 +97,25 @@ pub fn ObjectLinkValues<Object: Struct + Typed + Clone>(
 	#[prop(into)] items: MaybeSignal<Vec<Object>>,
 	get_id: fn(&Object)->i32,
 ) -> impl IntoView {
+	let prefix = match Object::type_ident() {
+		None => String::new(),
+		Some("Model") => {
+			let path = Object::type_path();
+			let module_path = path.strip_suffix("Model").expect("Type path does not end with it's identifier");
+			let module = module_path.strip_prefix("entities").unwrap_or(module_path);
+			let module_name = module.trim_matches(':');
+			
+			format!("/{module_name}/")
+		},
+		Some(str) => format!("/{str}/"),
+	};
 	view! {
 		<For
 			each = move || items.get().into_iter()
 			key = get_id
 			let:object
 		>
-			<A class="object_value_list" href={get_id(&object).to_string()}>
+			<A class="object_value_list" href={ format!("{prefix}{}", get_id(&object))}>
 				<ObjectValues object = &object/>
 			</A>
 		</For>

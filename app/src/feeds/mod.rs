@@ -9,7 +9,7 @@ use sea_orm::*;
 #[component(transparent)]
 pub fn FeedRoutes() -> impl IntoView {
 	view! {
-		<Route path="/feeds" view=Outlet>
+		<Route path="/feed" view=Outlet>
 			<Route path="" view= || view! {
 				<main>
 					<Outlet/>

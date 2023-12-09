@@ -42,7 +42,7 @@ fn Nav() -> impl IntoView {
 	view! {
 		<nav class="global">
 			<A href="">Home</A>
-			<A href="feeds">Feeds</A>
+			<A href="feed">Feeds</A>
 			<A href="strats">Strategies</A>
 		</nav>
 	}
