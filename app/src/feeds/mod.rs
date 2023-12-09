@@ -121,15 +121,17 @@ pub async fn get_fetches(feed_id: i32) -> Result<Vec<fetch::Model>, ServerFnErro
 
 #[component]
 pub fn Fetches() -> impl IntoView {
-	let id = crate::utils::with_id_param(|id| id).expect("No id");
-	view! {
-		<Await future=move || get_fetches(id) let:fetches>
-			{
-				fetches.clone().map(|feeds| view! {
-					<ObjectTable items = feeds get_id = |feed| feed.id/>
-				})
-			}
-		</Await>
+	// Use a closure to opt into the reactive system and respond to changes to id
+	|| {
+		crate::utils::with_id_param(|feed_id| view! {
+			<Await future=move || get_fetches(feed_id) let:fetches>
+				{
+					fetches.clone().map(|feeds| view! {
+						<ObjectTable items = feeds get_id = |feed| feed.id/>
+					})
+				}
+			</Await>
+		})
 	}
 }
 
