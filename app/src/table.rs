@@ -37,9 +37,11 @@ Displays a reflected value.
 #[component]
 pub fn Reflected<'a>(value: &'a dyn Reflect) -> impl IntoView {
 	if let Some(str) = value.downcast_ref::<String>() {
-		 str.clone()
+		str.clone()
 	} else if let Some(i) = value.downcast_ref::<i32>() {
-		 format!("{i}")
+		i.to_string()
+	} else if let Some(status) = value.downcast_ref::<entities::fetch::Status>() {
+		status.to_string()
 	} else {
 		tracing::error!("Don't know how to display a {}", value.reflect_type_path());
 		"🤷".to_owned()

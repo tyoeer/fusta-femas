@@ -19,6 +19,18 @@ pub enum Status {
 	EntryUpdateError,
 }
 
+impl std::fmt::Display for Status {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		let str = match self {
+			Self::Success => "Success",
+			Self::FetchError => "Error Fetching",
+			Self::ParseError => "Error Parsing",
+			Self::EntryUpdateError => "Error Updating Entries",
+		};
+		write!(f, "{str}")
+	}
+}
+
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, bevy_reflect::Reflect)]
 #[reflect(from_reflect = false)]
 #[cfg_attr(feature="orm", derive(DeriveEntityModel) )]
