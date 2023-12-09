@@ -41,6 +41,7 @@ pub fn Reflected<'a>(value: &'a dyn Reflect) -> impl IntoView {
 	} else if let Some(i) = value.downcast_ref::<i32>() {
 		 format!("{i}")
 	} else {
+		tracing::error!("Don't know how to display a {}", value.reflect_type_path());
 		"🤷".to_owned()
 	}
 }
