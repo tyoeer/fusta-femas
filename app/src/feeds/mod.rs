@@ -1,9 +1,34 @@
 use leptos::*;
-use leptos_router::{ActionForm, A, Outlet};
+use leptos_router::{Route, Redirect, ActionForm, A, Outlet};
 use entities::*;
 use crate::table::*;
 #[cfg(feature="ssr")]
 use sea_orm::*;
+
+
+#[component(transparent)]
+pub fn FeedRoutes() -> impl IntoView {
+	view! {
+		<Route path="/feeds" view=Outlet>
+			<Route path="" view= || view! {
+				<main>
+					<Outlet/>
+				</main>
+			}>
+				<Route path="" view=crate::feeds::Feeds />
+				<Route path="/new" view=crate::feeds::FeedCreator />
+			</Route>
+			<Route path="/:id" view=crate::feeds::FeedOverview>
+				<Route path="" view=|| view! { <Redirect path="about"/> }/>
+				<Route path="about" view = || {
+					crate::utils::with_id_param(|id| view! {
+						<crate::feeds::FeedInfo id />
+					})
+				} />
+			</Route>
+		</Route>
+	}
+}
 
 
 // FEED INFO

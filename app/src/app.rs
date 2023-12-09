@@ -29,24 +29,7 @@ pub fn App() -> impl IntoView {
 			<div class="global_section">
 				<Routes>
 					<Route path="" view=HomePage />
-					<Route path="/feeds" view=Outlet>
-						<Route path="" view= || view! {
-							<main>
-								<Outlet/>
-							</main>
-						}>
-							<Route path="" view=crate::feeds::Feeds />
-							<Route path="/new" view=crate::feeds::FeedCreator />
-						</Route>
-						<Route path="/:id" view=crate::feeds::FeedOverview>
-							<Route path="" view=|| view! { <Redirect path="about"/> }/>
-							<Route path="about" view = || {
-								crate::utils::with_id_param(|id| view! {
-									<crate::feeds::FeedInfo id />
-								})
-							} />
-						</Route>
-					</Route>
+					<crate::feeds::FeedRoutes />
 					<Route path="/strats" view=crate::strategies::Strategies />
 				</Routes>
 			</div>
