@@ -25,6 +25,7 @@ pub fn FeedRoutes() -> impl IntoView {
 						<crate::feeds::FeedInfo id />
 					})
 				} />
+				<Route path="fetches" view=Fetches/>
 			</Route>
 		</Route>
 	}
@@ -108,6 +109,30 @@ pub fn FeedInfo(id: i32) -> impl IntoView {
 	}
 }
 
+#[server]
+pub async fn get_fetches(feed_id: i32) -> Result<Vec<fetch::Model>, ServerFnError> {
+	let conn = crate::extension!(DatabaseConnection);
+	fetch::Entity::find()
+		.filter(fetch::Column::FeedId.eq(feed_id))
+		.all(&conn)
+		.await
+		.map_err(|e| e.into())
+}
+
+#[component]
+pub fn Fetches() -> impl IntoView {
+	let id = crate::utils::with_id_param(|id| id).expect("No id");
+	view! {
+		<Await future=move || get_fetches(id) let:fetches>
+			{
+				fetches.clone().map(|feeds| view! {
+					<ObjectTable items = feeds get_id = |feed| feed.id/>
+				})
+			}
+		</Await>
+	}
+}
+
 #[component]
 pub fn FeedOverview() -> impl IntoView {
 	view! {
@@ -115,6 +140,9 @@ pub fn FeedOverview() -> impl IntoView {
 			<ul>
 				<li>
 					<A href="about">About</A>
+				</li>
+				<li>
+					<A href="fetches">Fetches</A>
 				</li>
 			</ul>
 		</nav>
