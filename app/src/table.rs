@@ -25,8 +25,9 @@ pub fn struct_info<Type: Struct + Typed>() -> &'static StructInfo {
 	}
 }
 
+
 /**
-Displays a reflected value.
+Turns a reflected value into a string to display
 
 ## Supported values
 
@@ -35,8 +36,7 @@ Displays a reflected value.
 - [`fetch::Status`](entities::fetch::Status)
 
 */
-#[component]
-pub fn Reflected<'a>(value: &'a dyn Reflect) -> impl IntoView {
+pub fn reflect_to_string(value: &dyn Reflect) -> String {
 	if let Some(str) = value.downcast_ref::<String>() {
 		str.clone()
 	} else if let Some(i) = value.downcast_ref::<i32>() {
@@ -47,6 +47,17 @@ pub fn Reflected<'a>(value: &'a dyn Reflect) -> impl IntoView {
 		tracing::error!("Don't know how to display a {}", value.reflect_type_path());
 		"🤷".to_owned()
 	}
+}
+
+/**
+Displays a reflected value.
+
+See [`reflect_to_string()`](reflect_to_string) for supported values
+
+*/
+#[component]
+pub fn Reflected<'a>(value: &'a dyn Reflect) -> impl IntoView {
+	reflect_to_string(value)
 }
 
 #[component]
