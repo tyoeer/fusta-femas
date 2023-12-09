@@ -32,6 +32,7 @@ Displays a reflected value.
 
 - [`String`](std::string::String)
 - [`i32`](std::i32)
+- [`fetch::Status`](entities::fetch::Status)
 
 */
 #[component]
