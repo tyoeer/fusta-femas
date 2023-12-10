@@ -36,7 +36,7 @@ pub fn FeedRoutes() -> impl IntoView {
 
 
 #[server]
-pub async fn fetch_one_feed(id: i32) -> Result<i32, ServerFnError> {
+pub async fn fetch_one_feed(id: i32) -> Result<fetch::Model, ServerFnError> {
 	let conn = crate::extension!(DatabaseConnection);
 	let strats = crate::extension!(acquire::strategy_list::StrategyList);
 	
@@ -54,7 +54,7 @@ pub async fn fetch_one_feed(id: i32) -> Result<i32, ServerFnError> {
 		}
 	};
 	
-	Ok(fetch.id)
+	Ok(fetch)
 }
 
 #[component]
@@ -65,13 +65,8 @@ pub fn FetchFeedButton(id: i32) -> impl IntoView {
 			"fetching...".to_owned()
 		} else {
 			match fetch_one.value().get() {
-				None => {
-					"fetch".to_owned()
-				},
-				Some(res) => match res {
-					Ok(id) => format!("fetched: {id}"),
-					Err(err) => format!("server error: {err}"),
-				}
+				None => "fetch".to_owned(),
+				Some(_) => "fetch again".to_owned(),
 			}
 		}
 	};
@@ -80,6 +75,20 @@ pub fn FetchFeedButton(id: i32) -> impl IntoView {
 			<input type="hidden" name="id" value=id/>
 			<input type="submit" value=button_name disabled=move || {fetch_one.pending().get()}/>
 		</ActionForm>
+		{move || {
+			match fetch_one.value().get() {
+				Some(Ok(fetch)) => view! {
+					<A href=format!("/fetch/{}",fetch.id)>Fetched: {fetch.status.to_string()}</A>
+				}, 
+				Some(Err(err)) => {
+					tracing::error!(fetch_id = ?fetch_one.value().get(), "Error occurred trying to fetch:\n{err}");
+					format!("Server error: {err}").into_view()
+				},
+				None => {
+					().into_view()
+				},
+			}
+		}}
 	}
 }
 
