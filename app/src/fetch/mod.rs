@@ -99,6 +99,17 @@ pub fn FieldList(id: i32) -> impl IntoView {
 					<table::ObjectFieldValueList object=&feed overloads=vec![
 						("error", false, |fetch| view! {
 							<table::Reflected value=&fetch.error short=true/>
+						}),
+						("feed_id", true, |fetch| {
+							//Grab id out because it otherwise will complain about fetch outliving the closure
+							//Since the id is i32 which is Copy, it doesn't have that problem
+							let id = fetch.feed_id;
+							view! {
+								<A href=format!("/feed/{id}") class="object_fieldvalue">
+									<span class="object_field"> feed_id </span>
+									<span class="object_value"> {id} </span>
+								</A>
+							}.into_view()
 						})
 					]/>
 				})
