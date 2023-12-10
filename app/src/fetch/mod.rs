@@ -86,13 +86,18 @@ pub async fn get_fetch(id: i32) -> Result<fetch::Model, ServerFnError> {
 pub fn FetchError(id: i32) -> impl IntoView {
 	view! {
 		<Await future=move || get_fetch(id) let:fetch_res>
-			<pre>
-				{
-					fetch_res.clone().map(|fetch| {
-						fetch.error.unwrap_or("No error 🤷".to_owned())
-					})
-				}
-			</pre>
+			{
+				fetch_res.clone().map(|fetch| {
+					match fetch.error {
+						None => "No error 🤷".into_view(),
+						Some(error) => view! {
+							<pre>
+								{error}
+							</pre>
+						}.into_view(),
+					}
+				})
+			}
 		</Await>
 	}
 }
@@ -100,13 +105,18 @@ pub fn FetchError(id: i32) -> impl IntoView {
 pub fn FetchedContent(id: i32) -> impl IntoView {
 	view! {
 		<Await future=move || get_fetch(id) let:fetch_res>
-			<pre>
-				{
-					fetch_res.clone().map(|fetch| {
-						fetch.content.unwrap_or("No content 🤷".to_owned())
-					})
-				}
-			</pre>
+			{
+				fetch_res.clone().map(|fetch| {
+					match fetch.content {
+						None => "No content 🤷".into_view(),
+						Some(content) => view! {
+							<pre>
+								{content}
+							</pre>
+						}.into_view(),
+					}
+				})
+			}
 		</Await>
 	}
 }
