@@ -89,8 +89,7 @@ pub fn FetchError(id: i32) -> impl IntoView {
 			<pre>
 				{
 					fetch_res.clone().map(|fetch| {
-						tracing::debug!(fetch.error);
-						fetch.error.unwrap_or("No error".to_owned())
+						fetch.error.unwrap_or("No error 🤷".to_owned())
 					})
 				}
 			</pre>
