@@ -78,7 +78,7 @@ pub fn FetchFeedButton(id: i32) -> impl IntoView {
 	view! {
 		<ActionForm action=fetch_one>
 			<input type="hidden" name="id" value=id/>
-			<input type="submit" value=button_name/>
+			<input type="submit" value=button_name disabled=move || {fetch_one.pending().get()}/>
 		</ActionForm>
 	}
 }
