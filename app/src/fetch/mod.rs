@@ -96,7 +96,11 @@ pub fn FieldList(id: i32) -> impl IntoView {
 		<Await future=move || get_fetch(id) let:fetch>
 			{
 				fetch.clone().map(|feed| view! {
-					<table::ObjectFieldValueList object=&feed />
+					<table::ObjectFieldValueList object=&feed overloads=vec![
+						("error", false, |fetch| view! {
+							<table::Reflected value=&fetch.error short=true/>
+						})
+					]/>
 				})
 			}
 		</Await>
