@@ -34,6 +34,11 @@ pub fn Routes() -> impl IntoView {
 						<FetchError id />
 					})
 				} />
+				<Route path="content" view = || {
+					crate::utils::with_id_param(|id| view! {
+						<FetchedContent id />
+					})
+				} />
 			</Route>
 		</Route>
 	}
@@ -49,6 +54,9 @@ pub fn SidebarView() -> impl IntoView {
 				</li>
 				<li>
 					<A href="error">Error</A>
+				</li>
+				<li>
+					<A href="content">Content</A>
 				</li>
 			</ul>
 		</nav>
@@ -89,6 +97,20 @@ pub fn FetchError(id: i32) -> impl IntoView {
 		</Await>
 	}
 }
+#[component]
+pub fn FetchedContent(id: i32) -> impl IntoView {
+	view! {
+		<Await future=move || get_fetch(id) let:fetch_res>
+			<pre>
+				{
+					fetch_res.clone().map(|fetch| {
+						fetch.content.unwrap_or("No content 🤷".to_owned())
+					})
+				}
+			</pre>
+		</Await>
+	}
+}
 
 #[component]
 pub fn FieldList(id: i32) -> impl IntoView {
@@ -99,6 +121,9 @@ pub fn FieldList(id: i32) -> impl IntoView {
 					<table::ObjectFieldValueList object=&feed overloads=vec![
 						("error", false, |fetch| view! {
 							<table::Reflected value=&fetch.error short=true/>
+						}),
+						("content", false, |fetch| view! {
+							<table::Reflected value=&fetch.content short=true/>
 						}),
 						("feed_id", true, |fetch| {
 							//Grab id out because it otherwise will complain about fetch outliving the closure
