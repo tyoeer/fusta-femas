@@ -1,7 +1,9 @@
 pub mod app;
 pub mod error_template;
-pub mod strategies;
+
 pub mod feeds;
+pub mod fetch;
+pub mod strategies;
 
 pub mod table;
 pub mod utils;

@@ -30,6 +30,7 @@ pub fn App() -> impl IntoView {
 				<Routes>
 					<Route path="" view=HomePage />
 					<crate::feeds::FeedRoutes />
+					<crate::fetch::Routes />
 					<Route path="/strats" view=crate::strategies::Strategies />
 				</Routes>
 			</div>
