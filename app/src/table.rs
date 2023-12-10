@@ -79,6 +79,9 @@ pub fn Reflected<'a>(value: &'a dyn Reflect, #[prop(default = false)] short: boo
 	reduced.chars().take(30).collect::<String>()
 }
 
+
+
+
 #[component]
 pub fn ObjectFieldList(struct_info: &'static StructInfo) -> impl IntoView {
 	view! {
@@ -101,24 +104,56 @@ pub fn ObjectValues<Object: Struct, 'object>(object: &'object Object) -> impl In
 	}).collect::<Vec<_>>()
 }
 
+/**
+The tuple components are:
+- `&'static str`: which field the overwrite
+- `bool`: false if only the value should be overwritten, true if the entire list entry should be overwritten
+- `fn(&Object) -> View`: function taking in the object whose fields are being displayed, returning what to render as value
+*/
+pub type FieldValueOverwrites<Object> = Vec<(&'static str, bool, fn(&Object) -> View)>;
+
 #[component]
-pub fn ObjectFieldValues<Object: Struct + Typed, 'object>(object: &'object Object) -> impl IntoView {
+pub fn ObjectFieldValues<Object: Struct + Typed, 'object>(
+	object: &'object Object,
+	#[prop(optional)]
+	overloads: FieldValueOverwrites<Object>,
+) -> impl IntoView {
 	let struct_info = struct_info::<Object>();
 	object.iter_fields().zip(struct_info.field_names()).map(|(value, field)| {
-		view! {
-			<li class="object_fieldvalue">
-				<span class="object_field"> {*field} </span>
-				<span class="object_value"> <Reflected value/> </span>
-			</li>
+		if let Some(overload) = overloads
+			.iter()
+			.find( |(overload_field, _, _)| field == overload_field )
+		{
+			if overload.1 {
+				overload.2(object)
+			} else {
+				view! {
+					<li class="object_fieldvalue">
+						<span class="object_field"> {*field} </span>
+						<span class="object_value"> {overload.2(object)} </span>
+					</li>
+				}.into_view()
+			}
+		} else {
+			view! {
+				<li class="object_fieldvalue">
+					<span class="object_field"> {*field} </span>
+					<span class="object_value"> <Reflected value/> </span>
+				</li>
+			}.into_view()
 		}
 	}).collect::<Vec<_>>()
 }
 
 #[component]
-pub fn ObjectFieldValueList<Object: Struct + Typed, 'object>(object: &'object Object) -> impl IntoView {
+pub fn ObjectFieldValueList<Object: Struct + Typed, 'object>(
+	object: &'object Object,
+	#[prop(optional)]
+	overloads: FieldValueOverwrites<Object>,
+) -> impl IntoView {
 	view! {
 		<ul class="object_fieldvalue_list">
-			<ObjectFieldValues object />
+			<ObjectFieldValues object overloads/>
 		</ul>
 	}
 }
