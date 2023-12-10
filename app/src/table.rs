@@ -31,7 +31,8 @@ Turns a reflected value into a string to display
 
 ## Supported values
 
-- [`String`](std::string::String)
+- [`String`]
+- [`Option`]`<`[`String`]`>`
 - [`i32`](std::i32)
 - [`fetch::Status`](entities::fetch::Status)
 
@@ -39,6 +40,11 @@ Turns a reflected value into a string to display
 pub fn reflect_to_string(value: &dyn Reflect) -> String {
 	if let Some(str) = value.downcast_ref::<String>() {
 		str.clone()
+	} else if let Some(maybe_str) = value.downcast_ref::<Option<String>>() {
+		match maybe_str {
+			Some(str) => str.clone(),
+			None => "".to_owned(),
+		}
 	} else if let Some(i) = value.downcast_ref::<i32>() {
 		i.to_string()
 	} else if let Some(status) = value.downcast_ref::<entities::fetch::Status>() {
