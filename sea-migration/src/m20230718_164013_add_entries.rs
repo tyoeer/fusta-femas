@@ -14,7 +14,8 @@ pub enum Iden {
 	Viewed,
 	EmbedUrl,
 	Name,
-	Date,
+	ProducedDate,
+	ProducedTime,
 }
 
 #[derive(DeriveMigrationName)]
@@ -35,7 +36,8 @@ impl MigrationTrait for Migration {
 				.col(ColumnDef::new(Iden::FeedEntryId).string().not_null())
 				.col(ColumnDef::new(Iden::FeedId).integer().not_null())
 				.col(ColumnDef::new(Iden::LatestFetchId).integer().null())
-				.col(ColumnDef::new(Iden::Date).timestamp().null())
+				.col(ColumnDef::new(Iden::ProducedDate).date().not_null())
+				.col(ColumnDef::new(Iden::ProducedTime).time().null())
 				.foreign_key(
 					ForeignKey::create()
 					.from(Iden::Entry, Iden::FeedId)

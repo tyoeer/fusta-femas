@@ -17,7 +17,9 @@ pub struct Model {
 	pub feed_id: i32,
 	pub latest_fetch_id: Option<i32>,
 	#[reflect(ignore)]
-	pub date: Option<time::PrimitiveDateTime>,
+	pub produced_date: time::Date,
+	#[reflect(ignore)]
+	pub produced_time: Option<time::Time>,
 	#[cfg_attr(feature="orm", sea_orm(primary_key) )]
 	pub id: i32,
 	#[reflect(ignore)]

@@ -82,8 +82,7 @@ struct YtdlpVideoInfo {
 
 impl From<YtdlpVideoInfo> for EntryInfo {
 	fn from(info: YtdlpVideoInfo) -> EntryInfo {
-		let mut entry = EntryInfo::new(info.id.clone(), info.title, info.webpage_url);
-		entry.uploaded_at(info.upload_date.midnight());
+		let mut entry = EntryInfo::new(info.id.clone(), info.title, info.webpage_url, info.upload_date);
 		if info.playable_in_embed {
 			entry.embed_url(format!("www.youtube-nocookie.com/embed/{}",info.id));
 		}
@@ -113,14 +112,14 @@ impl Strategy for YtDlpStrategy {
 	}
 	
 	async fn fetch(&self, conn: &DatabaseConnection, feed: &feed::Model) -> anyhow::Result<String> {
-		let last = feed.find_related(entry::Entity)
-			.order_by_desc(entry::Column::Date)
+		let maybe_last_entry = feed.find_related(entry::Entity)
+			.order_by_desc(entry::Column::ProducedDate)
 			.one(conn).await?;
 		
 		let mut cmd_args = YtdlpCommand::new(feed.url.clone());
 		
-		if let Some(datetime) = last.and_then(|e| e.date) {
-			cmd_args.date_after(datetime.date());
+		if let Some(last_entry) = maybe_last_entry {
+			cmd_args.date_after(last_entry.produced_date);
 		} else {
 			cmd_args.playlist_end(self.fetch_amount_if_no_date);
 		};

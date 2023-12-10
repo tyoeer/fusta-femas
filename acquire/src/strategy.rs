@@ -6,22 +6,24 @@ pub struct EntryInfo {
 	title: String,
 	view_url: String,
 	embed_url: Option<String>,
-	uploaded_at: Option<time::PrimitiveDateTime>,
+	produced_date: time::Date,
+	produced_time: Option<time::Time>,
 }
 
 impl EntryInfo {
-	pub fn new(feed_entry_id: String, title: String, view_url: String) -> Self {
+	pub fn new(feed_entry_id: String, title: String, view_url: String, produced_date: time::Date) -> Self {
 		Self {
 			feed_entry_id,
 			title,
 			view_url,
 			embed_url: None,
-			uploaded_at: None,
+			produced_date,
+			produced_time: None,
 		}
 	}
 	
-	pub fn uploaded_at(&mut self, uploaded_at: time::PrimitiveDateTime) -> &mut Self {
-		self.uploaded_at = Some(uploaded_at);
+	pub fn produced_time(&mut self, time: time::Time) -> &mut Self {
+		self.produced_time = Some(time);
 		self
 	}
 	
@@ -69,7 +71,8 @@ async fn update_entries(conn: &DatabaseConnection, feed: feed::Model, fetch_id: 
 			model.name = Set(entry.title);
 			model.view_url = Set(entry.view_url);
 			model.embed_url = Set(entry.embed_url);
-			model.date = Set(entry.uploaded_at);
+			model.produced_date = Set(entry.produced_date);
+			model.produced_time = Set(entry.produced_time);
 			model.save(conn).await?;
 		}
 		
