@@ -56,8 +56,21 @@ See [`reflect_to_string()`](reflect_to_string) for supported values
 
 */
 #[component]
-pub fn Reflected<'a>(value: &'a dyn Reflect) -> impl IntoView {
-	reflect_to_string(value)
+pub fn Reflected<'a>(value: &'a dyn Reflect, #[prop(default = false)] short: bool) -> impl IntoView {
+	let reflected = reflect_to_string(value);
+	if !short {return reflected};
+	
+	let trimmed = reflected.trim();
+	let reduced = match trimmed.split_once('\n') {
+		None => {
+			trimmed
+		},
+		Some((first_line, _other_lines)) => {
+			first_line
+		},
+	};
+	
+	reduced.chars().take(30).collect::<String>()
 }
 
 #[component]
@@ -77,7 +90,7 @@ pub fn ObjectFieldList(struct_info: &'static StructInfo) -> impl IntoView {
 pub fn ObjectValues<Object: Struct, 'object>(object: &'object Object) -> impl IntoView {
 	object.iter_fields().map(|field| {
 		view! {
-			<span class="object_value"><Reflected value=field/></span>
+			<span class="object_value"><Reflected value=field short=true/></span>
 		}
 	}).collect::<Vec<_>>()
 }
