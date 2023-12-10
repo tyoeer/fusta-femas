@@ -29,6 +29,11 @@ pub fn Routes() -> impl IntoView {
 						<FieldList id />
 					})
 				} />
+				<Route path="error" view = || {
+					crate::utils::with_id_param(|id| view! {
+						<FetchError id />
+					})
+				} />
 			</Route>
 		</Route>
 	}
@@ -42,6 +47,9 @@ pub fn SidebarView() -> impl IntoView {
 				<li>
 					<A href="about">About</A>
 				</li>
+				<li>
+					<A href="error">Error</A>
+				</li>
 			</ul>
 		</nav>
 		<main>
@@ -51,7 +59,7 @@ pub fn SidebarView() -> impl IntoView {
 }
 
 
-// ABOUT
+// INFO
 
 
 #[server]
@@ -61,8 +69,25 @@ pub async fn get_fetch(id: i32) -> Result<fetch::Model, ServerFnError> {
 		.one(&conn)
 		.await?
 		.ok_or(
-			ServerFnError::ServerError("No such feed".into())
+			ServerFnError::ServerError("No such fetch".into())
 		)
+}
+
+
+#[component]
+pub fn FetchError(id: i32) -> impl IntoView {
+	view! {
+		<Await future=move || get_fetch(id) let:fetch_res>
+			<pre>
+				{
+					fetch_res.clone().map(|fetch| {
+						tracing::debug!(fetch.error);
+						fetch.error.unwrap_or("No error".to_owned())
+					})
+				}
+			</pre>
+		</Await>
+	}
 }
 
 #[component]
