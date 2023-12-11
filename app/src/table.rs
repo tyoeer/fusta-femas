@@ -64,6 +64,9 @@ pub fn reflect_to_string(value: &dyn Reflect) -> String {
 	}
 }
 
+//TODO move into style or make a setting
+const SHORTENED_MAX_SIZE: usize = 35;
+
 /**
 Displays a reflected value.
 
@@ -85,7 +88,7 @@ pub fn Reflected<'a>(value: &'a dyn Reflect, #[prop(default = false)] short: boo
 		},
 	};
 	
-	let mut shortened = first_line.chars().take(30).collect::<String>();
+	let mut shortened = first_line.chars().take(SHORTENED_MAX_SIZE).collect::<String>();
 	if shortened.len() != trimmed.len() {
 		if shortened.len() == first_line.len() {
 			//This is the first line, preserve some whitespace
