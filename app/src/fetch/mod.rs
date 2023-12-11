@@ -2,6 +2,7 @@ use leptos::*;
 use leptos_router::{Route, Redirect, A, Outlet};
 use entities::*;
 use crate::table;
+use crate::utils;
 #[cfg(feature="ssr")]
 use sea_orm::*;
 
@@ -85,69 +86,61 @@ pub async fn get_fetch(id: i32) -> Result<fetch::Model, ServerFnError> {
 #[component]
 pub fn FetchError(id: i32) -> impl IntoView {
 	view! {
-		<Await future=move || get_fetch(id) let:fetch_res>
+		<utils::AwaitOk future=move || get_fetch(id) let:fetch>
 			{
-				fetch_res.clone().map(|fetch| {
-					match fetch.error {
-						None => "No error 🤷".into_view(),
-						Some(error) => view! {
-							<pre>
-								{error}
-							</pre>
-						}.into_view(),
-					}
-				})
+				match fetch.error {
+					None => "No error 🤷".into_view(),
+					Some(error) => view! {
+						<pre>
+							{error}
+						</pre>
+					}.into_view(),
+				}
 			}
-		</Await>
+		</utils::AwaitOk>
 	}
 }
 #[component]
 pub fn FetchedContent(id: i32) -> impl IntoView {
 	view! {
-		<Await future=move || get_fetch(id) let:fetch_res>
+		<utils::AwaitOk future=move || get_fetch(id) let:fetch>
 			{
-				fetch_res.clone().map(|fetch| {
-					match fetch.content {
-						None => "No content 🤷".into_view(),
-						Some(content) => view! {
-							<pre>
-								{content}
-							</pre>
-						}.into_view(),
-					}
-				})
+				match fetch.content {
+					None => "No content 🤷".into_view(),
+					Some(content) => view! {
+						<pre>
+							{content}
+						</pre>
+					}.into_view(),
+				}
 			}
-		</Await>
+		</utils::AwaitOk>
 	}
 }
 
 #[component]
 pub fn FieldList(id: i32) -> impl IntoView {
 	view! {
-		<Await future=move || get_fetch(id) let:fetch>
-			{
-				fetch.clone().map(|feed| view! {
-					<table::ObjectFieldValueList object=&feed overloads=vec![
-						("error", false, |fetch| view! {
-							<table::Reflected value=&fetch.error short=true/>
-						}),
-						("content", false, |fetch| view! {
-							<table::Reflected value=&fetch.content short=true/>
-						}),
-						("feed_id", true, |fetch| {
-							//Grab id out because it otherwise will complain about fetch outliving the closure
-							//Since the id is i32 which is Copy, it doesn't have that problem
-							let id = fetch.feed_id;
-							view! {
-								<A href=format!("/feed/{id}") class="object_fieldvalue">
-									<span class="object_field"> feed_id </span>
-									<span class="object_value"> {id} </span>
-								</A>
-							}.into_view()
-						})
-					]/>
+		<utils::AwaitOk future=move || get_fetch(id) let:fetch>
+			<table::ObjectFieldValueList object=&fetch overloads=vec![
+				("error", false, |fetch| view! {
+					<table::Reflected value=&fetch.error short=true/>
+				}),
+				("content", false, |fetch| view! {
+					<table::Reflected value=&fetch.content short=true/>
+				}),
+				("feed_id", true, |fetch| {
+					//Grab id out because it otherwise will complain about fetch outliving the closure
+					//Since the id is i32 which is Copy, it doesn't have that problem
+					let id = fetch.feed_id;
+					view! {
+						<A href=format!("/feed/{id}") class="object_fieldvalue">
+							<span class="object_field"> feed_id </span>
+							<span class="object_value"> {id} </span>
+						</A>
+					}.into_view()
 				})
-			}
-		</Await>
+			]/>
+		</utils::AwaitOk>
 	}
 }

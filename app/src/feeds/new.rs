@@ -1,6 +1,7 @@
 use leptos::*;
 use leptos_router::ActionForm;
 use entities::*;
+use crate::utils;
 #[cfg(feature="ssr")]
 use sea_orm::*;
 
@@ -40,22 +41,15 @@ pub fn FeedCreator() -> impl IntoView {
 			<input type="text" name="name" />
 			<input type="text" name="url" />
 			<select name="strategy">
-				<Await future=crate::strategies::get_strategies let:strats>
-					{
-						strats.clone().map(|strats| {
-							view! {
-								<For
-									each=move || strats.clone()
-									key=|s| s.clone()
-									let:strat
-								>
-									<option value=strat.clone()> {strat} </option>
-								</For>
-							}
-						})
-					}
-					
-				</Await>
+				<utils::AwaitOk future=crate::strategies::get_strategies let:strats>
+					<For
+						each=move || strats.clone()
+						key=|s| s.clone()
+						let:strat
+					>
+						<option value=strat.clone()> {strat} </option>
+					</For>
+				</utils::AwaitOk>
 			</select>
 			<input type="submit" value=button_name/>
 		</ActionForm>

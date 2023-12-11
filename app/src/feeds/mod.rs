@@ -2,6 +2,7 @@ use leptos::*;
 use leptos_router::{Route, Redirect, ActionForm, A, Outlet};
 use entities::*;
 use crate::table::*;
+use crate::utils;
 #[cfg(feature="ssr")]
 use sea_orm::*;
 
@@ -107,14 +108,10 @@ pub async fn get_feed(id: i32) -> Result<feed::Model, ServerFnError> {
 #[component]
 pub fn FeedInfo(id: i32) -> impl IntoView {
 	view! {
-		<Await future=move || get_feed(id) let:feed>
-			{
-				feed.clone().map(|feed| view! {
-					<ObjectFieldValueList object=&feed />
-					<a href=&feed.url target="_blank">{feed.url}</a>
-				})
-			}
-		</Await>
+		<utils::AwaitOk future=move || get_feed(id) let:feed>
+			<ObjectFieldValueList object=&feed />
+			<a href=&feed.url target="_blank">{feed.url}</a>
+		</utils::AwaitOk>
 		<FetchFeedButton id />
 	}
 }
@@ -134,13 +131,9 @@ pub fn Fetches() -> impl IntoView {
 	// Use a closure to opt into the reactive system and respond to changes to id
 	|| {
 		crate::utils::with_id_param(|feed_id| view! {
-			<Await future=move || get_fetches(feed_id) let:fetches>
-				{
-					fetches.clone().map(|feeds| view! {
-						<ObjectTable items = feeds get_id = |feed| feed.id/>
-					})
-				}
-			</Await>
+			<utils::AwaitOk future=move || get_fetches(feed_id) let:fetches>
+				<ObjectTable items = fetches get_id = |feed| feed.id/>
+			</utils::AwaitOk>
 		})
 	}
 }
@@ -180,13 +173,9 @@ pub async fn get_feeds() -> Result<Vec<feed::Model>, ServerFnError> {
 #[component]
 pub fn Feeds() -> impl IntoView {
 	view! {
-		<Await future=get_feeds let:feeds_res>
-			{
-				feeds_res.clone().map(|feeds| view! {
-					<ObjectTable items = feeds get_id = |feed| feed.id/>
-				})
-			}
-		</Await>
+		<utils::AwaitOk future=get_feeds let:feeds>
+			<ObjectTable items = feeds get_id = |feed| feed.id/>
+		</utils::AwaitOk>
 		<A href="new">Create new feed</A>
 	}
 }

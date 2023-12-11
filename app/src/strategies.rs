@@ -1,4 +1,5 @@
 use leptos::*;
+use crate::utils;
 
 #[server]
 pub async fn get_strategies() -> Result<Vec<String>, ServerFnError> {	
@@ -10,16 +11,14 @@ pub async fn get_strategies() -> Result<Vec<String>, ServerFnError> {
 #[component]
 pub fn Strategies() -> impl IntoView {
 	view! {
-		<Await future=get_strategies let:strats>
+		<utils::AwaitOk future=get_strategies let:strats>
 			<ul>
 				{
-					strats.clone().map(|vec| {
-						vec.into_iter()
-							.map(|e| view! {<li>{e}</li>})
-							.collect::<Vec<_>>()
-					})
+					strats.into_iter()
+						.map(|e| view! {<li>{e}</li>})
+						.collect::<Vec<_>>()
 				}
 			</ul>
-		</Await>
+		</utils::AwaitOk>
 	}
 }
