@@ -28,6 +28,7 @@ pub fn FeedRoutes() -> impl IntoView {
 					})
 				} />
 				<Route path="fetches" view=Fetches/>
+				<Route path="entries" view=Entries/>
 			</Route>
 		</Route>
 	}
@@ -132,7 +133,29 @@ pub fn Fetches() -> impl IntoView {
 	|| {
 		crate::utils::with_id_param(|feed_id| view! {
 			<utils::AwaitOk future=move || get_fetches(feed_id) let:fetches>
-				<ObjectTable items = fetches get_id = |feed| feed.id/>
+				<ObjectTable items = fetches get_id = |fetch| fetch.id/>
+			</utils::AwaitOk>
+		})
+	}
+}
+
+#[server]
+pub async fn get_entries(feed_id: i32) -> Result<Vec<entry::Model>, ServerFnError> {
+	let conn = crate::extension!(DatabaseConnection);
+	entry::Entity::find()
+		.filter(entry::Column::FeedId.eq(feed_id))
+		.all(&conn)
+		.await
+		.map_err(|e| e.into())
+}
+
+#[component]
+pub fn Entries() -> impl IntoView {
+	// Use a closure to opt into the reactive system and respond to changes to id
+	|| {
+		crate::utils::with_id_param(|feed_id| view! {
+			<utils::AwaitOk future=move || get_entries(feed_id) let:entries>
+				<ObjectTable items = entries get_id = |entry| entry.id/>
 			</utils::AwaitOk>
 		})
 	}
@@ -148,6 +171,9 @@ pub fn FeedOverview() -> impl IntoView {
 				</li>
 				<li>
 					<A href="fetches">Fetches</A>
+				</li>
+				<li>
+					<A href="entries">Entries</A>
 				</li>
 			</ul>
 		</nav>
