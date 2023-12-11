@@ -15,7 +15,7 @@ body {
 }
 .global_section:has(> nav.sidebar) {
 	display: grid;
-	grid-template-columns: 10em auto 10em;
+	grid-template-columns: 10em minmax(max-content, auto) 10em;
 }
 
 main {
