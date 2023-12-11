@@ -73,7 +73,7 @@ See [`reflect_to_string()`](reflect_to_string) for supported values
 #[component]
 pub fn Reflected<'a>(value: &'a dyn Reflect, #[prop(default = false)] short: bool) -> impl IntoView {
 	let reflected = reflect_to_string(value);
-	if !short {return reflected};
+	if !short {return reflected.into_view()};
 	
 	let trimmed = reflected.trim();
 	let first_line = match trimmed.split_once('\n') {
@@ -92,9 +92,15 @@ pub fn Reflected<'a>(value: &'a dyn Reflect, #[prop(default = false)] short: boo
 			shortened.push(' ');
 		}
 		shortened.push_str("...");
+		view! {
+			<span title=reflected>
+				{shortened}
+			</span>
+		}.into_view()
+	} else {
+		shortened.into_view()
 	}
 	
-	shortened
 }
 
 
