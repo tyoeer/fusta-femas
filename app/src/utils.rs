@@ -55,12 +55,22 @@ pub fn AwaitOk<
 	future: AsyncFunction,
 	children: Children,
 ) -> impl IntoView {
+	//Not doing this causes a lifetime error I don't get, and this is what Await does, so it seems fine
+	let children_stored = store_value(children);
 	view! {
 		<Await future let:result>
 			{
-				//Removing the closure causes a lifetime error
-				#[allow(clippy::redundant_closure)]
-				result.clone().map(|output| children(output))
+				//The children of the ErrorBoundary become a closure, which would otherwise escape with result
+				let result = result.clone();
+				view! {
+					<ErrorBoundary fallback = |errors| view!{ <crate::app::ErrorsView errors /> } >
+						{
+							//Removing the closure causes a lifetime error
+							#[allow(clippy::redundant_closure)]
+							children_stored.with_value(|children| result.map(children))
+						}
+					</ErrorBoundary>
+				}
 			}
 		</Await>
 	}

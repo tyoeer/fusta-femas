@@ -11,7 +11,11 @@ pub fn App() -> impl IntoView {
 	let (_is_routing, set_is_routing) = create_signal(false);
 	
 	view! {
-		<ErrorBoundary fallback=errors_view>
+		<ErrorBoundary fallback=|errors| view!{
+			<main>
+				<ErrorsView errors/>
+			</main>
+		} >
 			// id=leptos means cargo-leptos will hot-reload this stylesheet
 			<Stylesheet id="leptos" href="/pkg/fusta-femas.css"/>
 			<Title text="Fusta Femas"/>
@@ -51,22 +55,21 @@ fn Nav() -> impl IntoView {
 	}
 }
 
-fn errors_view(errors: RwSignal<Errors>) -> impl IntoView {
+#[component]
+pub fn ErrorsView(errors: RwSignal<Errors>) -> impl IntoView {
 	view! {
-		<main>
-			<h1>ERROR</h1>
-			<ul>
-				<For
-					each = move || errors.get().into_iter()
-					key = |err| err.0.clone()
-					let:err
-				>
-					<li>
-						{err.1.to_string()}
-					</li>
-				</For>
-			</ul>
-		</main>
+		<h1>ERROR</h1>
+		<ul>
+			<For
+				each = move || errors.get().into_iter()
+				key = |err| err.0.clone()
+				let:err
+			>
+				<li>
+					{err.1.to_string()}
+				</li>
+			</For>
+		</ul>
 	}
 }
 
