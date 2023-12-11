@@ -11,30 +11,32 @@ pub fn App() -> impl IntoView {
 	let (_is_routing, set_is_routing) = create_signal(false);
 	
 	view! {
-		// id=leptos means cargo-leptos will hot-reload this stylesheet
-		<Stylesheet id="leptos" href="/pkg/fusta-femas.css"/>
-		<Title text="Fusta Femas"/>
-		
-		<Router set_is_routing fallback=|| {
-			let mut outside_errors = Errors::default();
-			outside_errors.insert_with_default_key(AppError::NotFound);
-			view! {
-				<ErrorTemplate outside_errors/>
-			}
-			.into_view()
-		}>
-			// Default style makes it very quickly move the page up and down
-			// <RoutingProgress _is_routing />
-			<Nav/>
-			<div class="global_section">
-				<Routes>
-					<Route path="" view=HomePage />
-					<crate::feeds::FeedRoutes />
-					<crate::fetch::Routes />
-					<Route path="/strats" view=crate::strategies::Strategies />
-				</Routes>
-			</div>
-		</Router>
+		<ErrorBoundary fallback=errors_view>
+			// id=leptos means cargo-leptos will hot-reload this stylesheet
+			<Stylesheet id="leptos" href="/pkg/fusta-femas.css"/>
+			<Title text="Fusta Femas"/>
+			
+			<Router set_is_routing fallback=|| {
+				let mut outside_errors = Errors::default();
+				outside_errors.insert_with_default_key(AppError::NotFound);
+				view! {
+					<ErrorTemplate outside_errors/>
+				}
+				.into_view()
+			}>
+				// Default style makes it very quickly move the page up and down
+				// <RoutingProgress _is_routing />
+				<Nav/>
+				<div class="global_section">
+					<Routes>
+						<Route path="" view=HomePage />
+						<crate::feeds::FeedRoutes />
+						<crate::fetch::Routes />
+						<Route path="/strats" view=crate::strategies::Strategies />
+					</Routes>
+				</div>
+			</Router>
+		</ErrorBoundary>
 	}
 }
 
@@ -46,6 +48,25 @@ fn Nav() -> impl IntoView {
 			<A href="feed">Feeds</A>
 			<A href="strats">Strategies</A>
 		</nav>
+	}
+}
+
+fn errors_view(errors: RwSignal<Errors>) -> impl IntoView {
+	view! {
+		<main>
+			<h1>ERROR</h1>
+			<ul>
+				<For
+					each = move || errors.get().into_iter()
+					key = |err| err.0.clone()
+					let:err
+				>
+					<li>
+						{err.1.to_string()}
+					</li>
+				</For>
+			</ul>
+		</main>
 	}
 }
 
