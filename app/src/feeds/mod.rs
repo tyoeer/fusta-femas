@@ -158,8 +158,6 @@ pub fn FeedOverview() -> impl IntoView {
 }
 
 
-// CREATION
-
 // LIST
 
 
