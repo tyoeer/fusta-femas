@@ -67,7 +67,7 @@ pub fn Reflected<'a>(value: &'a dyn Reflect, #[prop(default = false)] short: boo
 	if !short {return reflected};
 	
 	let trimmed = reflected.trim();
-	let reduced = match trimmed.split_once('\n') {
+	let first_line = match trimmed.split_once('\n') {
 		None => {
 			trimmed
 		},
@@ -76,7 +76,16 @@ pub fn Reflected<'a>(value: &'a dyn Reflect, #[prop(default = false)] short: boo
 		},
 	};
 	
-	reduced.chars().take(30).collect::<String>()
+	let mut shortened = first_line.chars().take(30).collect::<String>();
+	if shortened.len() != trimmed.len() {
+		if shortened.len() == first_line.len() {
+			//This is the first line, preserve some whitespace
+			shortened.push(' ');
+		}
+		shortened.push_str("...");
+	}
+	
+	shortened
 }
 
 
