@@ -33,7 +33,9 @@ Turns a reflected value into a string to display
 
 - [`String`]
 - [`Option`]`<`[`String`]`>`
-- [`i32`](std::i32)
+- [`i32`]
+- [`Option`]`<`[`i32`]`>`
+- [`bool`]
 - [`fetch::Status`](entities::fetch::Status)
 
 */
@@ -47,6 +49,13 @@ pub fn reflect_to_string(value: &dyn Reflect) -> String {
 		}
 	} else if let Some(i) = value.downcast_ref::<i32>() {
 		i.to_string()
+	} else if let Some(maybe_int) = value.downcast_ref::<Option<i32>>() {
+		match maybe_int {
+			Some(int) => int.to_string(),
+			None => "".to_owned(),
+		}
+	} else if let Some(boolean) = value.downcast_ref::<bool>() {
+		(if *boolean {"yes"} else {"no"}).to_owned()
 	} else if let Some(status) = value.downcast_ref::<entities::fetch::Status>() {
 		status.to_string()
 	} else {
