@@ -128,18 +128,3 @@ pub async fn run_strategy(conn: DatabaseConnection, feed: feed::Model, strat: &d
 	
 	fetch.insert(&conn).await
 }
-
-pub struct MockStrat;
-
-#[async_trait::async_trait]
-impl Strategy for MockStrat{
-	fn name(&self) -> &'static str {
-		"MOCK"
-	}
-	async fn fetch(&self, _conn: &DatabaseConnection, _feed: &feed::Model) -> anyhow::Result<String> {
-		Ok("MOCK FETCHED".into())
-	}
-	async fn parse(&self, _data: &str) -> anyhow::Result<Vec<EntryInfo>> {
-		anyhow::bail!("Mock fail")
-	}
-}

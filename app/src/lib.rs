@@ -16,7 +16,7 @@ pub fn extend(router: axum::routing::Router) -> axum::routing::Router {
 		use acquire::*;
 		
 		let mut list = StrategyList::new();
-		list.add(strategy::MockStrat);
+		list.add(mock::MockStrat::default());
 		list.add(yt_dlp::YtDlpStrategy::default());
 		list
 	}))
