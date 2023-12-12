@@ -23,3 +23,18 @@ jobs:
         shared-key: "SharedTests"
     - name: Run tests
       run: cargo test --verbose
+  
+  leptos-build:
+    name: Cargo leptos build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: "SharedTests"
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-leptos
+      - name: Build with cargo-leptos
+        run: cargo leptos build
