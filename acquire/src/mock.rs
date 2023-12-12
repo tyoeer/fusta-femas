@@ -23,9 +23,12 @@ impl Strategy for MockStrat{
 		Ok(mock_fetched.to_owned())
 	}
 	async fn parse(&self, data: &str) -> anyhow::Result<Vec<EntryInfo>> {
-		match data {
+		let entries = match data {
+			"Mock ok" => Vec::new(),
 			"parse error" => anyhow::bail!("This mock shouldn't be parsed"),
 			_ => anyhow::bail!("idk what even is this"),
-		}
+		};
+		
+		Ok(entries)
 	}
 }

@@ -9,13 +9,16 @@ dependencies = [
  "anyhow",
  "async-trait",
  "entities",
+ "sea-migration",
  "sea-orm",
+ "sea-orm-macros",
  "serde",
  "serde_json",
  "thiserror",
  "time",
  "tokio",
  "tracing",
+ "tracing-subscriber",
 ]
 
 [[package]]
