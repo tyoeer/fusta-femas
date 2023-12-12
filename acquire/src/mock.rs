@@ -6,7 +6,10 @@ use crate::strategy::{
 };
 
 #[derive(Default, Debug, Clone)]
-pub struct MockStrat;
+pub struct MockStrat {
+	///Private field to prevent this from being created without a function call
+	_unused: (),
+}
 
 #[async_trait::async_trait]
 impl Strategy for MockStrat{
