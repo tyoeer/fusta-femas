@@ -29,7 +29,7 @@ impl StrategyList {
 		match strat {
 			None => Err(StrategyError::NotFound(feed.strategy)),
 			Some(strat) => {
-				Ok(run_strategy(conn, feed, strat.as_ref()).await?)
+				Ok(run_strategy(conn, &feed, strat.as_ref()).await?)
 			}
 		}
 	}

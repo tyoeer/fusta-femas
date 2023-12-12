@@ -10,7 +10,7 @@ async fn basic() -> Result<(), DbErr> {
 	let strat = MockStrat::default();
 	let feed = feed("ok", &strat, &db).await?;
 	
-	let fetch = strategy::run_strategy(db, feed, &strat).await?;
+	let fetch = strategy::run_strategy(db, &feed, &strat).await?;
 	
 	assert_eq!(fetch.status, fetch::Status::Success);
 	

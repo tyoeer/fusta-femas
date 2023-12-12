@@ -46,12 +46,14 @@ fn error_to_string(err: anyhow::Error) -> String {
 	format!("{err:?}")
 }
 
-async fn update_entries(conn: &DatabaseConnection, feed: feed::Model, fetch_id: i32, entries: Vec<EntryInfo>) -> anyhow::Result<()> {
+async fn update_entries(conn: &DatabaseConnection, feed: &feed::Model, fetch_id: i32, entries: Vec<EntryInfo>) -> anyhow::Result<()> {
 	let feed_entry_ids = entries.iter().map(|e| &e.feed_entry_id);
 	let existing = feed.find_related(entry::Entity)
 		.filter(entry::Column::FeedEntryId.is_in(feed_entry_ids))
 		.all(conn)
 		.await?;
+	
+	let feed_id = feed.id;
 	
 	conn.transaction::<_,_,DbErr>(|conn| Box::pin(async move {
 		for entry in entries {
@@ -63,7 +65,7 @@ async fn update_entries(conn: &DatabaseConnection, feed: feed::Model, fetch_id: 
 				}
 				let mut new = entry::ActiveModel::new();
 				new.feed_entry_id = Set(entry.feed_entry_id);
-				new.feed_id = Set(feed.id);
+				new.feed_id = Set(feed_id);
 				new
 			};
 			
@@ -82,13 +84,13 @@ async fn update_entries(conn: &DatabaseConnection, feed: feed::Model, fetch_id: 
 	Ok(())
 }
 
-pub async fn run_strategy(conn: DatabaseConnection, feed: feed::Model, strat: &dyn Strategy) -> Result<fetch::Model, DbErr> {
+pub async fn run_strategy(conn: DatabaseConnection, feed: &feed::Model, strat: &dyn Strategy) -> Result<fetch::Model, DbErr> {
 	use ActiveValue::Set;
 	let mut fetch = fetch::ActiveModel::new();
 	fetch.feed_id = Set(feed.id);
 	fetch.url = Set(feed.url.clone());
 	fetch.strategy = Set(strat.name().to_owned());
-	let fetched = strat.fetch(&conn, &feed).await;
+	let fetched = strat.fetch(&conn, feed).await;
 	match fetched {
 		Err(err) => {
 			fetch.status = Set(fetch::Status::FetchError);
@@ -109,7 +111,7 @@ pub async fn run_strategy(conn: DatabaseConnection, feed: feed::Model, strat: &d
 				fetch.status = Set(fetch::Status::EntryUpdateError);
 				let fetch = fetch.insert(&conn).await?;
 				
-				let res = update_entries(&conn, feed.clone(), fetch.id, parsed).await;
+				let res = update_entries(&conn, feed, fetch.id, parsed).await;
 				let mut fetch = fetch.into_active_model();
 				match res {
 					Ok(_) => {
