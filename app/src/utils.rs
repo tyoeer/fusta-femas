@@ -82,8 +82,14 @@ Errors get propagated up with `?`.
 
 # Example
 
-```
+```no_run
+# use app::extension;
+# use sea_orm::DatabaseConnection;
+# use leptos::ServerFnError;
+# async fn server_fn() -> Result<(), ServerFnError> {
 let conn = extension!(DatabaseConnection);
+# Ok(())
+# };
 ```
 
 */
