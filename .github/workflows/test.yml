@@ -33,6 +33,8 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           shared-key: "SharedTests"
+      - name: Get WASM target (& std)
+        run: rustup target add wasm32-unknown-unknown
       - uses: taiki-e/install-action@v2
         with:
           tool: cargo-leptos
