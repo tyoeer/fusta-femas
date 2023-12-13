@@ -31,6 +31,11 @@ pub fn Routes() -> impl IntoView {
 						<details::About id />
 					})
 				} />
+				<Route path="embedded" view = || {
+					crate::utils::with_id_param(|id| view! {
+						<details::Embed id />
+					})
+				} />
 			</Route>
 		</Route>
 	}

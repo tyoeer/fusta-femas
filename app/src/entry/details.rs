@@ -15,6 +15,9 @@ pub fn Navbar() -> impl IntoView {
 				<li>
 					<A href="about">About</A>
 				</li>
+				<li>
+					<A href="embedded">Embedded</A>
+				</li>
 			</ul>
 		</nav>
 		<main>
@@ -40,6 +43,29 @@ pub fn About(id: i32) -> impl IntoView {
 	view! {
 		<utils::AwaitOk future=move || get_entry(id) let:entry>
 			<table::ObjectFieldValueList object=&entry />
+		</utils::AwaitOk>
+	}
+}
+
+#[component]
+pub fn Embed(id: i32) -> impl IntoView {
+	view! {
+		<utils::AwaitOk future=move || get_entry(id) let:entry>
+			{
+				let maybe_url = entry.embed_url;
+				maybe_url.map(|mut url| {
+					if !url.contains("://") {
+						url = format!("https://{url}");
+					}
+					view! {
+						<iframe class="grow" src=url />
+					}.into_view()
+				}).unwrap_or_else(|| {
+					view! {
+						"Entry has no embed url specified 🤷"
+					}.into_view()
+				})
+			}
 		</utils::AwaitOk>
 	}
 }
