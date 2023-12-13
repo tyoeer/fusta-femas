@@ -155,7 +155,7 @@ pub fn Entries() -> impl IntoView {
 	|| {
 		crate::utils::with_id_param(|feed_id| view! {
 			<utils::AwaitOk future=move || get_entries(feed_id) let:entries>
-				<ObjectTable items = entries get_id = |entry| entry.id/>
+				<crate::entry::search::Table entries />
 			</utils::AwaitOk>
 		})
 	}
