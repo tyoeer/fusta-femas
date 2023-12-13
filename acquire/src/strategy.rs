@@ -65,7 +65,7 @@ async fn logged<Output>(task: impl std::future::Future<Output = Output>) -> (Str
 	let shared_log = SharedLog::default();
 	let subscriber_share = shared_log.clone();
 	let subscriber = fmt()
-		.event_format(fmt::format().pretty())
+		.event_format(fmt::format().pretty().with_ansi(false))
 		.with_writer(subscriber_share)
 		.finish();
 	
