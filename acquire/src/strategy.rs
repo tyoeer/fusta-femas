@@ -132,6 +132,8 @@ async fn update_entries(conn: &DatabaseConnection, feed: &feed::Model, fetch_id:
 async fn do_fetch(conn: &DatabaseConnection, feed: &feed::Model, strat: &dyn Strategy) -> Result<fetch::ActiveModel, DbErr> {
 	use ActiveValue::Set;
 	
+	tracing::info!(strategy = strat.name(), ?feed, "Fetching feed");
+	
 	//setup fetch
 	let mut fetch = fetch::ActiveModel::new();
 	fetch.feed_id = Set(feed.id);

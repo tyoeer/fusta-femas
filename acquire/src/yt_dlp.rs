@@ -134,7 +134,7 @@ impl Strategy for YtDlpStrategy {
 			.stderr(Stdio::piped())
 		;
 		
-		tracing::info!(feed.id, ?cmd, "Running yt-dlp command to fetch");
+		tracing::info!(?cmd, "Running yt-dlp command to fetch");
 		
 		let out = cmd.output().await?;
 		
