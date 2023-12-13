@@ -11,23 +11,23 @@ pub fn App() -> impl IntoView {
 	let (_is_routing, set_is_routing) = create_signal(false);
 	
 	view! {
-		<ErrorBoundary fallback=|errors| view!{
-			<main>
-				<ErrorsView errors/>
-			</main>
-		} >
-			// id=leptos means cargo-leptos will hot-reload this stylesheet
-			<Stylesheet id="leptos" href="/pkg/fusta-femas.css"/>
-			<Title text="Fusta Femas"/>
-			
-			<Router set_is_routing fallback=|| {
-				let mut outside_errors = Errors::default();
-				outside_errors.insert_with_default_key(AppError::NotFound);
-				view! {
-					<ErrorTemplate outside_errors/>
-				}
-				.into_view()
-			}>
+		// id=leptos means cargo-leptos will hot-reload this stylesheet
+		<Stylesheet id="leptos" href="/pkg/fusta-femas.css"/>
+		<Title text="Fusta Femas"/>
+		
+		<Router set_is_routing fallback=|| {
+			let mut outside_errors = Errors::default();
+			outside_errors.insert_with_default_key(AppError::NotFound);
+			view! {
+				<ErrorTemplate outside_errors/>
+			}
+			.into_view()
+		}>
+			<ErrorBoundary fallback=|errors| view!{
+				<main>
+					<ErrorsView errors/>
+				</main>
+			} >
 				// Default style makes it very quickly move the page up and down
 				// <RoutingProgress _is_routing />
 				<Nav/>
@@ -39,8 +39,8 @@ pub fn App() -> impl IntoView {
 						<Route path="/strats" view=crate::strategies::Strategies />
 					</Routes>
 				</div>
-			</Router>
-		</ErrorBoundary>
+			</ErrorBoundary>
+		</Router>
 	}
 }
 
