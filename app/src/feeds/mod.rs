@@ -6,7 +6,8 @@ use crate::utils;
 #[cfg(feature="ssr")]
 use sea_orm::*;
 
-mod new;
+pub mod new;
+pub mod search;
 
 #[component(transparent)]
 pub fn FeedRoutes() -> impl IntoView {
@@ -17,7 +18,7 @@ pub fn FeedRoutes() -> impl IntoView {
 					<Outlet/>
 				</main>
 			}>
-				<Route path="" view=crate::feeds::Feeds />
+				<Route path="" view=search::Search />
 				<Route path="/new" view=new::FeedCreator />
 			</Route>
 			<Route path="/:id" view=crate::feeds::FeedOverview>
@@ -180,26 +181,5 @@ pub fn FeedOverview() -> impl IntoView {
 		<main>
 			<Outlet/>
 		</main>
-	}
-}
-
-
-// LIST
-
-
-#[server]
-pub async fn get_feeds() -> Result<Vec<feed::Model>, ServerFnError> {
-	let conn = crate::extension!(DatabaseConnection);
-	let feeds = feed::Entity::find().all(&conn).await?;
-	Ok(feeds)
-}
-
-#[component]
-pub fn Feeds() -> impl IntoView {
-	view! {
-		<utils::AwaitOk future=get_feeds let:feeds>
-			<ObjectTable items = feeds get_id = |feed| feed.id/>
-		</utils::AwaitOk>
-		<A href="new">Create new feed</A>
 	}
 }
