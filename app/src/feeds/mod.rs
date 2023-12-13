@@ -81,7 +81,7 @@ pub fn FetchFeedButton(id: i32) -> impl IntoView {
 		{move || {
 			match fetch_one.value().get() {
 				Some(Ok(fetch)) => view! {
-					<A href=format!("/fetch/{}",fetch.id)>Fetched: {fetch.status.to_string()}</A>
+					<A href=format!("/fetch/{}",fetch.id)>"Fetched: " {fetch.status.to_string()}</A>
 				}, 
 				Some(Err(err)) => {
 					tracing::error!(fetch_id = ?fetch_one.value().get(), "Error occurred trying to fetch:\n{err}");
