@@ -118,6 +118,8 @@ impl Strategy for YtDlpStrategy {
 		
 		let mut cmd_args = YtdlpCommand::new(feed.url.clone());
 		
+		cmd_args.verbose(true);
+		
 		if let Some(last_entry) = maybe_last_entry {
 			cmd_args.date_after(last_entry.produced_date);
 		} else {
@@ -129,11 +131,16 @@ impl Strategy for YtDlpStrategy {
 			.args(cmd_args.get_args()?)
 			.kill_on_drop(true)
 			.stdout(Stdio::piped())
+			.stderr(Stdio::piped())
 		;
 		
-		tracing::debug!(feed.id, ?cmd, "Running yt-dlp command to fetch");
+		tracing::info!(feed.id, ?cmd, "Running yt-dlp command to fetch");
 		
 		let out = cmd.output().await?;
+		
+		//Formatted like this to get to print out the newlines instead of escaping them
+		tracing::info!("yt-dlp stderr:\n{}", String::from_utf8_lossy(&out.stderr));
+		
 		if !out.status.success() && !matches!(out.status.code(),Some(101))  {
 			anyhow::bail!("Process returned non-successful exit code: {}",out.status);
 		}
