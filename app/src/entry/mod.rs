@@ -8,7 +8,7 @@ use sea_orm::*;
 
 
 pub mod details;
-
+pub mod search;
 
 // ROUTING
 
@@ -22,9 +22,7 @@ pub fn Routes() -> impl IntoView {
 					<Outlet/>
 				</main>
 			}>
-				<Route path="" view=|| view! {
-					TODO
-				} />
+				<Route path="" view=search::Search />
 			</Route>
 			<Route path="/:id" view=details::Navbar>
 				<Route path="" view=|| view! { <Redirect path="about"/> }/>

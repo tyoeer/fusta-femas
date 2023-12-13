@@ -50,6 +50,7 @@ fn Nav() -> impl IntoView {
 	view! {
 		<nav class="global">
 			<A href="">Home</A>
+			<A href="entry">Entries</A>
 			<A href="feed">Feeds</A>
 			<A href="strats">Strategies</A>
 		</nav>
