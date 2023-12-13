@@ -3,6 +3,7 @@ pub mod error_template;
 
 pub mod feeds;
 pub mod fetch;
+pub mod entry;
 pub mod strategies;
 
 pub mod table;
