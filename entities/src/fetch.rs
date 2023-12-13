@@ -40,6 +40,7 @@ pub struct Model {
 	pub status: Status,
 	pub content: Option<String>,
 	pub error: Option<String>,
+	pub log: String,
 	pub strategy: String,
 	pub feed_id: i32,
 	#[cfg_attr(feature="orm", sea_orm(primary_key) )]

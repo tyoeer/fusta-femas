@@ -13,6 +13,7 @@ pub enum Iden {
 	Status,
 	Content,
 	Error,
+	Log,
 	FeedId,
 	Strategy,
 	
@@ -41,6 +42,7 @@ impl MigrationTrait for Migration {
 				.col(ColumnDef::new(Iden::Status).enumeration(Iden::Status, Status::iter()).not_null())
 				.col(ColumnDef::new(Iden::Content).string().null())
 				.col(ColumnDef::new(Iden::Error).string().null())
+				.col(ColumnDef::new(Iden::Log).string().not_null().default(""))
 				.col(ColumnDef::new(Iden::Strategy).string().not_null())
 				.col(ColumnDef::new(Iden::FeedId).integer().not_null())
 				.foreign_key(
