@@ -22,10 +22,8 @@ pub struct FetchOverview {
 	// pub log: String,
 	pub strategy: String,
 	pub feed_id: i32,
-	// #[reflect(ignore)]
-	// pub created_at: time::PrimitiveDateTime,
-	// #[reflect(ignore)]
-	// pub updated_at: time::PrimitiveDateTime,
+	pub created_at: time_fields::PrimitiveDateTime,
+	pub updated_at: time_fields::PrimitiveDateTime,
 }
 
 #[cfg(feature="ssr")]
@@ -35,7 +33,7 @@ impl FetchOverview {
 			.select_only()
 			.columns(fetch::Column::iter().filter(|column| {
 				use fetch::Column::*;
-				!matches!(column, Content | Error | Log | CreatedAt | UpdatedAt)
+				!matches!(column, Content | Error | Log )
 			}))
 	}
 	pub fn query(modifier: impl FnOnce(Select<fetch::Entity>) -> Select<fetch::Entity>)-> sea_orm::Selector<SelectModel<Self>> {
