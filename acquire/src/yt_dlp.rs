@@ -149,12 +149,17 @@ impl Strategy for YtDlpStrategy {
 	}
 	
 	async fn parse(&self, data: &str) -> anyhow::Result<Vec<EntryInfo>> {
-		data.trim().split('\n').map(|seg| -> anyhow::Result<EntryInfo> {
-			let parse_res = serde_json::from_str::<YtdlpVideoInfo>(seg);
-			let context_res = parse_res.map_err(|e| {
-				anyhow::Error::from(e).context(format!("While parsing: \"{seg}\""))
-			});
-			context_res.map(|info| info.into())
-		}).collect()
+		data
+			.trim() // remove empty segments at the ends
+			.split('\n') // data is newline delimited json
+			.filter(|segment| !segment.is_empty()) //empty data turns into an empty segment
+			.map(|segment| -> anyhow::Result<EntryInfo> {
+				let parse_res = serde_json::from_str::<YtdlpVideoInfo>(segment);
+				let context_res = parse_res.map_err(|e| {
+					anyhow::Error::from(e).context(format!("While parsing: \"{segment}\""))
+				});
+				context_res.map(|info| info.into())
+			})
+			.collect()
 	}
 }
