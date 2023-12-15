@@ -121,7 +121,7 @@ impl Strategy for YtDlpStrategy {
 		cmd_args.verbose(true);
 		
 		if let Some(last_entry) = maybe_last_entry {
-			cmd_args.date_after(last_entry.produced_date);
+			cmd_args.date_after(last_entry.produced_date.into());
 		} else {
 			cmd_args.playlist_end(self.fetch_amount_if_no_date);
 		};

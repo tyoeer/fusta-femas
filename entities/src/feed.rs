@@ -4,6 +4,9 @@
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
+use crate::time_fields as time;
+
+
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, bevy_reflect::Reflect)]
 #[reflect(from_reflect = false)]
 #[cfg_attr(feature="orm", derive(DeriveEntityModel) )]
@@ -14,9 +17,7 @@ pub struct Model {
 	pub strategy: String,
 	#[cfg_attr(feature="orm", sea_orm(primary_key) )]
 	pub id: i32,
-	#[reflect(ignore)]
 	pub created_at: time::PrimitiveDateTime,
-	#[reflect(ignore)]
 	pub updated_at: time::PrimitiveDateTime,
 }
 

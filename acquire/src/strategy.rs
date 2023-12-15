@@ -117,8 +117,8 @@ async fn update_entries(conn: &DatabaseConnection, feed: &feed::Model, fetch_id:
 			model.name = Set(entry.title);
 			model.view_url = Set(entry.view_url);
 			model.embed_url = Set(entry.embed_url);
-			model.produced_date = Set(entry.produced_date);
-			model.produced_time = Set(entry.produced_time);
+			model.produced_date = Set(entry.produced_date.into());
+			model.produced_time = Set(entry.produced_time.into());
 			model.save(conn).await?;
 		}
 		
