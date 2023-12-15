@@ -1,11 +1,5 @@
 use leptos::*;
-use leptos_router::{Route, Redirect, A, Outlet};
-use entities::*;
-use crate::table;
-use crate::utils;
-#[cfg(feature="ssr")]
-use sea_orm::*;
-
+use leptos_router::{Route, Redirect, Outlet};
 
 pub mod details;
 pub mod search;
