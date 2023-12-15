@@ -6,6 +6,8 @@ use crate::utils;
 #[cfg(feature="ssr")]
 use sea_orm::*;
 
+use crate::fetch::search::FetchOverview;
+
 pub mod new;
 pub mod search;
 
@@ -119,10 +121,9 @@ pub fn FeedInfo(id: i32) -> impl IntoView {
 }
 
 #[server]
-pub async fn get_fetches(feed_id: i32) -> Result<Vec<fetch::Model>, ServerFnError> {
+pub async fn get_fetches(feed_id: i32) -> Result<Vec<FetchOverview>, ServerFnError> {
 	let conn = crate::extension!(DatabaseConnection);
-	fetch::Entity::find()
-		.filter(fetch::Column::FeedId.eq(feed_id))
+	FetchOverview::query(|q| q.filter(fetch::Column::FeedId.eq(feed_id)))
 		.all(&conn)
 		.await
 		.map_err(|e| e.into())

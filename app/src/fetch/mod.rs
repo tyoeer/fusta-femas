@@ -7,6 +7,9 @@ use crate::utils;
 use sea_orm::*;
 
 
+pub mod search;
+
+
 // ROUTING
 
 
