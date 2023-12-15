@@ -3,6 +3,8 @@
 #[cfg(feature = "orm")]
 pub mod prelude;
 
+pub mod time_fields;
+
 pub mod entry;
 pub mod feed;
 pub mod fetch;
