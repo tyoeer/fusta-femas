@@ -58,6 +58,14 @@ pub fn reflect_to_string(value: &dyn Reflect) -> String {
 		(if *boolean {"yes"} else {"no"}).to_owned()
 	} else if let Some(status) = value.downcast_ref::<entities::fetch::Status>() {
 		status.to_string()
+	} else if let Some(date) = value.downcast_ref::<entities::time_fields::Date>() {
+		date.to_string()
+	} else if let Some(time) = value.downcast_ref::<entities::time_fields::Time>() {
+		time.to_string()
+	} else if let Some(date_time) = value.downcast_ref::<entities::time_fields::PrimitiveDateTime>() {
+		date_time.to_string()
+	} else if let Some(option_time) = value.downcast_ref::<entities::time_fields::OptionTime>() {
+		option_time.to_string()
 	} else {
 		tracing::error!("Don't know how to display a {}", value.reflect_type_path());
 		"🤷".to_owned()
