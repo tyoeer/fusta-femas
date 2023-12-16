@@ -1,6 +1,6 @@
 use leptos::*;
 use leptos_router::{Route, Redirect, ActionForm, A, Outlet};
-use entities::*;
+use entities::prelude::*;
 use crate::table::*;
 use crate::utils;
 #[cfg(feature="ssr")]

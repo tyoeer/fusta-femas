@@ -1,6 +1,6 @@
 use std::sync::{Mutex, Arc, MutexGuard};
 
-use entities::*;
+use entities::prelude::*;
 use sea_orm::*;
 use tracing::instrument::WithSubscriber;
 use tracing_subscriber::{

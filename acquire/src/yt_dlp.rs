@@ -1,6 +1,6 @@
 use std::{ffi::OsString, process::Stdio};
 
-use entities::*;
+use entities::prelude::*;
 use sea_orm::*;
 use super::strategy::*;
 

@@ -1,6 +1,6 @@
 use std::sync::Arc;
 use super::strategy::*;
-use entities::*;
+use entities::prelude::*;
 
 #[derive(thiserror::Error,Debug)]
 pub enum StrategyError {

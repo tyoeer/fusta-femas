@@ -1,5 +1,5 @@
 use sea_orm::*;
-use entities::*;
+use entities::prelude::*;
 use crate::strategy::{
 	Strategy,
 	EntryInfo

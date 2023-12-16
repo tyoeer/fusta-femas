@@ -8,7 +8,7 @@ use acquire::{
 	},
 	mock::MockStrat
 };
-use entities::*;
+use entities::prelude::*;
 
 ///A simple test that can copy/pasted to be the basis of other tests
 #[tokio::test]

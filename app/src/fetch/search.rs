@@ -1,6 +1,6 @@
 // use leptos::*;
 // use leptos_router::A;
-use entities::*;
+use entities::prelude::*;
 // use crate::table;
 // use crate::utils;
 #[cfg(feature="ssr")]
@@ -42,7 +42,7 @@ impl FetchOverview {
 	}
 }
 
-impl traits::Object for FetchOverview {
+impl Object for FetchOverview {
 	fn get_id(&self) -> i32 {
 		self.id
 	}

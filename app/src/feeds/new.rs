@@ -1,6 +1,6 @@
 use leptos::*;
 use leptos_router::{ActionForm, A};
-use entities::*;
+use entities::prelude::*;
 use crate::utils;
 #[cfg(feature="ssr")]
 use sea_orm::*;
