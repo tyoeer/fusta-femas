@@ -18,7 +18,7 @@ pub async fn all_feeds() -> Result<Vec<feed::Model>, ServerFnError> {
 pub fn Search() -> impl IntoView {
 	view! {
 		<utils::AwaitOk future=all_feeds let:feeds>
-			<ObjectTable items = feeds get_id = |feed| feed.id/>
+			<ObjectTable items = feeds />
 		</utils::AwaitOk>
 		<A href="new">Create new feed</A>
 	}

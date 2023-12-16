@@ -114,7 +114,7 @@ pub fn Fetches() -> impl IntoView {
 	|| {
 		crate::utils::with_id_param(|feed_id| view! {
 			<utils::AwaitOk future=move || get_fetches(feed_id) let:fetches>
-				<ObjectTable items = fetches get_id = |fetch| fetch.id/>
+				<ObjectTable items = fetches />
 			</utils::AwaitOk>
 		})
 	}

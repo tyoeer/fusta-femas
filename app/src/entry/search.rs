@@ -25,6 +25,6 @@ pub fn Search() -> impl IntoView {
 #[component]
 pub fn Table(#[prop(into)] entries: MaybeSignal<Vec<entry::Model>>) -> impl IntoView {
 	view! {
-		<table::ObjectTable items = entries get_id = |entry| entry.id/>
+		<table::ObjectTable items = entries />
 	}
 }

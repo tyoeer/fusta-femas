@@ -198,16 +198,18 @@ pub fn ObjectFieldValueList<Object: Struct + Typed, 'object>(
 #[component]
 pub fn ObjectLinkValues<Object: Struct + Typed + Clone + ObjectTrait>(
 	#[prop(into)] items: MaybeSignal<Vec<Object>>,
-	get_id: fn(&Object)->i32,
 ) -> impl IntoView {
-	let prefix = Object::get_object_name();
 	view! {
 		<For
 			each = move || items.get().into_iter()
 			key = Object::get_id
 			let:object
 		>
-			<A class="object_value_list" href={ format!("/{prefix}/{}", object.get_id())}>
+			<A class="object_value_list" href={ format!(
+				"/{}/{}",
+				Object::get_object_name(),
+				object.get_id()
+			)} >
 				<ObjectValues object = &object/>
 			</A>
 		</For>
@@ -218,12 +220,11 @@ pub fn ObjectLinkValues<Object: Struct + Typed + Clone + ObjectTrait>(
 #[component]
 pub fn ObjectTable<Object: Struct + Typed + Clone + ObjectTrait>(
 	#[prop(into)] items: MaybeSignal<Vec<Object>>,
-	get_id: fn(&Object)->i32
 ) -> impl IntoView {
 	view! {
 		<ul class="object_list object_table">
 			<ObjectFieldList struct_info={struct_info::<Object>()} />
-			<ObjectLinkValues items get_id/>
+			<ObjectLinkValues items />
 		</ul>
 	}
 }
