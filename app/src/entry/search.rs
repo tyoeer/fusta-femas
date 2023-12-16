@@ -9,7 +9,11 @@ use sea_orm::*;
 #[server]
 pub async fn all_entries() -> Result<Vec<entry::Model>, ServerFnError> {
 	let conn = crate::extension!(DatabaseConnection);
-	let feeds = entry::Entity::find().all(&conn).await?;
+	let feeds = entry::Entity::find()
+		.order_by_desc(entry::Column::ProducedDate)
+		.order_by_desc(entry::Column::ProducedTime)
+		.all(&conn)
+		.await?;
 	Ok(feeds)
 }
 
