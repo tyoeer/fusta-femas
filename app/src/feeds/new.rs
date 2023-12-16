@@ -1,5 +1,5 @@
 use leptos::*;
-use leptos_router::ActionForm;
+use leptos_router::{ActionForm, A};
 use entities::*;
 use crate::utils;
 #[cfg(feature="ssr")]
@@ -21,21 +21,6 @@ pub async fn new_feed(name: String, url: String, strategy: String) -> Result<i32
 #[component]
 pub fn FeedCreator() -> impl IntoView {
 	let new_feed = create_server_action::<NewFeed>();
-	let button_name = move || {
-		if new_feed.pending().get() {
-			"creating...".to_owned()
-		} else {
-			match new_feed.value().get() {
-				None => {
-					"Create".to_owned()
-				},
-				Some(res) => match res {
-					Ok(id) => format!("created : {id}"),
-					Err(err) => format!("server error: {err}"),
-				}
-			}
-		}
-	};
 	view! {
 		<ActionForm action=new_feed>
 			<ul class="object_fieldvalue_list">
@@ -62,8 +47,13 @@ pub fn FeedCreator() -> impl IntoView {
 					</select>
 				</li>
 			</ul>
-			<input type="submit" value=button_name/>
+			
+			<utils::FormSubmit button="create" action=new_feed/>
 		</ActionForm>
+		
+		<utils::FormResult action=new_feed let:id>
+			<A href=format!("/feed/{}", id)>"Created: " {id.to_string()}</A>
+		</utils::FormResult>
 	}
 }
 
