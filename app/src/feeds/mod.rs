@@ -66,35 +66,14 @@ pub async fn fetch_one_feed(id: i32) -> Result<fetch::Model, ServerFnError> {
 #[component]
 pub fn FetchFeedButton(id: i32) -> impl IntoView {
 	let fetch_one = create_server_action::<FetchOneFeed>();
-	let button_name = move || {
-		if fetch_one.pending().get() {
-			"fetching...".to_owned()
-		} else {
-			match fetch_one.value().get() {
-				None => "fetch".to_owned(),
-				Some(_) => "fetch again".to_owned(),
-			}
-		}
-	};
 	view! {
 		<ActionForm action=fetch_one>
 			<input type="hidden" name="id" value=id/>
-			<input type="submit" value=button_name disabled=move || {fetch_one.pending().get()}/>
+			<utils::FormSubmit button="fetch" action=fetch_one/>
 		</ActionForm>
-		{move || {
-			match fetch_one.value().get() {
-				Some(Ok(fetch)) => view! {
-					<A href=format!("/fetch/{}",fetch.id)>"Fetched: " {fetch.status.to_string()}</A>
-				}, 
-				Some(Err(err)) => {
-					tracing::error!(fetch_id = ?fetch_one.value().get(), "Error occurred trying to fetch:\n{err}");
-					format!("Server error: {err}").into_view()
-				},
-				None => {
-					().into_view()
-				},
-			}
-		}}
+		<utils::FormResult action=fetch_one let:fetch>
+			<A href=format!("/fetch/{}", fetch.id)>"Fetched: " {fetch.status.to_string()}</A>
+		</utils::FormResult>
 	}
 }
 

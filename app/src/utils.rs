@@ -77,6 +77,64 @@ pub fn AwaitOk<
 }
 
 /**
+Form submit button that disables itself while the server action is running.
+Also updates the button text.
+*/
+#[component]
+pub fn FormSubmit<
+	ActionInput: 'static,
+	ActionOutput: 'static,
+>(
+	#[prop(into)]
+	button: String,
+	action: Action<ActionInput, Result<ActionOutput, ServerFnError>>
+) -> impl IntoView {
+	let button_name = move || {
+		if action.pending().get() {
+			format!("{button}ing...")
+		} else {
+			format!("{button}{}", if action.value().with(|val| val.is_some()) {" again"} else {""} )
+		}
+	};
+	view! {
+		<input type="submit" value=button_name disabled=move || action.pending().get() />
+	}
+}
+
+/**
+Unpackages the result of a server action.
+
+Displays:
+- If `action` is yet to be run: nothing
+- If `action` returned an error: the error, and logs it with some extra info
+- If `action` was successful: render `children` with the action output
+*/
+#[component]
+pub fn FormResult<
+	ActionInput: Clone + std::fmt::Debug + 'static,
+	ActionOutput: Clone + 'static,
+	Children: Fn(ActionOutput) -> ChildrenView + 'static,
+	ChildrenView: IntoView,
+>(
+	#[prop(into)]
+	action: Action<ActionInput, Result<ActionOutput, ServerFnError>>,
+	children: Children,
+) -> impl IntoView {
+	move || {
+		match action.value().get() {
+			Some(Ok(output)) => {
+				children(output).into_view()
+			},
+			Some(Err(error)) => {
+				tracing::error!(input = ?action.input().get(), error=error.to_string(), url=action.url(), "Error occurred submitting form to server:");
+				format!("Server error: {error}").into_view()
+			},
+			None => ().into_view()
+		}
+	}
+}
+
+/**
 Extracts an <axum::Extension> of the type given as argument.
 Errors get propagated up with `?`.
 
