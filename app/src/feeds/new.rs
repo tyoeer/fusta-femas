@@ -38,19 +38,30 @@ pub fn FeedCreator() -> impl IntoView {
 	};
 	view! {
 		<ActionForm action=new_feed>
-			<input type="text" name="name" />
-			<input type="text" name="url" />
-			<select name="strategy">
-				<utils::AwaitOk future=crate::strategies::get_strategies let:strats>
-					<For
-						each=move || strats.clone()
-						key=|s| s.clone()
-						let:strat
-					>
-						<option value=strat.clone()> {strat} </option>
-					</For>
-				</utils::AwaitOk>
-			</select>
+			<ul class="object_fieldvalue_list">
+				<li class="object_fieldvalue">
+					<label class="object_field" for="name_input"> name </label>
+					<input class="object_value" type="text" name="name" id="name_input"/>
+				</li>
+				<li class="object_fieldvalue">
+					<label class="object_field" for="url_input"> url </label>
+					<input class="object_value" type="text" name="url" id="url_input"/>
+				</li>
+				<li class="object_fieldvalue">
+					<label class="object_field" for="strategy_input"> strategy </label>
+					<select class="object_value" name="strategy" id="strategy_input">
+						<utils::AwaitOk future=crate::strategies::get_strategies let:strats>
+							<For
+								each=move || strats.clone()
+								key=|s| s.clone()
+								let:strat
+							>
+								<option value=strat.clone()> {strat} </option>
+							</For>
+						</utils::AwaitOk>
+					</select>
+				</li>
+			</ul>
 			<input type="submit" value=button_name/>
 		</ActionForm>
 	}
