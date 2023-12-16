@@ -17,6 +17,7 @@
 		@extend %table_row;
 		> * {
 			@extend %table_cell;
+			margin: 0.3em;
 		}
 	}
 }

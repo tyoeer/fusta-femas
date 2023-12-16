@@ -26,11 +26,11 @@ pub fn FeedCreator() -> impl IntoView {
 			<ul class="object_fieldvalue_list">
 				<li class="object_fieldvalue">
 					<label class="object_field" for="name_input"> name </label>
-					<input class="object_value" type="text" name="name" id="name_input"/>
+					<input class="object_value" type="text" name="name" id="name_input" size=50/>
 				</li>
 				<li class="object_fieldvalue">
 					<label class="object_field" for="url_input"> url </label>
-					<input class="object_value" type="text" name="url" id="url_input"/>
+					<input class="object_value" type="text" name="url" id="url_input" size=50/>
 				</li>
 				<li class="object_fieldvalue">
 					<label class="object_field" for="strategy_input"> strategy </label>
