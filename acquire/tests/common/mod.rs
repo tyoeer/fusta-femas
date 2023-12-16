@@ -1,5 +1,6 @@
 use sea_migration::{MigratorTrait, Migrator};
 use sea_orm::{DatabaseConnection, error::DbErr, Set, ActiveModelTrait, ActiveModelBehavior};
+use entities::prelude::feed;
 
 pub async fn db() -> Result<DatabaseConnection, DbErr> {
 	let conn = sea_orm::Database::connect("sqlite::memory:").await?;
@@ -25,9 +26,9 @@ pub async fn feed(
 	url: impl Into<String>,
 	strat: &dyn acquire::strategy::Strategy,
 	db: &DatabaseConnection
-) -> Result<entities::feed::Model, DbErr> {
+) -> Result<feed::Model, DbErr> {
 	let url = url.into();
-	let mut feed = entities::feed::ActiveModel::new();
+	let mut feed = feed::ActiveModel::new();
 	feed.name = Set(format!("AutoTestFeed {} {}", strat.name(), url));
 	feed.url = Set(url);
 	feed.strategy = Set(strat.name().to_owned());

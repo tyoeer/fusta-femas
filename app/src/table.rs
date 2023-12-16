@@ -17,7 +17,7 @@ use bevy_reflect::{
 	Typed, TypeInfo, StructInfo,
 };
 
-use entities::traits::Object as ObjectTrait;
+use entities::prelude as entities;
 
 pub fn struct_info<Type: Struct + Typed>() -> &'static StructInfo {
 	if let TypeInfo::Struct(info) = Type::type_info() {
@@ -196,7 +196,7 @@ pub fn ObjectFieldValueList<Object: Struct + Typed, 'object>(
 }
 
 #[component]
-pub fn ObjectLinkValues<Object: Struct + Typed + Clone + ObjectTrait>(
+pub fn ObjectLinkValues<Object: Struct + Typed + Clone + entities::Object>(
 	#[prop(into)] items: MaybeSignal<Vec<Object>>,
 ) -> impl IntoView {
 	view! {
@@ -218,7 +218,7 @@ pub fn ObjectLinkValues<Object: Struct + Typed + Clone + ObjectTrait>(
 
 ///A table of objects where each row is a link
 #[component]
-pub fn ObjectTable<Object: Struct + Typed + Clone + ObjectTrait>(
+pub fn ObjectTable<Object: Struct + Typed + Clone + entities::Object>(
 	#[prop(into)] items: MaybeSignal<Vec<Object>>,
 ) -> impl IntoView {
 	view! {

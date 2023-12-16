@@ -1,8 +1,6 @@
-// entities
-
-pub use crate::entry;
-pub use crate::feed;
-pub use crate::fetch;
+pub use crate::entities::entry;
+pub use crate::entities::feed;
+pub use crate::entities::fetch;
 
 pub use crate::traits::Object;
 
