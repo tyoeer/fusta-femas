@@ -4,6 +4,7 @@
 pub mod prelude;
 
 pub mod time_fields;
+pub mod traits;
 
 pub mod entry;
 pub mod feed;

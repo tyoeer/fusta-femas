@@ -5,6 +5,7 @@ use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::time_fields as time;
+use crate::traits;
 
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, bevy_reflect::Reflect)]
@@ -50,6 +51,17 @@ pub struct Model {
 	pub id: i32,
 	pub created_at: time::PrimitiveDateTime,
 	pub updated_at: time::PrimitiveDateTime,
+}
+
+
+impl traits::Object for Model {
+	fn get_id(&self) -> i32 {
+		self.id
+	}
+	
+	fn get_object_name() -> &'static str {
+		"fetch"
+	}
 }
 
 

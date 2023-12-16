@@ -17,6 +17,8 @@ use bevy_reflect::{
 	Typed, TypeInfo, StructInfo,
 };
 
+use entities::traits::Object as ObjectTrait;
+
 pub fn struct_info<Type: Struct + Typed>() -> &'static StructInfo {
 	if let TypeInfo::Struct(info) = Type::type_info() {
 		info
@@ -194,29 +196,18 @@ pub fn ObjectFieldValueList<Object: Struct + Typed, 'object>(
 }
 
 #[component]
-pub fn ObjectLinkValues<Object: Struct + Typed + Clone>(
+pub fn ObjectLinkValues<Object: Struct + Typed + Clone + ObjectTrait>(
 	#[prop(into)] items: MaybeSignal<Vec<Object>>,
 	get_id: fn(&Object)->i32,
 ) -> impl IntoView {
-	let prefix = match Object::type_ident() {
-		None => String::new(),
-		Some("Model") => {
-			let path = Object::type_path();
-			let module_path = path.strip_suffix("Model").expect("Type path does not end with it's identifier");
-			let module = module_path.strip_prefix("entities").unwrap_or(module_path);
-			let module_name = module.trim_matches(':');
-			
-			format!("/{module_name}/")
-		},
-		Some(str) => format!("/{str}/"),
-	};
+	let prefix = Object::get_object_name();
 	view! {
 		<For
 			each = move || items.get().into_iter()
-			key = get_id
+			key = Object::get_id
 			let:object
 		>
-			<A class="object_value_list" href={ format!("{prefix}{}", get_id(&object))}>
+			<A class="object_value_list" href={ format!("/{prefix}/{}", object.get_id())}>
 				<ObjectValues object = &object/>
 			</A>
 		</For>
@@ -225,7 +216,7 @@ pub fn ObjectLinkValues<Object: Struct + Typed + Clone>(
 
 ///A table of objects where each row is a link
 #[component]
-pub fn ObjectTable<Object: Struct + Typed + Clone>(
+pub fn ObjectTable<Object: Struct + Typed + Clone + ObjectTrait>(
 	#[prop(into)] items: MaybeSignal<Vec<Object>>,
 	get_id: fn(&Object)->i32
 ) -> impl IntoView {

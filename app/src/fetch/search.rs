@@ -41,3 +41,13 @@ impl FetchOverview {
 			.into_model::<Self>()
 	}
 }
+
+impl traits::Object for FetchOverview {
+	fn get_id(&self) -> i32 {
+		self.id
+	}
+	
+	fn get_object_name() -> &'static str {
+		"fetch"
+	}
+}
