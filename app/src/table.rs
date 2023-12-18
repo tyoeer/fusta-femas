@@ -75,7 +75,7 @@ pub fn reflect_to_string(value: &dyn Reflect) -> String {
 }
 
 //TODO move into style or make a setting
-const SHORTENED_MAX_SIZE: usize = 35;
+const SHORTENED_MAX_SIZE: usize = 55;
 
 /**
 Displays a reflected value.
