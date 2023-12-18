@@ -20,4 +20,4 @@ tracing-subscriber = {workspace = true}
 
 [dev-dependencies]
 sea-migration = {path="../sea-migration"}
-sea-orm-macros = "0.12.6"
+sea-orm-macros = "0.12.10"
