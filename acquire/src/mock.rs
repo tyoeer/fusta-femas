@@ -16,26 +16,41 @@ impl Strategy for MockStrat{
 	fn name(&self) -> &'static str {
 		"Mock test"
 	}
-	async fn fetch(&self, _conn: &DatabaseConnection, feed: &feed::Model) -> anyhow::Result<String> {
+	async fn fetch(&self, conn: &DatabaseConnection, feed: &feed::Model) -> anyhow::Result<String> {
 		let mock_fetched = match feed.url.as_str() {
-			"ok" => "Mock ok",
+			"ok" => "Mock ok".to_owned(),
 			"log ok" => {
 				tracing::info!("Mock fetch log");
-				"Mock logged"
+				"Mock logged".to_owned()
 			},
 			"log parse err" => {
 				tracing::info!("Mock fetch log");
-				"Mock parse log error"
+				"Mock parse log error".to_owned()
 			},
 			"log fetch err" => {
 				tracing::error!("Mock fetch err");
 				anyhow::bail!("Mock fetch log error")
 			},
-			"parse error" => "Mock don't parse this",
+			"parse error" => "Mock don't parse this".to_owned(),
 			"fetch error" => anyhow::bail!("Mock fetch error"),
+			entries if entries.contains('n') => {
+				let (n, new) = entries.split_once('n').expect("we just checked in the match guard");
+				let n = str::parse::<i32>(n)?;
+				let new = str::parse::<i32>(new)?;
+				let maybe_last_entry = feed.find_related(entry::Entity)
+					.order_by_desc(entry::Column::ProducedDate)
+					.one(conn).await?;
+				let last = match maybe_last_entry {
+					None => 0,
+					Some(entry) => str::parse(&entry.feed_entry_id)?,
+				};
+				let double = n - new;
+				let lower = 0.max(last - double + 1);
+				format!("{}-{}", lower, lower + n)
+			},
 			_ => anyhow::bail!("Unknown url, don't know which mocked behaviour to use"),
 		};
-		Ok(mock_fetched.to_owned())
+		Ok(mock_fetched)
 	}
 	async fn parse(&self, data: &str) -> anyhow::Result<Vec<EntryInfo>> {
 		let entries = match data {
@@ -49,6 +64,20 @@ impl Strategy for MockStrat{
 				anyhow::bail!("Mock parse log error");
 			},
 			"parse error" => anyhow::bail!("This mock shouldn't be parsed"),
+			range if range.contains('-') => {
+				let (from, to) = range.split_once('-').expect("we just checked in the match guard");
+				let from = str::parse::<i32>(from)?;
+				let to = str::parse::<i32>(to)?;
+				
+				let start_date: time::Date = time::Date::from_calendar_date(2000, time::Month::January, 1)?;
+				
+				(from..to).map(|i| EntryInfo::new(
+					i.to_string(),
+					format!("Entry {i}"),
+					format!("example.com/{i}"),
+					start_date + time::Duration::days(i.into())
+				)).collect::<Vec<_>>()	
+			},
 			_ => anyhow::bail!("idk what even is this"),
 		};
 		

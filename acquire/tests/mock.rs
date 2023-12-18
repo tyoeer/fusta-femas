@@ -1,6 +1,6 @@
 mod common;
 use common::{init, feed};
-use sea_orm::DbErr;
+use sea_orm::{DbErr, ModelTrait, PaginatorTrait};
 use acquire::{
 	strategy::{
 		self,
@@ -97,6 +97,31 @@ async fn logs() -> Result<(), DbErr> {
 	assert_eq!(fetch.status, fetch::Status::ParseError);
 	assert!(fetch.log.contains("Mock fetch log"));
 	assert!(fetch.log.contains("Mock parse err"));
+	
+	Ok(())
+}
+
+//entries get saved + fetches get tracked
+#[tokio::test]
+async fn entries() -> Result<(), DbErr> {
+	let db = init().await?;
+	let strat = MockStrat::default();
+	let feed = feed("10n5", &strat, &db).await?;
+	
+	let fetch1 = strategy::run_strategy(&db, &feed, &strat).await?;
+	
+	assert_eq!(fetch1.status, fetch::Status::Success);
+	let entry_count = fetch1.find_related(entry::Entity).count(&db).await?;
+	assert_eq!(entry_count, 10);
+	
+	let fetch2 = strategy::run_strategy(&db, &feed, &strat).await?;
+	
+	assert_eq!(fetch2.status, fetch::Status::Success);
+	let entry_count = fetch2.find_related(entry::Entity).count(&db).await?;
+	assert_eq!(entry_count, 10);
+	
+	let fetch1_entry_count = fetch1.find_related(entry::Entity).count(&db).await?;
+	assert_eq!(fetch1_entry_count, 5);
 	
 	Ok(())
 }
