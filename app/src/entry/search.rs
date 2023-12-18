@@ -6,15 +6,73 @@ use crate::utils;
 #[cfg(feature="ssr")]
 use sea_orm::*;
 
+
+#[derive(
+	Clone, Debug, PartialEq, Eq,
+	serde::Serialize, serde::Deserialize,
+	bevy_reflect::Reflect
+)]
+#[cfg_attr(feature="ssr", derive(FromQueryResult))]
+#[reflect(from_reflect = false)]
+pub struct EntryOverview {
+	pub name: String,
+	// pub view_url: String,
+	// pub embed_url: Option<String>,
+	pub viewed: bool,
+	pub feed_entry_id: String,
+	pub feed_id: i32,
+	// pub latest_fetch_id: Option<i32>,
+	pub produced_date: time_fields::Date,
+	pub produced_time: time_fields::OptionTime,
+	pub id: i32,
+	pub created_at: time_fields::PrimitiveDateTime,
+	pub updated_at: time_fields::PrimitiveDateTime,
+}
+
+#[cfg(feature="ssr")]
+impl EntryOverview {
+	fn base_query() -> sea_orm::Select<entry::Entity> {
+		entry::Entity::find()
+			.select_only()
+			.columns(entry::Column::iter().filter(|column| {
+				use entry::Column::*;
+				!matches!(column, ViewUrl | EmbedUrl | LatestFetchId )
+			}))
+	}
+	
+	pub fn query(modifier: impl FnOnce(Select<entry::Entity>) -> Select<entry::Entity>) -> sea_orm::Selector<SelectModel<Self>> {
+		Self::query_unordered( |query| {
+			let query = query
+				.order_by_desc(entry::Column::ProducedDate)
+				.order_by_desc(entry::Column::ProducedTime);
+			modifier(query)
+		} )
+	}
+	
+	pub fn query_unordered(modifier: impl FnOnce(Select<entry::Entity>) -> Select<entry::Entity>) -> sea_orm::Selector<SelectModel<Self>> {
+		modifier(Self::base_query())
+			.into_model::<Self>()
+	}
+}
+
+impl Object for EntryOverview {
+	fn get_id(&self) -> i32 {
+		self.id
+	}
+
+	fn get_object_name() -> &'static str where Self: Sized {
+		"entry"
+	}
+}
+
+
 #[server]
-pub async fn all_entries() -> Result<Vec<entry::Model>, ServerFnError> {
+pub async fn all_entries() -> Result<Vec<EntryOverview>, ServerFnError> {
 	let conn = crate::extension!(DatabaseConnection);
-	let feeds = entry::Entity::find()
-		.order_by_desc(entry::Column::ProducedDate)
-		.order_by_desc(entry::Column::ProducedTime)
+	let entries = EntryOverview::query(|q| q)
 		.all(&conn)
 		.await?;
-	Ok(feeds)
+	Ok(entries)
 }
 
 #[component]
@@ -27,7 +85,7 @@ pub fn Search() -> impl IntoView {
 }
 
 #[component]
-pub fn Table(#[prop(into)] entries: MaybeSignal<Vec<entry::Model>>) -> impl IntoView {
+pub fn Table(#[prop(into)] entries: MaybeSignal<Vec<EntryOverview>>) -> impl IntoView {
 	view! {
 		<table::ObjectTable items = entries />
 	}
