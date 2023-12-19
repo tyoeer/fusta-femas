@@ -1,6 +1,6 @@
 mod common;
 use common::{init, feed, run_strategy};
-use sea_orm::{DbErr, ModelTrait, PaginatorTrait};
+use sea_orm::{DbErr, ModelTrait, PaginatorTrait, QueryOrder};
 use acquire::{
 	strategy::Strategy,
 	mock::MockStrat
@@ -111,17 +111,27 @@ async fn entries() -> Result<(), DbErr> {
 	let fetch1 = run_strategy(&db, &feed, &strat).await?;
 	
 	assert_eq!(fetch1.status, fetch::Status::Success);
-	let entry_count = fetch1.find_related(entry::Entity).count(&db).await?;
-	assert_eq!(entry_count, 10);
+	assert_eq!(10, fetch1.find_related(entry::Entity).count(&db).await? );
+	
+	let entry_0 = fetch1.find_related(entry::Entity).order_by_asc(entry::Column::ProducedDate).one(&db).await?.expect("just created");
+	let entry_9 = fetch1.find_related(entry::Entity).order_by_desc(entry::Column::ProducedDate).one(&db).await?.expect("just created");
+	
+	assert_eq!(1, entry_0.find_related(fetch::Entity).count(&db).await? );
+	assert_eq!(1, entry_9.find_related(fetch::Entity).count(&db).await? );
 	
 	let fetch2 = run_strategy(&db, &feed, &strat).await?;
 	
 	assert_eq!(fetch2.status, fetch::Status::Success);
-	let entry_count = fetch2.find_related(entry::Entity).count(&db).await?;
-	assert_eq!(entry_count, 10);
+	assert_eq!(10, fetch2.find_related(entry::Entity).count(&db).await? );
+	assert_eq!(10, fetch1.find_related(entry::Entity).count(&db).await? );
 	
-	let fetch1_entry_count = fetch1.find_related(entry::Entity).count(&db).await?;
-	assert_eq!(fetch1_entry_count, 10);
+	let entry_5 = fetch2.find_related(entry::Entity).order_by_asc(entry::Column::ProducedDate).one(&db).await?.expect("just created");
+	let entry_14 = fetch2.find_related(entry::Entity).order_by_desc(entry::Column::ProducedDate).one(&db).await?.expect("just created");
+	
+	assert_eq!(1, entry_0.find_related(fetch::Entity).count(&db).await? );
+	assert_eq!(2, entry_5.find_related(fetch::Entity).count(&db).await? );
+	assert_eq!(2, entry_9.find_related(fetch::Entity).count(&db).await? );
+	assert_eq!(1, entry_14.find_related(fetch::Entity).count(&db).await? );
 	
 	Ok(())
 }
