@@ -113,7 +113,6 @@ async fn update_entries(conn: &DatabaseConnection, feed: &feed::Model, fetch_id:
 				new
 			};
 			
-			model.latest_fetch_id = Set(Some(fetch_id));
 			model.name = Set(entry.title);
 			model.view_url = Set(entry.view_url);
 			model.embed_url = Set(entry.embed_url);

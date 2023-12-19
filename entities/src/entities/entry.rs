@@ -17,7 +17,6 @@ pub struct Model {
 	pub viewed: bool,
 	pub feed_entry_id: String,
 	pub feed_id: i32,
-	pub latest_fetch_id: Option<i32>,
 	pub produced_date: time::Date,
 	pub produced_time: time::OptionTime,
 	#[cfg_attr(feature="orm", sea_orm(primary_key) )]
@@ -51,14 +50,8 @@ pub enum Relation {
 		on_delete = "NoAction"
 	)]
 	Feed,
-	#[sea_orm(
-		belongs_to = "super::fetch::Entity",
-		from = "Column::LatestFetchId",
-		to = "super::fetch::Column::Id",
-		on_update = "NoAction",
-		on_delete = "NoAction"
-	)]
-	Fetch,
+	// #[sea_orm(has_many = "super::fetch::Entity")]
+	// Fetch,
 	#[sea_orm(has_many = "super::fetch_entry::Entity")]
 	FetchEntry,
 }
@@ -71,7 +64,10 @@ impl Related<super::feed::Entity> for Entity {
 
 impl Related<super::fetch::Entity> for Entity {
 	fn to() -> RelationDef {
-		Relation::Fetch.def()
+		super::fetch_entry::Relation::Fetch.def()
+	}
+	fn via() -> Option<RelationDef> {
+		Some(super::fetch_entry::Relation::Entry.def().rev())
 	}
 }
 

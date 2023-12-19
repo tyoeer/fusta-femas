@@ -21,7 +21,6 @@ pub struct EntryOverview {
 	pub viewed: bool,
 	pub feed_entry_id: String,
 	pub feed_id: i32,
-	// pub latest_fetch_id: Option<i32>,
 	pub produced_date: time_fields::Date,
 	pub produced_time: time_fields::OptionTime,
 	pub id: i32,
@@ -36,7 +35,7 @@ impl EntryOverview {
 			.select_only()
 			.columns(entry::Column::iter().filter(|column| {
 				use entry::Column::*;
-				!matches!(column, ViewUrl | EmbedUrl | LatestFetchId )
+				!matches!(column, ViewUrl | EmbedUrl )
 			}))
 	}
 	

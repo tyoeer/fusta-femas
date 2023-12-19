@@ -68,8 +68,8 @@ cfg_if::cfg_if! { if #[cfg(feature = "orm")] {
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-	#[sea_orm(has_many = "super::entry::Entity")]
-	Entry,
+	// #[sea_orm(has_many = "super::entry::Entity")]
+	// Entry,
 	#[sea_orm(has_many = "super::fetch_entry::Entity")]
 	FetchEntry,
 	#[sea_orm(
@@ -84,7 +84,10 @@ pub enum Relation {
 
 impl Related<super::entry::Entity> for Entity {
 	fn to() -> RelationDef {
-		Relation::Entry.def()
+		super::fetch_entry::Relation::Entry.def()
+	}
+	fn via() -> Option<RelationDef> {
+		Some(super::fetch_entry::Relation::Fetch.def().rev())
 	}
 }
 
