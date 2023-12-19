@@ -30,7 +30,7 @@ pub fn get_table_name(tcs: &TableCreateStatement) -> Result<String, DbErr> {
 	};
 
 	//SQL injection go brr
-	assert!(name.chars().all(char::is_alphabetic));
+	assert!(name.chars().all(|c| c.is_alphabetic() || c=='_'));
 
 	Ok(name)
 }

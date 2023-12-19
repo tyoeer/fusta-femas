@@ -70,6 +70,8 @@ cfg_if::cfg_if! { if #[cfg(feature = "orm")] {
 pub enum Relation {
 	#[sea_orm(has_many = "super::entry::Entity")]
 	Entry,
+	#[sea_orm(has_many = "super::fetch_entry::Entity")]
+	FetchEntry,
 	#[sea_orm(
 		belongs_to = "super::feed::Entity",
 		from = "Column::FeedId",
@@ -89,6 +91,12 @@ impl Related<super::entry::Entity> for Entity {
 impl Related<super::feed::Entity> for Entity {
 	fn to() -> RelationDef {
 		Relation::Feed.def()
+	}
+}
+
+impl Related<super::fetch_entry::Entity> for Entity {
+	fn to() -> RelationDef {
+		Relation::FetchEntry.def()
 	}
 }
 

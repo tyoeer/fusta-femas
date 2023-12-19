@@ -18,13 +18,19 @@ pub enum Iden {
 	ProducedTime,
 }
 
+#[derive(Iden)]
+pub enum FEIden {
+	FetchEntry,
+	FetchId,
+	EntryId,
+}
+
 #[derive(DeriveMigrationName)]
 pub struct Migration;
 
 #[async_trait::async_trait]
 impl MigrationTrait for Migration {
 	async fn up(&self, manager: &SchemaManager) -> DbRes {
-		// Replace the sample below with your own migration scripts
 		add_table(
 			manager,
 			Table::create()
@@ -49,10 +55,33 @@ impl MigrationTrait for Migration {
 					.to(Fetch::Fetch, UtilIdent::Id)
 				)
 		)
-		.await
+		.await?;
+		
+		add_table(
+			manager,
+			Table::create()
+				.table(FEIden::FetchEntry)
+				.col(ColumnDef::new(FEIden::FetchId).integer().not_null())
+				.col(ColumnDef::new(FEIden::EntryId).integer().not_null())
+				.foreign_key(
+					ForeignKey::create()
+						.from(FEIden::FetchEntry, FEIden::FetchId)
+						.to(Fetch::Fetch, UtilIdent::Id)
+				)
+				.foreign_key(
+					ForeignKey::create()
+						.from(FEIden::FetchEntry, FEIden::EntryId)
+						.to(Iden::Entry, UtilIdent::Id)
+				)
+		).await?;
+		
+		Ok(())
 	}
 
 	async fn down(&self, manager: &SchemaManager) -> DbRes {
-		remove_table(manager, Iden::Entry).await
+		remove_table(manager, Iden::Entry).await?;
+		remove_table(manager, FEIden::FetchEntry).await?;
+		
+		Ok(())
 	}
 }
