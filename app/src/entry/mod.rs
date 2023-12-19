@@ -30,6 +30,11 @@ pub fn Routes() -> impl IntoView {
 						<details::Embed id />
 					})
 				} />
+				<Route path="fetches" view = || {
+					crate::utils::with_id_param(|id| view! {
+						<details::Fetches id />
+					})
+				} />
 			</Route>
 		</Route>
 	}

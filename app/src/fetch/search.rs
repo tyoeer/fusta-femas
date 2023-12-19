@@ -36,6 +36,17 @@ impl FetchOverview {
 				!matches!(column, Content | Error | Log )
 			}))
 	}
+		
+	pub fn from_query(query: Select<fetch::Entity>) -> sea_orm::Selector<SelectModel<Self>> {
+		query
+			.select_only()
+			.columns(fetch::Column::iter().filter(|column| {
+				use fetch::Column::*;
+				!matches!(column, Content | Error | Log )
+			}))
+			.into_model::<Self>()
+	}
+	
 	pub fn query(modifier: impl FnOnce(Select<fetch::Entity>) -> Select<fetch::Entity>)-> sea_orm::Selector<SelectModel<Self>> {
 		modifier(Self::base_query())
 			.into_model::<Self>()

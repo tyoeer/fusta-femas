@@ -1,7 +1,7 @@
 use leptos::*;
 use leptos_router::{A, Outlet};
 use entities::prelude::*;
-use crate::table;
+use crate::{table, fetch::search::FetchOverview};
 use crate::utils;
 #[cfg(feature="ssr")]
 use sea_orm::*;
@@ -17,6 +17,9 @@ pub fn Navbar() -> impl IntoView {
 				</li>
 				<li>
 					<A href="embedded">Embedded</A>
+				</li>
+				<li>
+					<A href="fetches">Fetches</A>
 				</li>
 			</ul>
 		</nav>
@@ -66,6 +69,26 @@ pub fn Embed(id: i32) -> impl IntoView {
 					}.into_view()
 				})
 			}
+		</utils::AwaitOk>
+	}
+}
+
+#[server]
+pub async fn get_fetches(entry_id: i32) -> Result<Vec<FetchOverview>, ServerFnError> {
+	let conn = crate::extension!(DatabaseConnection);
+	let query = <entry::Entity as Related<fetch::Entity>>::find_related()
+		.filter(entry::Column::Id.eq(entry_id));
+	FetchOverview::from_query(query)
+		.all(&conn)
+		.await
+		.map_err(|e| e.into())	
+}
+
+#[component]
+pub fn Fetches(id: i32) -> impl IntoView {
+	view! {
+		<utils::AwaitOk future=move || get_fetches(id) let:fetches>
+			<table::ObjectTable items = fetches />
 		</utils::AwaitOk>
 	}
 }
