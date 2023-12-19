@@ -4,7 +4,7 @@ use sea_orm_migration::{
 };
 
 use super::utils::*;
-use super::m20230715_000002_add_feeds::Iden as Feed;
+use super::m20231219_000002_add_feeds::Iden as Feed;
 
 #[derive(Iden)]
 pub enum Iden {

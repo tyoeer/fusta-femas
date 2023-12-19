@@ -1,8 +1,8 @@
 use sea_orm_migration::prelude::*;
 
 use super::utils::*;
-use super::m20230715_000002_add_feeds::Iden as Feed;
-use super::m20230718_164002_add_fetches::Iden as Fetch;
+use super::m20231219_000002_add_feeds::Iden as Feed;
+use super::m20231219_000003_add_fetches::Iden as Fetch;
 
 #[derive(Iden)]
 pub enum Iden {
