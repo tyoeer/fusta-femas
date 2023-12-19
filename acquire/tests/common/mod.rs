@@ -1,6 +1,7 @@
+use acquire::strategy::{Strategy, self};
 use sea_migration::{MigratorTrait, Migrator};
 use sea_orm::{DatabaseConnection, error::DbErr, Set, ActiveModelTrait, ActiveModelBehavior};
-use entities::prelude::feed;
+use entities::{prelude::feed, entities::fetch};
 
 pub async fn db() -> Result<DatabaseConnection, DbErr> {
 	let conn = sea_orm::Database::connect("sqlite::memory:").await?;
@@ -36,4 +37,17 @@ pub async fn feed(
 	let feed = feed.insert(db).await?;
 	
 	Ok(feed)
+}
+
+pub async fn run_strategy(db: &DatabaseConnection, feed: &feed::Model, strategy: &dyn Strategy) -> Result<fetch::Model, DbErr> {
+	let fetch = strategy::run_strategy(db, feed, strategy).await?;
+	
+	if let Some(ref error) = fetch.error {
+		//Formatted like this to preserve newlines
+		tracing::error!("Fetch error:\n{}", error);
+	}
+	//Formatted like this to preserve newlines
+	tracing::debug!("Fetch log:\n{}", fetch.log);
+	
+	Ok(fetch)
 }
