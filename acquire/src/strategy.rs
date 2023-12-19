@@ -119,7 +119,14 @@ async fn update_entries(conn: &DatabaseConnection, feed: &feed::Model, fetch_id:
 			model.embed_url = Set(entry.embed_url);
 			model.produced_date = Set(entry.produced_date.into());
 			model.produced_time = Set(entry.produced_time.into());
-			model.save(conn).await?;
+			let entry_saved = model.save(conn).await?;
+			//Shouldn't be an error because we just saved it
+			let entry_saved = entry_saved.try_into_model()?;
+			
+			let mut fetch_entry = fetch_entry::ActiveModel::new();
+			fetch_entry.fetch_id = Set(fetch_id);
+			fetch_entry.entry_id = Set(entry_saved.id);
+			fetch_entry.insert(conn).await?;
 		}
 		
 		Ok(())
