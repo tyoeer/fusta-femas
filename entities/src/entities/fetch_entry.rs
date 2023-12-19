@@ -1,3 +1,4 @@
+#[cfg(feature = "orm")]
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
