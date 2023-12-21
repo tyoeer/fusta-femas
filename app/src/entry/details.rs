@@ -1,11 +1,35 @@
 use leptos::*;
-use leptos_router::{A, Outlet};
+use leptos_router::{A, Outlet, Route, Redirect};
 use entities::prelude::*;
-use crate::{table, fetch::search::FetchOverview};
+use crate::table;
+use crate::fetch::search::FetchOverview;
 use crate::utils;
 #[cfg(feature="ssr")]
 use sea_orm::*;
 
+#[component(transparent)]
+pub fn Routes() -> impl IntoView {
+	view! {
+		<Route path="/:id" view=Navbar>
+			<Route path="" view=|| view! { <Redirect path="about"/> }/>
+			<Route path="about" view = || {
+				utils::with_id_param(|id| view! {
+					<About id />
+				})
+			} />
+			<Route path="embedded" view = || {
+				utils::with_id_param(|id| view! {
+					<Embed id />
+				})
+			} />
+			<Route path="fetches" view = || {
+				utils::with_id_param(|id| view! {
+					<Fetches id />
+				})
+			} />
+		</Route>
+	}
+}
 
 #[component]
 pub fn Navbar() -> impl IntoView {
