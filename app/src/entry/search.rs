@@ -39,6 +39,16 @@ impl EntryOverview {
 			}))
 	}
 	
+	pub fn from_query(query: Select<entry::Entity>) -> sea_orm::Selector<SelectModel<Self>> {
+		query
+			.select_only()
+			.columns(entry::Column::iter().filter(|column| {
+				use entry::Column::*;
+				!matches!(column, ViewUrl | EmbedUrl )
+			}))
+			.into_model::<Self>()
+	}
+	
 	pub fn query(modifier: impl FnOnce(Select<entry::Entity>) -> Select<entry::Entity>) -> sea_orm::Selector<SelectModel<Self>> {
 		Self::query_unordered( |query| {
 			let query = query

@@ -1,7 +1,7 @@
 use leptos::*;
 use leptos_router::{Route, Redirect, A, Outlet};
 use entities::prelude::*;
-use crate::table;
+use crate::{table, entry::search::EntryOverview};
 use crate::utils;
 #[cfg(feature="ssr")]
 use sea_orm::*;
@@ -48,6 +48,11 @@ pub fn Routes() -> impl IntoView {
 						<FetchLog id />
 					})
 				} />
+				<Route path="entries" view = || {
+					crate::utils::with_id_param(|id| view! {
+						<Entries id />
+					})
+				} />
 			</Route>
 		</Route>
 	}
@@ -69,6 +74,9 @@ pub fn SidebarView() -> impl IntoView {
 				</li>
 				<li>
 					<A href="log">Log</A>
+				</li>
+				<li>
+					<A href="entries">Entries</A>
 				</li>
 			</ul>
 		</nav>
@@ -144,6 +152,26 @@ pub fn FetchLog(id: i32) -> impl IntoView {
 					}.into_view()
 				}
 			}
+		</utils::AwaitOk>
+	}
+}
+
+#[server]
+async fn get_entries(fetch_id: i32) -> Result<Vec<EntryOverview>,ServerFnError> {
+	let conn = crate::extension!(DatabaseConnection);
+	let query = <fetch::Entity as Related<entry::Entity>>::find_related()
+		.filter(fetch::Column::Id.eq(fetch_id));
+	EntryOverview::from_query(query)
+		.all(&conn)
+		.await
+		.map_err(|e| e.into())	
+}
+
+#[component]
+pub fn Entries(id: i32) -> impl IntoView {
+	view! {
+		<utils::AwaitOk future=move || get_entries(id) let:entries>
+			<crate::entry::search::Table entries />
 		</utils::AwaitOk>
 	}
 }
