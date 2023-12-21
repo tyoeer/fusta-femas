@@ -157,3 +157,29 @@ macro_rules! extension {
 		leptos_axum::extractor::<axum::Extension<$extension>>().await?.0
 	};
 }
+
+/**
+Grabs a model from the entities crate from the Leptos context, and puts it into scope.
+
+# Example
+
+```no_run
+# use app::model;
+# use leptos::use_context;
+# use entities::entry;
+model!(entry);
+dbg!(entry);
+```
+
+*/
+#[macro_export]
+macro_rules! model {
+	($entity:ident) => {
+		{
+			let Some(model) = use_context::<$entity::Model>() else {
+				return None;
+			};
+			model
+		}
+	};
+}

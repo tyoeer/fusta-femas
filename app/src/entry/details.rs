@@ -10,18 +10,10 @@ use sea_orm::*;
 #[component(transparent)]
 pub fn Routes() -> impl IntoView {
 	view! {
-		<Route path="/:id" view=Navbar>
+		<Route path="/:id" view=ObjectContext>
 			<Route path="" view=|| view! { <Redirect path="about"/> }/>
-			<Route path="about" view = || {
-				utils::with_id_param(|id| view! {
-					<About id />
-				})
-			} />
-			<Route path="embedded" view = || {
-				utils::with_id_param(|id| view! {
-					<Embed id />
-				})
-			} />
+			<Route path="about" view = About />
+			<Route path="embedded" view = Embed />
 			<Route path="fetches" view = || {
 				utils::with_id_param(|id| view! {
 					<Fetches id />
@@ -29,6 +21,24 @@ pub fn Routes() -> impl IntoView {
 			} />
 		</Route>
 	}
+}
+
+#[component]
+pub fn ObjectContext() -> impl IntoView {
+	|| crate::utils::with_id_param(|id| view! {
+		<Navbar />
+		<main>
+			<utils::AwaitOk future=move || get_entry(id) let:entry>
+				{
+					provide_context(entry);
+					
+					view! {
+						<Outlet/>
+					}
+				}
+			</utils::AwaitOk>
+		</main>
+	})
 }
 
 #[component]
@@ -47,9 +57,6 @@ pub fn Navbar() -> impl IntoView {
 				</li>
 			</ul>
 		</nav>
-		<main>
-			<Outlet/>
-		</main>
 	}
 }
 
@@ -66,35 +73,31 @@ pub async fn get_entry(id: i32) -> Result<entry::Model, ServerFnError> {
 }
 
 #[component]
-pub fn About(id: i32) -> impl IntoView {
+pub fn About() -> impl IntoView {
+	let entry = crate::model!(entry);
+	
 	view! {
-		<utils::AwaitOk future=move || get_entry(id) let:entry>
-			<table::ObjectFieldValueList object=&entry />
-		</utils::AwaitOk>
-	}
+		<table::ObjectFieldValueList object=&entry />
+	}.into()
 }
 
 #[component]
-pub fn Embed(id: i32) -> impl IntoView {
-	view! {
-		<utils::AwaitOk future=move || get_entry(id) let:entry>
-			{
-				let maybe_url = entry.embed_url;
-				maybe_url.map(|mut url| {
-					if !url.contains("://") {
-						url = format!("https://{url}");
-					}
-					view! {
-						<iframe class="grow" src=url />
-					}.into_view()
-				}).unwrap_or_else(|| {
-					view! {
-						"Entry has no embed url specified 🤷"
-					}.into_view()
-				})
-			}
-		</utils::AwaitOk>
-	}
+pub fn Embed() -> impl IntoView {
+	let entry = crate::model!(entry);
+	
+	let maybe_url = entry.embed_url;
+	maybe_url.map(|mut url| {
+		if !url.contains("://") {
+			url = format!("https://{url}");
+		}
+		view! {
+			<iframe class="grow" src=url />
+		}.into_view()
+	}).unwrap_or_else(|| {
+		view! {
+			"Entry has no embed url specified 🤷"
+		}.into_view()
+	}).into()
 }
 
 #[server]
