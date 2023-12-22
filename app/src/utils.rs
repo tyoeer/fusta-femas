@@ -7,16 +7,43 @@ struct IdParam {
 	pub id: Option<i32>,
 }
 
-pub fn with_id_param<Mapped>(callback: impl Fn(i32) -> Mapped) -> Result<Mapped, ParamsError> {
+///Returns a signal containing the Result of parsing the id parameter
+pub fn use_id_result() -> impl Fn() -> Result<i32,ParamsError> {
 	let id_res_memo = use_params::<IdParam>();
-	let res = id_res_memo.get().map(|params| params.id);
-	
-	match res {
-		Ok(Some(id)) => Ok(callback(id)),
-		Ok(None) => Err(ParamsError::MissingParam("id".to_string())),
+	move || {
+		let res = id_res_memo.get().map(|params| params.id);
+		
+		match res {
+			Ok(Some(id)) => Ok(id),
+			Ok(None) => {
+				tracing::error!("Missing id parameter");
+				Err(ParamsError::MissingParam("id".to_string()))
+			},
+			Err(err) => {
+				tracing::error!(?err, "Other error with id parameter: ");
+				Err(err)
+			},
+		}
+	}	
+}
+
+///Returns a reactive callback 
+pub fn react_id<Mapped>(callback: impl Fn(i32) -> Mapped) -> impl Fn() -> Result<Mapped, ParamsError> {
+	// Using a match statement because it tries to move out of `callback` when using Result::map
+	// Only call use_id_result in the closure because it otherwise doesn't find the id parameter for some unknown reason
+	move || match use_id_result()() {
+		Ok(id) => Ok(callback(id)),
 		Err(err) => Err(err),
 	}
-	
+}
+
+pub fn with_id_param<Mapped>(callback: impl Fn(i32) -> Mapped) -> Result<Mapped, ParamsError> {
+	/*
+	Call react_id instead of the other way around because this function takes ownership of callback,
+		yet react_id needs to be able to use it multiple times,
+		and taking a reference makes this one annoying to call
+	*/
+	react_id(callback)()
 }
 
 #[component]
