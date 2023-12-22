@@ -113,10 +113,13 @@ pub fn MarkViewedButton(entry: RwSignal<entry::Model>) -> impl IntoView {
 #[component]
 pub fn About() -> impl IntoView {
 	let entry = crate::model!(entry);
-	let spec: [entry::Model; 0] = [];
+	
+	//Need to use a use statement because the view! macro can't parse a :: in a generic
+	use entry::Model as EntryModel;
 	
 	view! {
-		<table::ObjectFieldValueList object=entry _type=spec/>
+		//Need to manually specify generic because it can't infer type because we might want to put a MaybeSignal in a MaybeSignal
+		<table::ObjectFieldValueList<EntryModel> object=entry />
 		<MarkViewedButton entry = entry/>
 	}.into()
 }

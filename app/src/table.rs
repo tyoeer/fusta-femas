@@ -191,8 +191,6 @@ pub fn ObjectFieldValueList<Object: Struct + Typed>(
 	object: MaybeSignal<Object>,
 	#[prop(optional)]
 	overloads: FieldValueOverwrites<Object>,
-	#[prop(optional)]
-	_type: [Object; 0],
 ) -> impl IntoView {
 	view! {
 		<ul class="object_fieldvalue_list">
