@@ -14,11 +14,7 @@ pub fn Routes() -> impl IntoView {
 			<Route path="" view=|| view! { <Redirect path="about"/> }/>
 			<Route path="about" view = About />
 			<Route path="embedded" view = Embed />
-			<Route path="fetches" view = || {
-				utils::with_id_param(|id| view! {
-					<Fetches id />
-				})
-			} />
+			<Route path="fetches" view = Fetches />
 		</Route>
 	}
 }
@@ -112,10 +108,12 @@ pub async fn get_fetches(entry_id: i32) -> Result<Vec<FetchOverview>, ServerFnEr
 }
 
 #[component]
-pub fn Fetches(id: i32) -> impl IntoView {
+pub fn Fetches() -> impl IntoView {
+	let entry = crate::model!(entry);
+	
 	view! {
-		<utils::AwaitOk future=move || get_fetches(id) let:fetches>
+		<utils::AwaitOk future=move || get_fetches(entry.id) let:fetches>
 			<table::ObjectTable items = fetches />
 		</utils::AwaitOk>
-	}
+	}.into()
 }
