@@ -21,7 +21,7 @@ pub fn Routes() -> impl IntoView {
 
 #[component]
 pub fn ObjectContext() -> impl IntoView {
-	|| crate::utils::with_id_param(|id| view! {
+	utils::react_id(|id| view! {
 		<Navbar />
 		<main>
 			<utils::AwaitOk future=move || get_entry(id) let:entry>

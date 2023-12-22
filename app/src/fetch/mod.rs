@@ -28,31 +28,21 @@ pub fn Routes() -> impl IntoView {
 			</Route>
 			<Route path="/:id" view=SidebarView>
 				<Route path="" view=|| view! { <Redirect path="about"/> }/>
-				<Route path="about" view = || {
-					crate::utils::with_id_param(|id| view! {
+				<Route path="about" view = utils::react_id(|id| view! {
 						<FieldList id />
-					})
-				} />
-				<Route path="error" view = || {
-					crate::utils::with_id_param(|id| view! {
+				}) />
+				<Route path="error" view = utils::react_id(|id| view! {
 						<FetchError id />
-					})
-				} />
-				<Route path="content" view = || {
-					crate::utils::with_id_param(|id| view! {
+				}) />
+				<Route path="content" view = utils::react_id(|id| view! {
 						<FetchedContent id />
-					})
-				} />
-				<Route path="log" view = || {
-					crate::utils::with_id_param(|id| view! {
+				}) />
+				<Route path="log" view = utils::react_id(|id| view! {
 						<FetchLog id />
-					})
-				} />
-				<Route path="entries" view = || {
-					crate::utils::with_id_param(|id| view! {
+				}) />
+				<Route path="entries" view = utils::react_id(|id| view! {
 						<Entries id />
-					})
-				} />
+				}) />
 			</Route>
 		</Route>
 	}

@@ -26,11 +26,9 @@ pub fn FeedRoutes() -> impl IntoView {
 			</Route>
 			<Route path="/:id" view=crate::feeds::FeedOverview>
 				<Route path="" view=|| view! { <Redirect path="about"/> }/>
-				<Route path="about" view = || {
-					crate::utils::with_id_param(|id| view! {
-						<crate::feeds::FeedInfo id />
-					})
-				} />
+				<Route path="about" view = utils::react_id(|id| view! {
+					<FeedInfo id />
+				}) />
 				<Route path="fetches" view=Fetches/>
 				<Route path="entries" view=Entries/>
 			</Route>
@@ -111,14 +109,11 @@ pub async fn get_fetches(feed_id: i32) -> Result<Vec<FetchOverview>, ServerFnErr
 
 #[component]
 pub fn Fetches() -> impl IntoView {
-	// Use a closure to opt into the reactive system and respond to changes to id
-	|| {
-		crate::utils::with_id_param(|feed_id| view! {
-			<utils::AwaitOk future=move || get_fetches(feed_id) let:fetches>
-				<ObjectTable items = fetches />
-			</utils::AwaitOk>
-		})
-	}
+	utils::react_id(|feed_id| view! {
+		<utils::AwaitOk future=move || get_fetches(feed_id) let:fetches>
+			<ObjectTable items = fetches />
+		</utils::AwaitOk>
+	})
 }
 
 #[server]
@@ -134,14 +129,11 @@ pub async fn get_entries(feed_id: i32) -> Result<Vec<EntryOverview>, ServerFnErr
 
 #[component]
 pub fn Entries() -> impl IntoView {
-	// Use a closure to opt into the reactive system and respond to changes to id
-	|| {
-		crate::utils::with_id_param(|feed_id| view! {
-			<utils::AwaitOk future=move || get_entries(feed_id) let:entries>
-				<crate::entry::search::Table entries />
-			</utils::AwaitOk>
-		})
-	}
+	utils::react_id(|feed_id| view! {
+		<utils::AwaitOk future=move || get_entries(feed_id) let:entries>
+			<crate::entry::search::Table entries />
+		</utils::AwaitOk>
+	})
 }
 
 #[component]
