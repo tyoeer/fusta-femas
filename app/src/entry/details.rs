@@ -26,7 +26,7 @@ pub fn ObjectContext() -> impl IntoView {
 		<main>
 			<utils::AwaitOk future=move || get_entry(id) let:entry>
 				{
-					provide_context(entry);
+					provide_context(create_rw_signal(entry));
 					
 					view! {
 						<Outlet/>
@@ -69,23 +69,29 @@ pub async fn get_entry(id: i32) -> Result<entry::Model, ServerFnError> {
 }
 
 #[server]
-pub async fn mark_viewed(id: i32, viewed: bool) -> Result<(), ServerFnError> {
+pub async fn mark_viewed(id: i32, viewed: bool) -> Result<entry::Model, ServerFnError> {
 	let db = crate::extension!(DatabaseConnection);
 	
 	let mut entry = entry::ActiveModel::new();
 	entry.viewed = Set(viewed);
 	entry.id = Unchanged(id);
-	entry.update(&db).await?;
+	let entry = entry.update(&db).await?;
 	
-	Ok(())
+	Ok(entry)
 }
 
 #[component]
-pub fn MarkViewedButton<'entry>(entry: &'entry entry::Model) -> impl IntoView {
+pub fn MarkViewedButton(entry: RwSignal<entry::Model>) -> impl IntoView {
 	let action = create_server_action::<MarkViewed>();
-	let entry = entry.clone();
-	let viewed = move || entry.viewed;
+	let viewed = move || entry.get().viewed;
 	let un = move || if viewed() {"un"} else {""};
+	
+	//TODO the book says effects shouldn't be used for this
+	create_isomorphic_effect(move |_| {
+		if let Some(Ok(new_entry)) = action.value().get() {
+			entry.set(new_entry);
+		}
+	});
 	
 	let button_name = move || {
 		if action.pending().get() {
@@ -97,7 +103,7 @@ pub fn MarkViewedButton<'entry>(entry: &'entry entry::Model) -> impl IntoView {
 	
 	view! {
 		<ActionForm action = action>
-			<input type="hidden" name="id" value=entry.id />
+			<input type="hidden" name="id" value=move || entry.get().id />
 			<input type="hidden" name="viewed" value=move || (!viewed()).to_string() />
 			<input type="submit" value=button_name disabled=move || action.pending().get() />
 		</ActionForm>
@@ -109,28 +115,31 @@ pub fn About() -> impl IntoView {
 	let entry = crate::model!(entry);
 	
 	view! {
-		<table::ObjectFieldValueList object=&entry />
-		<MarkViewedButton entry = &entry/>
+		<table::ObjectFieldValueList object=&entry.get() />
+		<MarkViewedButton entry = entry/>
 	}.into()
 }
 
 #[component]
 pub fn Embed() -> impl IntoView {
 	let entry = crate::model!(entry);
+	let (maybe_url, _) = slice!(entry.embed_url);
 	
-	let maybe_url = entry.embed_url;
-	maybe_url.map(|mut url| {
-		if !url.contains("://") {
-			url = format!("https://{url}");
-		}
-		view! {
-			<iframe class="grow" src=url />
-		}.into_view()
-	}).unwrap_or_else(|| {
-		view! {
-			"Entry has no embed url specified 🤷"
-		}.into_view()
-	}).into()
+	Some( move || match maybe_url.get() {
+		Some(mut url) => {
+			if !url.contains("://") {
+				url = format!("https://{url}");
+			}
+			view! {
+				<iframe class="grow" src=url />
+			}.into_view()
+		},
+		None => {
+			view! {
+				"Entry has no embed url specified 🤷"
+			}.into_view()
+		},
+	} )
 }
 
 #[server]
@@ -147,9 +156,10 @@ pub async fn get_fetches(entry_id: i32) -> Result<Vec<FetchOverview>, ServerFnEr
 #[component]
 pub fn Fetches() -> impl IntoView {
 	let entry = crate::model!(entry);
+	let (id, _) = slice!(entry.id);
 	
 	view! {
-		<utils::AwaitOk future=move || get_fetches(entry.id) let:fetches>
+		<utils::AwaitOk future=move || get_fetches(id.get()) let:fetches>
 			<table::ObjectTable items = fetches />
 		</utils::AwaitOk>
 	}.into()

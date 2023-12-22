@@ -176,7 +176,7 @@ dbg!(entry);
 macro_rules! model {
 	($entity:ident) => {
 		{
-			let Some(model) = use_context::<$entity::Model>() else {
+			let Some(model) = ::leptos::use_context::<::leptos::RwSignal<$entity::Model>>() else {
 				return None;
 			};
 			model
