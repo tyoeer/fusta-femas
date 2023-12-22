@@ -1,5 +1,5 @@
 use leptos::*;
-use leptos_router::{A, Outlet, Route, Redirect};
+use leptos_router::{A, Outlet, Route, Redirect, ActionForm};
 use entities::prelude::*;
 use crate::table;
 use crate::fetch::search::FetchOverview;
@@ -68,12 +68,49 @@ pub async fn get_entry(id: i32) -> Result<entry::Model, ServerFnError> {
 		)
 }
 
+#[server]
+pub async fn mark_viewed(id: i32, viewed: bool) -> Result<(), ServerFnError> {
+	let db = crate::extension!(DatabaseConnection);
+	
+	let mut entry = entry::ActiveModel::new();
+	entry.viewed = Set(viewed);
+	entry.id = Unchanged(id);
+	entry.update(&db).await?;
+	
+	Ok(())
+}
+
+#[component]
+pub fn MarkViewedButton<'entry>(entry: &'entry entry::Model) -> impl IntoView {
+	let action = create_server_action::<MarkViewed>();
+	let entry = entry.clone();
+	let viewed = move || entry.viewed;
+	let un = move || if viewed() {"un"} else {""};
+	
+	let button_name = move || {
+		if action.pending().get() {
+			format!("marking as {}viewed...", un() )
+		} else {
+			format!("mark {}viewed", un() )
+		}
+	};
+	
+	view! {
+		<ActionForm action = action>
+			<input type="hidden" name="id" value=entry.id />
+			<input type="hidden" name="viewed" value=move || (!viewed()).to_string() />
+			<input type="submit" value=button_name disabled=move || action.pending().get() />
+		</ActionForm>
+	}
+}
+
 #[component]
 pub fn About() -> impl IntoView {
 	let entry = crate::model!(entry);
 	
 	view! {
 		<table::ObjectFieldValueList object=&entry />
+		<MarkViewedButton entry = &entry/>
 	}.into()
 }
 
