@@ -113,9 +113,10 @@ pub fn MarkViewedButton(entry: RwSignal<entry::Model>) -> impl IntoView {
 #[component]
 pub fn About() -> impl IntoView {
 	let entry = crate::model!(entry);
+	let spec: [entry::Model; 0] = [];
 	
 	view! {
-		<table::ObjectFieldValueList object=&entry.get() />
+		<table::ObjectFieldValueList object=entry _type=spec/>
 		<MarkViewedButton entry = entry/>
 	}.into()
 }

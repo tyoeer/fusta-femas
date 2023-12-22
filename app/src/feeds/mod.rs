@@ -93,7 +93,7 @@ pub async fn get_feed(id: i32) -> Result<feed::Model, ServerFnError> {
 pub fn FeedInfo(id: i32) -> impl IntoView {
 	view! {
 		<utils::AwaitOk future=move || get_feed(id) let:feed>
-			<ObjectFieldValueList object=&feed />
+			<ObjectFieldValueList object=feed.clone() />
 			<a href=&feed.url target="_blank">{feed.url}</a>
 		</utils::AwaitOk>
 		<FetchFeedButton id />

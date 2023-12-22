@@ -180,7 +180,7 @@ pub fn Entries(id: i32) -> impl IntoView {
 pub fn FieldList(id: i32) -> impl IntoView {
 	view! {
 		<utils::AwaitOk future=move || get_fetch(id) let:fetch>
-			<table::ObjectFieldValueList object=&fetch overloads=vec![
+			<table::ObjectFieldValueList object=fetch overloads=vec![
 				("error", false, |fetch| view! {
 					<table::Reflected value=&fetch.error short=true/>
 				}),

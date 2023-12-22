@@ -150,43 +150,49 @@ The tuple components are:
 pub type FieldValueOverwrites<Object> = Vec<(&'static str, bool, fn(&Object) -> View)>;
 
 #[component]
-pub fn ObjectFieldValues<Object: Struct + Typed, 'object>(
-	object: &'object Object,
+pub fn ObjectFieldValues<Object: Struct + Typed>(
+	#[prop(into)]
+	object: MaybeSignal<Object>,
 	#[prop(optional)]
 	overloads: FieldValueOverwrites<Object>,
 ) -> impl IntoView {
 	let struct_info = struct_info::<Object>();
-	object.iter_fields().zip(struct_info.field_names()).map(|(value, field)| {
-		if let Some(overload) = overloads
-			.iter()
-			.find( |(overload_field, _, _)| field == overload_field )
-		{
-			if overload.1 {
-				overload.2(object)
+	move || object.with(|object| {
+		object.iter_fields().zip(struct_info.field_names()).map(|(value, field)| {
+			if let Some(overload) = overloads
+				.iter()
+				.find( |(overload_field, _, _)| field == overload_field )
+			{
+				if overload.1 {
+					overload.2(object)
+				} else {
+					view! {
+						<li class="object_fieldvalue">
+							<span class="object_field"> {*field} </span>
+							<span class="object_value"> {overload.2(object)} </span>
+						</li>
+					}.into_view()
+				}
 			} else {
 				view! {
 					<li class="object_fieldvalue">
 						<span class="object_field"> {*field} </span>
-						<span class="object_value"> {overload.2(object)} </span>
+						<span class="object_value"> <Reflected value/> </span>
 					</li>
 				}.into_view()
 			}
-		} else {
-			view! {
-				<li class="object_fieldvalue">
-					<span class="object_field"> {*field} </span>
-					<span class="object_value"> <Reflected value/> </span>
-				</li>
-			}.into_view()
-		}
-	}).collect::<Vec<_>>()
+		}).collect::<Vec<_>>()
+	})
 }
 
 #[component]
-pub fn ObjectFieldValueList<Object: Struct + Typed, 'object>(
-	object: &'object Object,
+pub fn ObjectFieldValueList<Object: Struct + Typed>(
+	#[prop(into)]
+	object: MaybeSignal<Object>,
 	#[prop(optional)]
 	overloads: FieldValueOverwrites<Object>,
+	#[prop(optional)]
+	_type: [Object; 0],
 ) -> impl IntoView {
 	view! {
 		<ul class="object_fieldvalue_list">
