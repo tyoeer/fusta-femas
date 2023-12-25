@@ -10,6 +10,7 @@ use leptos::*;
 use leptos_axum::{generate_route_list, LeptosRoutes, handle_server_fns};
 use tower::ServiceExt;
 use tower_http::services::ServeDir;
+use tracing::level_filters::LevelFilter;
 use tracing_subscriber::{fmt, EnvFilter, registry, prelude::*};
 
 async fn get_static_file(uri: Uri, root: &str) -> Result<Response, (StatusCode, String)> {
@@ -35,9 +36,17 @@ pub async fn run<View>(app: fn() -> View, extend: impl FnOnce(Router) -> Router)
 	
 	let fmt_layer = fmt::layer()
 		.event_format(fmt::format().pretty());
+	let maybe_env_filter = EnvFilter::builder()
+		.with_default_directive(LevelFilter::WARN.into())
+		.try_from_env();
+	let filter = maybe_env_filter.unwrap_or_else(|_|
+		EnvFilter::builder()
+			.parse("debug,hyper=info,sqlx=warn")
+			.expect("hardcoded log filter should be correct")
+	);
 	registry()
 		.with(fmt_layer)
-		.with(EnvFilter::from_default_env())
+		.with(filter)
 		.init();
 	// Setting get_configuration(None) means we'll be using cargo-leptos's env values
 	// For deployment these variables are:
