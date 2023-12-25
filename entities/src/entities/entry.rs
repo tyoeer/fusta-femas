@@ -12,7 +12,9 @@ use crate::traits;
 #[cfg_attr(feature="orm", sea_orm(table_name = "entry") )]
 pub struct Model {
 	pub name: String,
+	///The natural page containing the content
 	pub view_url: String,
+	///Just the content
 	pub embed_url: Option<String>,
 	pub viewed: bool,
 	pub feed_entry_id: String,
