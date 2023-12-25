@@ -30,7 +30,8 @@ async fn get_static_file(uri: Uri, root: &str) -> Result<Response, (StatusCode, 
 pub async fn run<View>(app: fn() -> View, extend: impl FnOnce(Router) -> Router) where
 	View: IntoView + 'static
 {
-	// let app = app::app::App;
+	//We want backtraces for errors while fetching
+	std::env::set_var("RUST_BACKTRACE", "1");
 	
 	dotenvy::dotenv().ok();
 	
