@@ -1,5 +1,5 @@
 use leptos::*;
-use leptos_router::{Route, ActionForm, A, Outlet};
+use leptos_router::{Route, ActionForm, A};
 use entities::prelude::*;
 use crate::table::*;
 use crate::utils;
@@ -13,7 +13,7 @@ use crate::entry::search::EntryOverview;
 #[component(transparent)]
 pub fn Routes() -> impl IntoView {
 	view! {
-		<Route path="/:id" view=FeedOverview>
+		<Route path="/:id" view=FeedContext>
 			<utils::RouteAlias to="about" />
 			<Route path="about" view = utils::react_id(|id| view! {
 				<FeedInfo id />
@@ -24,10 +24,17 @@ pub fn Routes() -> impl IntoView {
 	}
 }
 
-
+#[component]
+pub fn FeedContext() -> impl IntoView {
+	view! {
+		<utils::ObjectContext getter=get_feed>
+			<Sidebar />
+		</utils::ObjectContext>
+	}
+}
 
 #[component]
-pub fn FeedOverview() -> impl IntoView {
+pub fn Sidebar() -> impl IntoView {
 	view! {
 		<nav class="sidebar">
 			<ul>
@@ -42,9 +49,6 @@ pub fn FeedOverview() -> impl IntoView {
 				</li>
 			</ul>
 		</nav>
-		<main>
-			<Outlet/>
-		</main>
 	}
 }
 
