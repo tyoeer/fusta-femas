@@ -13,3 +13,12 @@ reset-db:
 # cargo leptos watch
 watch:
 	cargo leptos watch --hot-reload
+
+# Serve the alt database
+alt $DATABASE_URL="sqlite://.local/alt/db/alt.db?mode=rwc":
+	cargo leptos serve
+
+# DANGEROUS Rebuilds the database from migrations
+[confirm]
+reset-alt-db $DATABASE_URL="sqlite://.local/alt/db/alt.db?mode=rwc":
+	sea migrate -d sea-migration fresh

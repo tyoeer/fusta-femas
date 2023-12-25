@@ -50,6 +50,14 @@ Run `just binstall` to install the requirements with [`cargo binstall`](https://
 			- enums
 			- https://github.com/SeaQL/sea-orm/issues/924
 
+### Alt database
+
+I wanted to use Fusta Femas already while still developing it, before building a whole release and distribution pipeline/process.
+
+To serve the current codebase with the alt database, run `just alt`.
+
+To reset/create the database, run `just reset-alt-db`
+
 ## Useful links
 
 - [Leptos book](https://leptos-rs.github.io/leptos/)
