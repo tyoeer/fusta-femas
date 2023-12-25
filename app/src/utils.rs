@@ -65,9 +65,13 @@ pub fn RouteAlias(
 	path: &'static str,
 	to: &'static str,
 ) -> impl IntoView {
+	let navigation_options = leptos_router::NavigateOptions {
+		replace: true,
+		..Default::default()
+	};
 	view! {
 		<leptos_router::Route path=path view=move || view! {
-			<leptos_router::Redirect path=to/>
+			<leptos_router::Redirect path=to options=navigation_options.clone() />
 		}/>
 	}
 }
