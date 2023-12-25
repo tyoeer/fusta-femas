@@ -111,7 +111,48 @@ pub fn About() -> impl IntoView {
 	
 	view! {
 		//Need to manually specify generic because it can't infer type because we might want to put a MaybeSignal in a MaybeSignal
-		<table::ObjectFieldValueList<EntryModel> object=entry />
+		<table::ObjectFieldValueList<EntryModel> object=entry overloads=vec![
+			("feed_id", true, |entry| {
+				//Grab id out because it otherwise will complain about fetch outliving the closure
+				//Since the id is i32 which is Copy, it doesn't have that problem
+				let id = entry.feed_id;
+				view! {
+					<A href=format!("/feed/{id}") class="object_fieldvalue">
+						<span class="object_field"> feed_id </span>
+						<span class="object_value"> {id} </span>
+					</A>
+				}.into_view()
+			}),
+			("view_url", true, |entry| {
+				let url = entry.view_url.to_owned();
+				view! {
+					// <A> is always relative to the current route, and- uses an empty href if it tries to go to a different domain
+					<a href=utils::format_link(url.clone()) class="object_fieldvalue">
+						<span class="object_field"> view_url </span>
+						<span class="object_value"> {url} </span>
+					</a>
+				}.into_view()
+			}),
+			("embed_url", true, |entry| {
+				if let Some(url) = entry.embed_url.to_owned() {
+					view! {
+						// <A> is always relative to the current route, and- uses an empty href if it tries to go to a different domain
+						<a href=utils::format_link(url.clone()) class="object_fieldvalue">
+							<span class="object_field"> embed_url </span>
+							<span class="object_value"> {url} </span>
+						</a>
+					}.into_view()
+				} else {
+					view! {
+						<span class="object_fieldvalue">
+							<span class="object_field"> embed_url </span>
+							<span class="object_value">  </span>
+						</span>
+					}.into_view()
+					
+				}
+			}),
+		]/>
 		<MarkViewedButton entry = entry/>
 	}.into()
 }
