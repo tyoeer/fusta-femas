@@ -131,6 +131,7 @@ pub fn Embed() -> impl IntoView {
 		}
 		
 		view! {
+			<MarkViewedButton entry />
 			<iframe class="grow" src=url />
 		}
 	};
