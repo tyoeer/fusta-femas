@@ -15,9 +15,7 @@ pub fn Routes() -> impl IntoView {
 	view! {
 		<Route path="/:id" view=FeedContext>
 			<utils::RouteAlias to="about" />
-			<Route path="about" view = utils::react_id(|id| view! {
-				<FeedInfo id />
-			}) />
+			<Route path="about" view=FeedInfo/>
 			<Route path="fetches" view=Fetches/>
 			<Route path="entries" view=Entries/>
 		</Route>
@@ -76,7 +74,7 @@ pub async fn fetch_one_feed(id: i32) -> Result<fetch::Model, ServerFnError> {
 }
 
 #[component]
-pub fn FetchFeedButton(id: i32) -> impl IntoView {
+pub fn FetchFeedButton(#[prop(into)] id: MaybeSignal<i32>) -> impl IntoView {
 	let fetch_one = create_server_action::<FetchOneFeed>();
 	view! {
 		<ActionForm action=fetch_one>
@@ -101,14 +99,18 @@ pub async fn get_feed(id: i32) -> Result<feed::Model, ServerFnError> {
 }
 
 #[component]
-pub fn FeedInfo(id: i32) -> impl IntoView {
+pub fn FeedInfo() -> impl IntoView {
+	let feed = crate::model!(feed);
+	let (id, _) = slice!(feed.id);
+	let (url, _) = slice!(feed.url);
+	
+	use feed::Model as FeedModel;
+	
 	view! {
-		<utils::AwaitOk future=move || get_feed(id) let:feed>
-			<ObjectFieldValueList object=feed.clone() />
-			<a href=&feed.url target="_blank">{feed.url}</a>
-		</utils::AwaitOk>
+		<ObjectFieldValueList<FeedModel> object=feed />
+		<a href=move || feed.get().url target="_blank"> {url} </a>
 		<FetchFeedButton id />
-	}
+	}.into()
 }
 
 #[server]
@@ -122,11 +124,13 @@ pub async fn get_fetches(feed_id: i32) -> Result<Vec<FetchOverview>, ServerFnErr
 
 #[component]
 pub fn Fetches() -> impl IntoView {
-	utils::react_id(|feed_id| view! {
-		<utils::AwaitOk future=move || get_fetches(feed_id) let:fetches>
+	let feed = crate::model!(feed);
+	
+	view! {
+		<utils::AwaitOk future=move || get_fetches(feed.get().id) let:fetches>
 			<ObjectTable items = fetches />
 		</utils::AwaitOk>
-	})
+	}.into()
 }
 
 #[server]
@@ -142,9 +146,11 @@ pub async fn get_entries(feed_id: i32) -> Result<Vec<EntryOverview>, ServerFnErr
 
 #[component]
 pub fn Entries() -> impl IntoView {
-	utils::react_id(|feed_id| view! {
-		<utils::AwaitOk future=move || get_entries(feed_id) let:entries>
+	let feed = crate::model!(feed);
+	
+	view! {
+		<utils::AwaitOk future=move || get_entries(feed.get().id) let:entries>
 			<crate::entry::search::Table entries />
 		</utils::AwaitOk>
-	})
+	}.into()
 }
