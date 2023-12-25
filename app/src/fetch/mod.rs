@@ -1,5 +1,5 @@
 use leptos::*;
-use leptos_router::{Route, Redirect, A, Outlet};
+use leptos_router::{Route, A, Outlet};
 use leptos_meta::Title;
 use entities::prelude::*;
 use crate::{table, entry::search::EntryOverview};
@@ -29,7 +29,7 @@ pub fn Routes() -> impl IntoView {
 				} />
 			</Route>
 			<Route path="/:id" view=SidebarView>
-				<Route path="" view=|| view! { <Redirect path="about"/> }/>
+				<utils::RouteAlias to="about" />
 				<Route path="about" view = utils::react_id(|id| view! {
 						<FieldList id />
 				}) />

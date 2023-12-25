@@ -58,6 +58,21 @@ pub fn with_id_param<Mapped>(callback: impl Fn(i32) -> Mapped) -> Result<Mapped,
 	react_id(callback)()
 }
 
+
+#[component(transparent)]
+pub fn RouteAlias(
+	#[prop(default = "")]
+	path: &'static str,
+	to: &'static str,
+) -> impl IntoView {
+	view! {
+		<leptos_router::Route path=path view=move || view! {
+			<leptos_router::Redirect path=to/>
+		}/>
+	}
+}
+
+
 #[component]
 pub fn AwaitOk<
 	FutureOk:

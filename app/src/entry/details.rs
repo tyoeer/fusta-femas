@@ -1,5 +1,5 @@
 use leptos::*;
-use leptos_router::{A, Route, Redirect, ActionForm};
+use leptos_router::{A, Route, ActionForm};
 use entities::prelude::*;
 use crate::table;
 use crate::fetch::search::FetchOverview;
@@ -11,7 +11,7 @@ use sea_orm::*;
 pub fn Routes() -> impl IntoView {
 	view! {
 		<Route path="/:id" view=EntryContext>
-			<Route path="" view=|| view! { <Redirect path="about"/> }/>
+			<utils::RouteAlias to="about" />
 			<Route path="about" view = About />
 			<Route path="embedded" view = Embed />
 			<Route path="fetches" view = Fetches />
