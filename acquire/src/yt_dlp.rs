@@ -136,7 +136,13 @@ impl Strategy for YtDlpStrategy {
 			.order_by_desc(entry::Column::ProducedDate)
 			.one(conn).await?;
 		
-		let mut cmd_args = YtdlpCommand::new(feed.url.clone());
+		let mut url = feed.url.to_owned();
+		if !url.contains('/') {
+			url = format!("www.youtube.com/channel/{url}/videos");
+			tracing::info!(url, "Expanded url:")
+		}
+		
+		let mut cmd_args = YtdlpCommand::new(url);
 		
 		cmd_args.verbose(true);
 		
