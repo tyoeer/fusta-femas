@@ -90,17 +90,37 @@ impl From<YtdlpVideoInfo> for EntryInfo {
 	}
 }
 
+#[derive(Clone, PartialEq, Eq)]
+pub enum Limit {
+	AfterDate(time::Date),
+	Amount(u16),
+}
+
+impl Limit {
+	fn apply(&self, cmd: &mut YtdlpCommand) {
+		match self {
+			Self::AfterDate(date) => {
+				
+				cmd.date_after(*date);
+			},
+			Self::Amount(amount) => {
+				cmd.playlist_end(*amount);
+			}
+		}
+	}
+}
+
 #[derive(Clone,PartialEq,Eq)]
 pub struct YtDlpStrategy {
 	command: String,
-	fetch_amount_if_no_date: u16,
+	backup_limit: Limit,
 }
 
 impl Default for YtDlpStrategy {
 	fn default() -> Self {
 		Self {
 			command: "yt-dlp".into(),
-			fetch_amount_if_no_date: 10,
+			backup_limit: Limit::Amount(10),
 		}
 	}
 }
@@ -123,7 +143,7 @@ impl Strategy for YtDlpStrategy {
 		if let Some(last_entry) = maybe_last_entry {
 			cmd_args.date_after(last_entry.produced_date.into());
 		} else {
-			cmd_args.playlist_end(self.fetch_amount_if_no_date);
+			self.backup_limit.apply(&mut cmd_args);
 		};
 		
 		let mut cmd = tokio::process::Command::new(self.command.clone());
