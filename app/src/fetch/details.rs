@@ -12,21 +12,11 @@ pub fn Routes() -> impl IntoView {
 	view! {
 		<Route path="/:id" view=FetchContext>
 			<utils::RouteAlias to="about" />
-			<Route path="about" view = utils::react_id(|id| view! {
-					<FieldList id />
-			}) />
-			<Route path="error" view = utils::react_id(|id| view! {
-					<FetchError id />
-			}) />
-			<Route path="content" view = utils::react_id(|id| view! {
-					<FetchedContent id />
-			}) />
-			<Route path="log" view = utils::react_id(|id| view! {
-					<FetchLog id />
-			}) />
-			<Route path="entries" view = utils::react_id(|id| view! {
-					<Entries id />
-			}) />
+			<Route path="about" view = FieldList />
+			<Route path="error" view = FetchError />
+			<Route path="content" view = FetchedContent />
+			<Route path="log" view = FetchLog />
+			<Route path="entries" view = Entries />
 		</Route>
 	}
 }
@@ -83,7 +73,7 @@ pub async fn get_fetch(id: i32) -> Result<fetch::Model, ServerFnError> {
 
 
 #[component]
-pub fn FetchError(id: i32) -> impl IntoView {
+pub fn FetchError() -> impl IntoView {
 	let fetch = crate::model!(fetch);
 	
 	let react = move || {
@@ -100,7 +90,7 @@ pub fn FetchError(id: i32) -> impl IntoView {
 	Some(react)
 }
 #[component]
-pub fn FetchedContent(id: i32) -> impl IntoView {
+pub fn FetchedContent() -> impl IntoView {
 	let fetch = crate::model!(fetch);
 	
 	let react = move || {
@@ -117,7 +107,7 @@ pub fn FetchedContent(id: i32) -> impl IntoView {
 	Some(react)
 }
 #[component]
-pub fn FetchLog(id: i32) -> impl IntoView {
+pub fn FetchLog() -> impl IntoView {
 	let fetch = crate::model!(fetch);
 	
 	let react = move || {
@@ -148,7 +138,7 @@ async fn get_entries(fetch_id: i32) -> Result<Vec<EntryOverview>,ServerFnError> 
 }
 
 #[component]
-pub fn Entries(id: i32) -> impl IntoView {
+pub fn Entries() -> impl IntoView {
 	let fetch = crate::model!(fetch);
 	
 	view! {
@@ -159,7 +149,7 @@ pub fn Entries(id: i32) -> impl IntoView {
 }
 
 #[component]
-pub fn FieldList(id: i32) -> impl IntoView {
+pub fn FieldList() -> impl IntoView {
 	let fetch = crate::model!(fetch);
 	
 	use fetch::Model as FetchModel;
