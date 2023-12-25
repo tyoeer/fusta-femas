@@ -23,14 +23,14 @@ pub fn Routes() -> impl IntoView {
 pub fn EntryContext() -> impl IntoView {
 	view! {
 		<utils::ObjectContext getter=get_entry>
-			<Navbar />
+			<Sidebar />
 		</utils::ObjectContext>
 	}
 }
 
 
 #[component]
-pub fn Navbar() -> impl IntoView {
+pub fn Sidebar() -> impl IntoView {
 	view! {
 		<nav class="sidebar">
 			<ul>

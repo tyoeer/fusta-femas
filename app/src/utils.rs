@@ -137,7 +137,7 @@ pub fn AwaitOk<
 
 /**
 Renders an outlet in a `<main>` with a [`RwSignal`](leptos::RwSignal)`<Object>` in the context.
-Renders it's children before the `<main>`, which is useful for e.g. a Navbar
+Renders it's children before the `<main>`, which is useful for e.g. a Sidebar
 */
 #[component]
 pub fn ObjectContext<
