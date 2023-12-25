@@ -84,56 +84,56 @@ pub async fn get_fetch(id: i32) -> Result<fetch::Model, ServerFnError> {
 
 #[component]
 pub fn FetchError(id: i32) -> impl IntoView {
-	view! {
-		<utils::AwaitOk future=move || get_fetch(id) let:fetch>
-			{
-				match fetch.error {
-					None => "No error 🤷".into_view(),
-					Some(error) => view! {
-						<pre>
-							{error}
-						</pre>
-					}.into_view(),
-				}
-			}
-		</utils::AwaitOk>
-	}
+	let fetch = crate::model!(fetch);
+	
+	let react = move || {
+		match fetch.get().error {
+			None => "No error 🤷".into_view(),
+			Some(error) => view! {
+				<pre>
+					{error}
+				</pre>
+			}.into_view(),
+		}
+	};
+	
+	Some(react)
 }
 #[component]
 pub fn FetchedContent(id: i32) -> impl IntoView {
-	view! {
-		<utils::AwaitOk future=move || get_fetch(id) let:fetch>
-			{
-				match fetch.content {
-					None => "No content 🤷".into_view(),
-					Some(content) => view! {
-						<pre>
-							{content}
-						</pre>
-					}.into_view(),
-				}
-			}
-		</utils::AwaitOk>
-	}
+	let fetch = crate::model!(fetch);
+	
+	let react = move || {
+		match fetch.get().content {
+			None => "No content 🤷".into_view(),
+			Some(content) => view! {
+				<pre>
+					{content}
+				</pre>
+			}.into_view(),
+		}
+	};
+	
+	Some(react)
 }
 #[component]
 pub fn FetchLog(id: i32) -> impl IntoView {
-	view! {
-		<utils::AwaitOk future=move || get_fetch(id) let:fetch>
-			{
-				let log = fetch.log;
-				if log.is_empty() {
-					"Log empty 🤷".into_view()
-				} else {
-					view! {
-						<pre>
-							{log}
-						</pre>
-					}.into_view()
-				}
-			}
-		</utils::AwaitOk>
-	}
+	let fetch = crate::model!(fetch);
+	
+	let react = move || {
+		let log = fetch.get().log;
+		if log.is_empty() {
+			"Log empty 🤷".into_view()
+		} else {
+			view! {
+				<pre>
+					{log}
+				</pre>
+			}.into_view()
+		}
+	};
+	
+	Some(react)
 }
 
 #[server]
@@ -149,39 +149,43 @@ async fn get_entries(fetch_id: i32) -> Result<Vec<EntryOverview>,ServerFnError> 
 
 #[component]
 pub fn Entries(id: i32) -> impl IntoView {
+	let fetch = crate::model!(fetch);
+	
 	view! {
-		<utils::AwaitOk future=move || get_entries(id) let:entries>
+		<utils::AwaitOk future=move || get_entries(fetch.get().id) let:entries>
 			<crate::entry::search::Table entries />
 		</utils::AwaitOk>
-	}
+	}.into()
 }
 
 #[component]
 pub fn FieldList(id: i32) -> impl IntoView {
+	let fetch = crate::model!(fetch);
+	
+	use fetch::Model as FetchModel;
+	
 	view! {
-		<utils::AwaitOk future=move || get_fetch(id) let:fetch>
-			<table::ObjectFieldValueList object=fetch overloads=vec![
-				("error", false, |fetch| view! {
-					<table::Reflected value=&fetch.error short=true/>
-				}),
-				("content", false, |fetch| view! {
-					<table::Reflected value=&fetch.content short=true/>
-				}),
-				("log", false, |fetch| view! {
-					<table::Reflected value=&fetch.log short=true/>
-				}),
-				("feed_id", true, |fetch| {
-					//Grab id out because it otherwise will complain about fetch outliving the closure
-					//Since the id is i32 which is Copy, it doesn't have that problem
-					let id = fetch.feed_id;
-					view! {
-						<A href=format!("/feed/{id}") class="object_fieldvalue">
-							<span class="object_field"> feed_id </span>
-							<span class="object_value"> {id} </span>
-						</A>
-					}.into_view()
-				})
-			]/>
-		</utils::AwaitOk>
-	}
+		<table::ObjectFieldValueList<FetchModel> object=fetch overloads=vec![
+			("error", false, |fetch| view! {
+				<table::Reflected value=&fetch.error short=true/>
+			}),
+			("content", false, |fetch| view! {
+				<table::Reflected value=&fetch.content short=true/>
+			}),
+			("log", false, |fetch| view! {
+				<table::Reflected value=&fetch.log short=true/>
+			}),
+			("feed_id", true, |fetch| {
+				//Grab id out because it otherwise will complain about fetch outliving the closure
+				//Since the id is i32 which is Copy, it doesn't have that problem
+				let id = fetch.feed_id;
+				view! {
+					<A href=format!("/feed/{id}") class="object_fieldvalue">
+						<span class="object_field"> feed_id </span>
+						<span class="object_value"> {id} </span>
+					</A>
+				}.into_view()
+			})
+		]/>
+	}.into()
 }
