@@ -1,5 +1,5 @@
 use leptos::*;
-use leptos_router::{A, Outlet, Route, Redirect, ActionForm};
+use leptos_router::{A, Route, Redirect, ActionForm};
 use entities::prelude::*;
 use crate::table;
 use crate::fetch::search::FetchOverview;
@@ -22,55 +22,12 @@ pub fn Routes() -> impl IntoView {
 #[component]
 pub fn EntryContext() -> impl IntoView {
 	view! {
-		<ObjectContext getter=get_entry>
+		<utils::ObjectContext getter=get_entry>
 			<Navbar />
-		</ObjectContext>
+		</utils::ObjectContext>
 	}
 }
 
-/**
-Renders an outlet in a `<main>` with a [`RwSignal`](leptos::RwSignal)`<Object>` in the context.
-Renders it's children before the `<main>`, which is useful for e.g. a Navbar
-*/
-#[component]
-pub fn ObjectContext<
-	Object:
-		//Await requires the future output to be Serializable because it can run on the server
-		serde::Serialize + serde::de::DeserializeOwned +
-		// Required by AwaitOk for some reason
-		Clone +
-		//Not quite sure why necessary, but otherwise gives a "may not live long enough" error
-		'static,
-	Future:
-		std::future::Future<Output = Result<Object, ServerFnError>> +
-		//Wanted by await
-		'static,
-	AsyncFunction:
-		Fn(i32) -> Future +
-		//Wanted by await
-		'static,
->(
-	getter: AsyncFunction,
-	children: ChildrenFn,
-) -> impl IntoView {
-	let getter = store_value(getter);
-	
-	utils::react_id(move |id| view! {
-		// <Navbar />
-		{children()}
-		<main>
-			<utils::AwaitOk future=move || getter.with_value(|getter| getter(id)) let:entry>
-				{
-					provide_context(create_rw_signal(entry));
-					
-					view! {
-						<Outlet/>
-					}
-				}
-			</utils::AwaitOk>
-		</main>
-	})
-}
 
 #[component]
 pub fn Navbar() -> impl IntoView {

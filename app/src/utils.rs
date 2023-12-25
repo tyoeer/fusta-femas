@@ -1,5 +1,5 @@
 use leptos::*;
-use leptos_router::{use_params, Params, IntoParam, ParamsError};
+use leptos_router::{use_params, Outlet, Params, IntoParam, ParamsError};
 
 #[derive(leptos::Params, Clone, PartialEq, Eq)]
 struct IdParam {
@@ -102,6 +102,52 @@ pub fn AwaitOk<
 		</Await>
 	}
 }
+
+
+/**
+Renders an outlet in a `<main>` with a [`RwSignal`](leptos::RwSignal)`<Object>` in the context.
+Renders it's children before the `<main>`, which is useful for e.g. a Navbar
+*/
+#[component]
+pub fn ObjectContext<
+	Object:
+		//Await requires the future output to be Serializable because it can run on the server
+		serde::Serialize + serde::de::DeserializeOwned +
+		// Required by AwaitOk for some reason
+		Clone +
+		//Not quite sure why necessary, but otherwise gives a "may not live long enough" error
+		'static,
+	Future:
+		std::future::Future<Output = Result<Object, ServerFnError>> +
+		//Wanted by await
+		'static,
+	AsyncFunction:
+		Fn(i32) -> Future +
+		//Wanted by await
+		'static,
+>(
+	getter: AsyncFunction,
+	children: ChildrenFn,
+) -> impl IntoView {
+	let getter = store_value(getter);
+	
+	react_id(move |id| view! {
+		// <Navbar />
+		{children()}
+		<main>
+			<AwaitOk future=move || getter.with_value(|getter| getter(id)) let:entry>
+				{
+					provide_context(create_rw_signal(entry));
+					
+					view! {
+						<Outlet/>
+					}
+				}
+			</AwaitOk>
+		</main>
+	})
+}
+
 
 /**
 Form submit button that disables itself while the server action is running.
