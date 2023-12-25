@@ -127,6 +127,8 @@ pub fn ObjectContext<
 		serde::Serialize + serde::de::DeserializeOwned +
 		// Required by AwaitOk for some reason
 		Clone +
+		//To get the name for the title
+		entities::prelude::Object +
 		//Not quite sure why necessary, but otherwise gives a "may not live long enough" error
 		'static,
 	Future:
@@ -144,7 +146,7 @@ pub fn ObjectContext<
 	let getter = store_value(getter);
 	
 	react_id(move |id| view! {
-		// <Navbar />
+		<leptos_meta::Title text=format!("{} {}", Object::get_object_name(), id) />
 		{children()}
 		<main>
 			<AwaitOk future=move || getter.with_value(|getter| getter(id)) let:entry>

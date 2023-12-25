@@ -1,4 +1,5 @@
 use leptos::*;
+use leptos_meta::Title;
 use crate::utils;
 
 #[server]
@@ -11,6 +12,7 @@ pub async fn get_strategies() -> Result<Vec<String>, ServerFnError> {
 #[component]
 pub fn Strategies() -> impl IntoView {
 	view! {
+		<Title text="Strategies" />
 		<utils::AwaitOk future=get_strategies let:strats>
 			<ul>
 				{

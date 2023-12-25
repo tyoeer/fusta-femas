@@ -13,7 +13,13 @@ pub fn App() -> impl IntoView {
 	view! {
 		// id=leptos means cargo-leptos will hot-reload this stylesheet
 		<Stylesheet id="leptos" href="/pkg/fusta-femas.css"/>
-		<Title text="Fusta Femas"/>
+		<Title text="" formatter=|text: String| {
+			if text.is_empty() {
+				"Fusta Femas".to_owned()
+			} else {
+				format!("{text} - Fusta Femas")
+			}
+		}/>
 		
 		<Router set_is_routing fallback=|| {
 			let mut outside_errors = Errors::default();
@@ -83,6 +89,7 @@ fn HomePage() -> impl IntoView {
 	let on_click = move |_| set_count.update(|count| *count += 1);
 
 	view! {
+		<Title text="Home" />
 		<h1>"Welcome to Leptos!"</h1>
 		<button on:click=on_click>"Click Me: " {count}</button>
 	}

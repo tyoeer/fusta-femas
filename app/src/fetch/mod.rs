@@ -1,5 +1,6 @@
 use leptos::*;
 use leptos_router::{Route, Redirect, A, Outlet};
+use leptos_meta::Title;
 use entities::prelude::*;
 use crate::{table, entry::search::EntryOverview};
 use crate::utils;
@@ -18,6 +19,7 @@ pub fn Routes() -> impl IntoView {
 	view! {
 		<Route path="/fetch" view=Outlet>
 			<Route path="" view= || view! {
+				<Title text="Fetch" />
 				<main>
 					<Outlet/>
 				</main>

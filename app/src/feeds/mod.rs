@@ -1,5 +1,6 @@
 use leptos::*;
 use leptos_router::{Route, Redirect, ActionForm, A, Outlet};
+use leptos_meta::Title;
 use entities::prelude::*;
 use crate::table::*;
 use crate::utils;
@@ -17,6 +18,7 @@ pub fn FeedRoutes() -> impl IntoView {
 	view! {
 		<Route path="/feed" view=Outlet>
 			<Route path="" view= || view! {
+				<Title text="Feeds" />
 				<main>
 					<Outlet/>
 				</main>
