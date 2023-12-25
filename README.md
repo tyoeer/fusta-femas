@@ -24,15 +24,22 @@ A very very WIP Full Stack Feed Management System prototype.
 
 ## Getting started
 
-### Prereqs
+### Tools
 
-- `cargo install`
-	- `sea-orm-cli`
-	- `cargo-leptos`
+#### Basically required
+
+- `cargo-leptos`
+- `sea-orm-cli`
+
+#### Other
+
+[There's a `.justfile` to run shortcuts with `just`](https://just.systems).
+
+Run `just binstall` to install the requirements with [`cargo binstall`](https://github.com/cargo-bins/cargo-binstall)
 
 ### Database management
 
-- Set up a development database with `sea migrate -d sea-migration fresh`
+- Set up a development database with `just reset-db`
 - Update entities:
 	- Update model in [`entities`](/entities/)
 	- Add migration in [`sea-migration`](/sea-migration/)
