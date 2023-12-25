@@ -124,19 +124,10 @@ pub fn Embed() -> impl IntoView {
 	
 	let url = move || maybe_embed_url.get().unwrap_or_else(|| view_url.get());
 	
-	let view = move || {
-		let mut url = url();
-		if !url.contains("://") {
-			url = format!("https://{url}");
-		}
-		
-		view! {
-			<MarkViewedButton entry />
-			<iframe class="grow" src=url />
-		}
-	};
-	
-	Some(view)
+	view! {
+		<MarkViewedButton entry />
+		<iframe class="grow" src=utils::format_link(url()) />
+	}.into()	
 }
 
 #[server]

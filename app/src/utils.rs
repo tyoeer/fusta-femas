@@ -1,6 +1,18 @@
 use leptos::*;
 use leptos_router::{use_params, Outlet, Params, IntoParam, ParamsError};
 
+
+///Formats a url so it properly links, e.g. adds https:// in front of it.
+pub fn format_link(url: impl Into<String>) -> String {
+	let mut url = url.into();
+	if !url.contains("://") {
+		url = format!("https://{url}");
+	}
+	
+	url
+}
+
+
 #[derive(leptos::Params, Clone, PartialEq, Eq)]
 struct IdParam {
 	// Has to be an Option due to Leptos limitations
