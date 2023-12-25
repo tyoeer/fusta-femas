@@ -187,15 +187,18 @@ macro_rules! extension {
 
 /**
 Grabs a model from the entities crate from the Leptos context, and puts it into scope.
+Does `return None` if the model isn't in the context.
 
 # Example
 
 ```no_run
 # use app::model;
-# use leptos::use_context;
-# use entities::entry;
-model!(entry);
-dbg!(entry);
+use entities::prelude::entry;
+# fn test() -> Option<()> {
+let entry = model!(entry);
+# dbg!(entry);
+# return None;
+# }
 ```
 
 */
