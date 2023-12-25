@@ -119,23 +119,23 @@ pub fn About() -> impl IntoView {
 #[component]
 pub fn Embed() -> impl IntoView {
 	let entry = crate::model!(entry);
-	let (maybe_url, _) = slice!(entry.embed_url);
+	let (maybe_embed_url, _) = slice!(entry.embed_url);
+	let (view_url, _) = slice!(entry.view_url);
 	
-	Some( move || match maybe_url.get() {
-		Some(mut url) => {
-			if !url.contains("://") {
-				url = format!("https://{url}");
-			}
-			view! {
-				<iframe class="grow" src=url />
-			}.into_view()
-		},
-		None => {
-			view! {
-				"Entry has no embed url specified 🤷"
-			}.into_view()
-		},
-	} )
+	let url = move || maybe_embed_url.get().unwrap_or_else(|| view_url.get());
+	
+	let view = move || {
+		let mut url = url();
+		if !url.contains("://") {
+			url = format!("https://{url}");
+		}
+		
+		view! {
+			<iframe class="grow" src=url />
+		}
+	};
+	
+	Some(view)
 }
 
 #[server]
