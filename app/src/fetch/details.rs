@@ -1,5 +1,5 @@
 use leptos::*;
-use leptos_router::{Route, A, Outlet};
+use leptos_router::{Route, A};
 use entities::prelude::*;
 use crate::{table, entry::search::EntryOverview};
 use crate::utils;
@@ -10,7 +10,7 @@ use sea_orm::*;
 #[component(transparent)]
 pub fn Routes() -> impl IntoView {
 	view! {
-		<Route path="/:id" view=SidebarView>
+		<Route path="/:id" view=FetchContext>
 			<utils::RouteAlias to="about" />
 			<Route path="about" view = utils::react_id(|id| view! {
 					<FieldList id />
@@ -32,9 +32,17 @@ pub fn Routes() -> impl IntoView {
 }
 
 
+#[component]
+pub fn FetchContext() -> impl IntoView {
+	view! {
+		<utils::ObjectContext getter=get_fetch>
+			<Sidebar />
+		</utils::ObjectContext>
+	}
+}
 
 #[component]
-pub fn SidebarView() -> impl IntoView {
+pub fn Sidebar() -> impl IntoView {
 	view! {
 		<nav class="sidebar">
 			<ul>
@@ -55,9 +63,6 @@ pub fn SidebarView() -> impl IntoView {
 				</li>
 			</ul>
 		</nav>
-		<main>
-			<Outlet/>
-		</main>
 	}
 }
 
