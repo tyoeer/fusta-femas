@@ -1,13 +1,33 @@
 use std::sync::Arc;
 use super::strategy::*;
 use entities::prelude::*;
+use sea_orm::EntityTrait;
 
 #[derive(thiserror::Error,Debug)]
-pub enum StrategyError {
+pub enum RunError {
 	#[error("Database error")]
 	Db(#[from] sea_orm::DbErr),
 	#[error(transparent)]
-	NotFound(#[from] NotFoundError),
+	StrategyNotFound(#[from] NotFoundError),
+}
+
+#[derive(thiserror::Error,Debug)]
+pub enum RunIdError {
+	#[error("Database error")]
+	Db(#[from] sea_orm::DbErr),
+	#[error("Could not find feed with id \"{0}\"")]
+	NoSuchFeed(i32),
+	#[error(transparent)]
+	StrategyNotFound(#[from] NotFoundError),
+}
+
+impl From<RunError> for RunIdError {
+	fn from(run_error: RunError) -> Self {
+		match run_error {
+			RunError::Db(db) => RunIdError::Db(db),
+			RunError::StrategyNotFound(nfe) => RunIdError::StrategyNotFound(nfe),
+		}
+	}
 }
 
 #[derive(thiserror::Error,Debug)]
@@ -35,9 +55,22 @@ impl StrategyList {
 			.ok_or_else(|| NotFoundError(name.to_owned()))
 	}
 	
-	pub async fn run(&self, conn: &sea_orm::DatabaseConnection, feed: feed::Model) -> Result<fetch::Model, StrategyError> {
+	pub async fn run(&self, conn: &sea_orm::DatabaseConnection, feed: feed::Model) -> Result<fetch::Model, RunError> {
 		let strat = self.get_by_name(&feed.strategy)?;
 		let fetch = run_strategy(conn, &feed, strat.as_ref()).await?;
+		Ok(fetch)
+	}
+	
+	pub async fn run_id(&self, feed_id: i32, db: &sea_orm::DatabaseConnection) -> Result<fetch::Model ,RunIdError> {
+		let maybe_feed: Option<feed::Model> = feed::Entity::find_by_id(feed_id)
+			.one(db)
+			.await?;
+		let Some(feed) = maybe_feed else {
+			return Err(RunIdError::NoSuchFeed(feed_id))
+		};
+		
+		let fetch = self.run(db, feed).await?;
+		
 		Ok(fetch)
 	}
 	
