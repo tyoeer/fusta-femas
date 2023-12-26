@@ -28,11 +28,20 @@ pub async fn feed(
 	strat: &dyn acquire::strategy::Strategy,
 	db: &DatabaseConnection
 ) -> Result<feed::Model, DbErr> {
+	feed_strat_name(url, strat.name(), db).await
+}
+
+pub async fn feed_strat_name(
+	url: impl Into<String>,
+	strat_name: impl AsRef<str>,
+	db: &DatabaseConnection
+) -> Result<feed::Model, DbErr> {
 	let url = url.into();
+	let strat_name = strat_name.as_ref();
 	let mut feed = feed::ActiveModel::new();
-	feed.name = Set(format!("AutoTestFeed {} {}", strat.name(), url));
+	feed.name = Set(format!("AutoTestFeed {} {}", strat_name, url));
 	feed.url = Set(url);
-	feed.strategy = Set(strat.name().to_owned());
+	feed.strategy = Set(strat_name.to_owned());
 	
 	let feed = feed.insert(db).await?;
 	
