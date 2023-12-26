@@ -6,9 +6,14 @@ use entities::prelude::*;
 pub enum StrategyError {
 	#[error("Database error")]
 	Db(#[from] sea_orm::DbErr),
-	#[error("Did not find strategy \"{0}\"")]
-	NotFound(String),
+	#[error(transparent)]
+	NotFound(#[from] NotFoundError),
 }
+
+#[derive(thiserror::Error,Debug)]
+#[error("Could not find strategy \"{0}\"")]
+pub struct NotFoundError(String);
+
 
 #[derive(Default,Clone)]
 pub struct StrategyList {
@@ -24,14 +29,16 @@ impl StrategyList {
 		self.list.push(Arc::new(strat));
 	}
 	
-	pub async fn run(&self, conn: sea_orm::DatabaseConnection, feed: feed::Model) -> Result<fetch::Model, StrategyError> {
-		let strat = self.list.iter().find(|s| s.name()==feed.strategy);
-		match strat {
-			None => Err(StrategyError::NotFound(feed.strategy)),
-			Some(strat) => {
-				Ok(run_strategy(&conn, &feed, strat.as_ref()).await?)
-			}
-		}
+	pub fn get_by_name(&self, name: &str) -> Result<&Arc<dyn Strategy + Send + Sync>, NotFoundError> {
+		self.list.iter()
+			.find(|s| s.name()==name)
+			.ok_or_else(|| NotFoundError(name.to_owned()))
+	}
+	
+	pub async fn run(&self, conn: &sea_orm::DatabaseConnection, feed: feed::Model) -> Result<fetch::Model, StrategyError> {
+		let strat = self.get_by_name(&feed.strategy)?;
+		let fetch = run_strategy(conn, &feed, strat.as_ref()).await?;
+		Ok(fetch)
 	}
 	
 	pub fn iter_strats(&self) -> impl Iterator<Item = &(dyn Strategy + Send + Sync)> {
