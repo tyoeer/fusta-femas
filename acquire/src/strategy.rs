@@ -147,43 +147,45 @@ async fn do_fetch(conn: &DatabaseConnection, feed: &feed::Model, strat: &dyn Str
 	fetch.strategy = Set(strat.name().to_owned());
 	
 	let fetched = strat.fetch(conn, feed).await;
-	match fetched {
+	
+	let data = match fetched {
 		Err(err) => {
 			fetch.status = Set(fetch::Status::FetchError);
 			fetch.error = Set(Some(error_to_string(err)));
+			
+			return Ok(fetch);
 		},
-		Ok(data) => {
-			fetch.content = Set(Some(data));
+		Ok(data) => data,
+	};
+	
+	fetch.content = Set(Some(data.clone()));
+	
+	let parsed = strat.parse(&data).await;
+	
+	let parsed = match parsed {
+		Err(err) => {
+			fetch.status = Set(fetch::Status::ParseError);
+			fetch.error = Set(Some(error_to_string(err)));
+			
+			return Ok(fetch);
 		},
-	}
-	if let Set(Some(data)) = &fetch.content {
-		let parsed = strat.parse(data).await;
-		match parsed {
-			Err(err) => {
-				fetch.status = Set(fetch::Status::ParseError);
-				fetch.error = Set(Some(error_to_string(err)));
-			},
-			Ok(parsed) => {
-				fetch.status = Set(fetch::Status::EntryUpdateError);
-				let fetch_inserted = fetch.insert(conn).await?;
-				
-				let res = update_entries(conn, feed, fetch_inserted.id, parsed).await;
-				fetch = fetch_inserted.into_active_model();
-				match res {
-					Ok(_) => {
-						fetch.status = Set(fetch::Status::Success);
-					},
-					Err(err) => {
-						fetch.error = Set(Some(error_to_string(err)));
-					}
-				}
-				// //return to not do the additional insert
-				// let fetch_inserted = fetch.update(&conn).await?;
-				// return Ok(fetch_inserted);
-			},
+		Ok(parsed) => parsed,
+	};
+	
+	fetch.status = Set(fetch::Status::EntryUpdateError);
+	let fetch_inserted = fetch.insert(conn).await?;
+	
+	let res = update_entries(conn, feed, fetch_inserted.id, parsed).await;
+	fetch = fetch_inserted.into_active_model();
+	match res {
+		Ok(_) => {
+			fetch.status = Set(fetch::Status::Success);
+		},
+		Err(err) => {
+			fetch.error = Set(Some(error_to_string(err)));
 		}
 	}
-
+	
 	Ok(fetch)
 }
 
