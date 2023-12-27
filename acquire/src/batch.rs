@@ -4,35 +4,41 @@ use sea_orm::DatabaseConnection as Db;
 use crate::{StrategyList, strategy_list::RunIdError};
 
 
+type FetchResult = Result<fetch::Model, RunIdError>;
+
 struct Batch {
 	total: usize,
-	done: usize,
+	finished: Vec<FetchResult>,
 }
 
 impl Batch {
 	pub fn new(total: usize) -> Self {
 		Self {
 			total,
-			done: 0,
+			finished: Vec::new(),
 		}
 	}
 	
-	pub fn add_done(&mut self) {
-		self.done += 1;
+	pub fn add_done(&mut self, fetch_result: FetchResult) {
+		self.finished.push(fetch_result);
 	}
 	
 	pub fn is_done(&self) -> bool {
-		self.total == self.done
+		self.total == self.finished.len()
 	}
 }
 
 enum BatchMessage {
-	Done(Result<fetch::Model,RunIdError>)
+	Done(FetchResult)
 }
 
 //TODO: this fetches every feed again, while making the list of ids requires fetching all of them in the first place
+/**
+Fetches all the feeds with the given ids in parallel (every feed gets spawned a new task).
 
-pub async fn fetch_batch(feeds: Vec<i32>, strats: StrategyList, db: Db) {
+The returned results are probably in a different order then the feed ids. Check fetch.feed_id to get the corresponding feed.
+*/
+pub async fn fetch_batch(feeds: Vec<i32>, strats: StrategyList, db: Db) -> Vec<FetchResult> {
 	let mut batch = Batch::new(feeds.len());
 	let (send, mut receive) = mpsc::channel(16);
 	
@@ -47,10 +53,8 @@ pub async fn fetch_batch(feeds: Vec<i32>, strats: StrategyList, db: Db) {
 		};
 		
 		match mes {
-			BatchMessage::Done(_) => {
-				//TODO check result for error
-				//TODO do something with failed fetch?
-				batch.add_done();
+			BatchMessage::Done(result) => {
+				batch.add_done(result);
 			}
 		}
 		
@@ -62,6 +66,8 @@ pub async fn fetch_batch(feeds: Vec<i32>, strats: StrategyList, db: Db) {
 	}
 	
 	//TODO maybe broadcast final update?
+	
+	batch.finished
 }
 
 ///Spawns a new task that fetches the feed, while sending update(s) along the channel
