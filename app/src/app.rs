@@ -92,5 +92,6 @@ fn HomePage() -> impl IntoView {
 		<Title text="Home" />
 		<h1>"Welcome to Leptos!"</h1>
 		<button on:click=on_click>"Click Me: " {count}</button>
+		<crate::fetch::batch::FetchAllButton />
 	}
 }

@@ -9,6 +9,7 @@ leptos_axum = { workspace=true, optional = true } # Used in the error template
 acquire = {path = "../acquire", optional = true}
 sea-orm = {workspace = true, optional = true}
 axum = {workspace = true, optional = true}
+tokio = {workspace = true, optional = true}
 
 # shared
 entities = {path = "../entities"}
@@ -38,6 +39,7 @@ ssr = [
 	"dep:acquire",
 	"entities/server",
 	"dep:sea-orm",
+	"dep:tokio",
 ]
 
 [package.metadata.cargo-all-features]

@@ -5,6 +5,7 @@ use leptos_meta::Title;
 
 pub mod details;
 pub mod search;
+pub mod batch;
 
 
 #[component(transparent)]

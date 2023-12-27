@@ -170,6 +170,7 @@ dependencies = [
  "sea-orm",
  "serde",
  "thiserror",
+ "tokio",
  "tracing",
 ]
 
