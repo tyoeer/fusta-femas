@@ -6,7 +6,7 @@ use acquire::{
 	strategy::Strategy,
 	mock::MockStrat, 
 	RunError,
-	batch::fetch_batch
+	batch::fetch_batch, batch_tracker::BatchTracker
 };
 use entities::prelude::*;
 use sea_orm::{ModelTrait, PaginatorTrait};
@@ -98,6 +98,27 @@ async fn updates() -> Result<(), anyhow::Error> {
 	let update = recv.recv().await?;
 	assert_eq!(2, update.total);
 	assert_eq!(2, update.done);
+	
+	Ok(())
+}
+
+///Sent updates look good
+#[tokio::test]
+async fn tracked() -> Result<(), anyhow::Error> {
+	let db = init().await?;
+	let strat = MockStrat::default();
+	let strat_name = strat.name();
+	let strats = list(strat);
+	
+	let feed1 = feed_strat_name("ok", strat_name, &db).await?;
+	let feed2 = feed_strat_name("ok", strat_name, &db).await?;
+	
+	let mut tracker = BatchTracker::default();
+	
+	tracker.queue_fetches(vec![feed1.id, feed2.id], db.clone(), strats).await?;
+	
+	assert_eq!(1, feed1.find_related(fetch::Entity).count(&db).await? );
+	assert_eq!(1, feed2.find_related(fetch::Entity).count(&db).await? );
 	
 	Ok(())
 }
