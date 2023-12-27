@@ -10,12 +10,13 @@ use sea_orm::*;
 pub async fn fetch_all() -> Result<(), ServerFnError> {
 	let db = crate::extension!(DatabaseConnection);
 	let strats = crate::extension!(acquire::StrategyList);
+	let tracker = crate::extension!(acquire::batch_tracker::BatchTracker);
 	
 	let feeds = feed::Entity::find().all(&db).await?;
 	
 	let feeds = feeds.into_iter().map(|feed| feed.id).collect();
 	
-	tokio::spawn(acquire::batch::fetch_batch(feeds, strats, db));
+	tracker.queue_fetches(feeds, db, strats).await;
 	
 	Ok(())
 }
