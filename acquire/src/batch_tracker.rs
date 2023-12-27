@@ -1,11 +1,30 @@
 use tokio::{sync::{broadcast, RwLock}, task::JoinHandle};
 use sea_orm::DatabaseConnection as Db;
 use std::{sync::Arc, ops::DerefMut};
-use crate::{StrategyList, batch::{FetchResult, BatchStatusUpdate, fetch_batch}};
+use crate::{StrategyList, batch::{FetchResult, BatchStatusUpdate, fetch_batch, Listener}};
 
-type Listener = broadcast::Receiver<BatchStatusUpdate>;
+type ListenerAlias = broadcast::Receiver<BatchStatusUpdate>;
 
-async fn update_status_loop(status: Arc<RwLock<BatchStatus>>, mut listener: Listener) {
+pub struct BroadcastListener {
+	sender: broadcast::Sender<BatchStatusUpdate>,
+}
+
+impl BroadcastListener {
+	pub fn from_sender(sender: broadcast::Sender<BatchStatusUpdate>) -> Self {
+		Self {
+			sender,
+		}
+	}
+}
+
+impl Listener for BroadcastListener {
+	fn fetch_finished(&mut self, update: BatchStatusUpdate) {
+		//don't care of nobody is listening
+		let _ = self.sender.send(update);
+	}
+}
+
+async fn update_status_loop(status: Arc<RwLock<BatchStatus>>, mut listener: ListenerAlias) {
 	loop {
 		let Ok(update) = listener.recv().await else {
 			//Nobody is sending updates, we can stop
@@ -20,13 +39,13 @@ async fn update_status_loop(status: Arc<RwLock<BatchStatus>>, mut listener: List
 #[derive(Debug)]
 pub struct TrackedBatch {
 	pub status: Arc<RwLock<BatchStatus>>,
-	pub listener: Listener,
+	pub listener: ListenerAlias,
 	///Tokio task that keeps updating status with the newest message from listener
 	pub updater: JoinHandle<()>,
 }
 
 impl TrackedBatch {
-	pub fn from_listener(recv: Listener) -> Self {
+	pub fn from_listener(recv: ListenerAlias) -> Self {
 		let status = Arc::new(RwLock::new(BatchStatus::Starting));
 		let updater = tokio::spawn(update_status_loop(status.clone(), recv.resubscribe()));
 		
@@ -55,7 +74,8 @@ impl BatchTracker {
 		let (send, recv) = broadcast::channel(16);
 		
 		self.batches.push(TrackedBatch::from_listener(recv));
+		let listener = BroadcastListener::from_sender(send);
 		
-		tokio::spawn(fetch_batch(feeds, send, strats, db))	
+		tokio::spawn(fetch_batch(feeds, listener, strats, db))	
 	}
 }

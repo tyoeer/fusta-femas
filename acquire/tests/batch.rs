@@ -6,12 +6,18 @@ use acquire::{
 	strategy::Strategy,
 	mock::MockStrat, 
 	RunError,
-	batch::fetch_batch, batch_tracker::BatchTracker
+	batch::{fetch_batch, BatchStatusUpdate}, batch_tracker::{BatchTracker, BroadcastListener}
 };
 use entities::prelude::*;
 use sea_orm::{ModelTrait, PaginatorTrait};
 use tokio::sync::broadcast;
 
+
+fn listener() -> (broadcast::Receiver<BatchStatusUpdate>, BroadcastListener) {
+	let (send, recv) = broadcast::channel(256);
+	
+	(recv, BroadcastListener::from_sender(send))
+}
 
 
 ///A simple test that can copy/pasted to be the basis of other tests
@@ -25,9 +31,9 @@ async fn basic() -> Result<(), RunError> {
 	let feed1 = feed_strat_name("ok", strat_name, &db).await?;
 	let feed2 = feed_strat_name("ok", strat_name, &db).await?;
 	
-	let (send, recv) = broadcast::channel(256);
+	let (recv, listener) = listener();
 	
-	fetch_batch(vec![feed1.id, feed2.id], send, strats, db.clone()).await;
+	fetch_batch(vec![feed1.id, feed2.id], listener, strats, db.clone()).await;
 	
 	assert_eq!(1, feed1.find_related(fetch::Entity).count(&db).await? );
 	assert_eq!(1, feed2.find_related(fetch::Entity).count(&db).await? );
@@ -49,10 +55,10 @@ async fn results() -> Result<(), RunError> {
 	
 	let ids = vec![feed1.id, feed2.id];
 	
-	let (send, recv) = broadcast::channel(1);
-	std::mem::drop(recv); // not caring
+	let (recv, listener) = listener();
+	std::mem::drop(recv); // don't care
 	
-	let results = fetch_batch(ids.clone(), send, strats, db.clone()).await;
+	let results = fetch_batch(ids.clone(), listener, strats, db.clone()).await;
 	
 	assert_eq!(ids.len(), results.len());
 	
@@ -85,9 +91,9 @@ async fn updates() -> Result<(), anyhow::Error> {
 	let feed1 = feed_strat_name("ok", strat_name, &db).await?;
 	let feed2 = feed_strat_name("ok", strat_name, &db).await?;
 	
-	let (send, mut recv) = broadcast::channel(256);
+	let (mut recv, listener) = listener();
 	
-	fetch_batch(vec![feed1.id, feed2.id], send, strats, db.clone()).await;
+	fetch_batch(vec![feed1.id, feed2.id], listener, strats, db.clone()).await;
 	
 	assert_eq!(1, feed1.find_related(fetch::Entity).count(&db).await? );
 	assert_eq!(1, feed2.find_related(fetch::Entity).count(&db).await? );

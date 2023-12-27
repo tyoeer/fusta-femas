@@ -1,7 +1,13 @@
-use tokio::sync::{mpsc, broadcast};
+use tokio::sync::mpsc;
 use entities::prelude::fetch;
 use sea_orm::DatabaseConnection as Db;
 use crate::{StrategyList, strategy_list::RunIdError};
+
+
+pub trait Listener {
+	///Called when a single fetch has been finished
+	fn fetch_finished(&mut self, status: BatchStatusUpdate);
+}
 
 
 pub type FetchResult = Result<fetch::Model, RunIdError>;
@@ -54,7 +60,7 @@ The returned results are probably in a different order then the feed ids. Check 
 */
 pub async fn fetch_batch(
 	feeds: Vec<i32>,
-	updates: broadcast::Sender<BatchStatusUpdate>,
+	mut listener: impl Listener,
 	strats: StrategyList,
 	db: Db
 ) -> Vec<FetchResult> {
@@ -78,7 +84,7 @@ pub async fn fetch_batch(
 		}
 		
 		//Don't care if nobody's listening
-		let _ = updates.send(batch.status());
+		listener.fetch_finished(batch.status());
 		
 		if batch.is_done() {
 			break;
