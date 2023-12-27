@@ -1,16 +1,10 @@
 mod common;
-use common::{init, feed_strat_name};
+use common::{init, list, feed_strat_name};
 use acquire::{
 	strategy::Strategy,
-	mock::MockStrat, StrategyList, RunError, strategy_list::RunIdError
+	mock::MockStrat, RunError, strategy_list::RunIdError
 };
 use entities::prelude::*;
-
-fn list(strat: impl Strategy + Send + Sync + 'static) -> StrategyList {
-	let mut list = StrategyList::new();
-	list.add(strat);
-	list
-}
 
 ///A simple test that can copy/pasted to be the basis of other tests
 #[tokio::test]

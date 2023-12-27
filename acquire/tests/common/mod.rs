@@ -1,4 +1,4 @@
-use acquire::strategy::{Strategy, self};
+use acquire::{strategy::{Strategy, self}, StrategyList};
 use sea_migration::{MigratorTrait, Migrator};
 use sea_orm::{DatabaseConnection, error::DbErr, Set, ActiveModelTrait, ActiveModelBehavior};
 use entities::{prelude::feed, entities::fetch};
@@ -59,4 +59,10 @@ pub async fn run_strategy(db: &DatabaseConnection, feed: &feed::Model, strategy:
 	tracing::debug!("Fetch log:\n{}", fetch.log);
 	
 	Ok(fetch)
+}
+
+pub fn list(strat: impl Strategy + Send + Sync + 'static) -> StrategyList {
+	let mut list = StrategyList::new();
+	list.add(strat);
+	list
 }
