@@ -1,10 +1,10 @@
-use tokio::sync::mpsc;
+use tokio::sync::{mpsc, broadcast};
 use entities::prelude::fetch;
 use sea_orm::DatabaseConnection as Db;
 use crate::{StrategyList, strategy_list::RunIdError};
 
 
-type FetchResult = Result<fetch::Model, RunIdError>;
+pub type FetchResult = Result<fetch::Model, RunIdError>;
 
 struct Batch {
 	total: usize,
@@ -26,6 +26,20 @@ impl Batch {
 	pub fn is_done(&self) -> bool {
 		self.total == self.finished.len()
 	}
+	
+	pub fn status(&self) -> BatchStatusUpdate {
+		BatchStatusUpdate {
+			total: self.total,
+			done: self.finished.len(),
+		}
+	}
+}
+
+#[non_exhaustive]
+#[derive(Debug, Clone,Copy,PartialEq,Eq)]
+pub struct BatchStatusUpdate {
+	pub total: usize,
+	pub done: usize,
 }
 
 enum BatchMessage {
@@ -38,7 +52,12 @@ Fetches all the feeds with the given ids in parallel (every feed gets spawned a 
 
 The returned results are probably in a different order then the feed ids. Check fetch.feed_id to get the corresponding feed.
 */
-pub async fn fetch_batch(feeds: Vec<i32>, strats: StrategyList, db: Db) -> Vec<FetchResult> {
+pub async fn fetch_batch(
+	feeds: Vec<i32>,
+	updates: broadcast::Sender<BatchStatusUpdate>,
+	strats: StrategyList,
+	db: Db
+) -> Vec<FetchResult> {
 	let mut batch = Batch::new(feeds.len());
 	let (send, mut receive) = mpsc::channel(16);
 	
@@ -58,14 +77,13 @@ pub async fn fetch_batch(feeds: Vec<i32>, strats: StrategyList, db: Db) -> Vec<F
 			}
 		}
 		
-		//TODO broadcast update
+		//Don't care if nobody's listening
+		let _ = updates.send(batch.status());
 		
 		if batch.is_done() {
 			break;
 		}
 	}
-	
-	//TODO maybe broadcast final update?
 	
 	batch.finished
 }
