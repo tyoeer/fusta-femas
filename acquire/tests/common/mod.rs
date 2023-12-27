@@ -1,3 +1,6 @@
+//Not all tests use all the stuff in here, so they generate false warnings
+#![allow(dead_code)]
+
 use acquire::{strategy::{Strategy, self}, StrategyList};
 use sea_migration::{MigratorTrait, Migrator};
 use sea_orm::{DatabaseConnection, error::DbErr, Set, ActiveModelTrait, ActiveModelBehavior};
