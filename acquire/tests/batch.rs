@@ -119,9 +119,9 @@ async fn tracked() -> Result<(), anyhow::Error> {
 	let feed1 = feed_strat_name("ok", strat_name, &db).await?;
 	let feed2 = feed_strat_name("ok", strat_name, &db).await?;
 	
-	let mut tracker = BatchTracker::default();
+	let tracker = BatchTracker::default();
 	
-	tracker.queue_fetches(vec![feed1.id, feed2.id], db.clone(), strats).await?;
+	tracker.queue_fetches(vec![feed1.id, feed2.id], db.clone(), strats).await.await?;
 	
 	assert_eq!(1, feed1.find_related(fetch::Entity).count(&db).await? );
 	assert_eq!(1, feed2.find_related(fetch::Entity).count(&db).await? );

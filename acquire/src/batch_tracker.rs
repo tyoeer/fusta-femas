@@ -64,17 +64,23 @@ pub enum BatchStatus {
 	Finished(Vec<FetchResult>)
 }
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Clone)]
 pub struct BatchTracker {
-	batches: Vec<TrackedBatch>,
+	batches: Arc<RwLock<Vec<TrackedBatch>>>,
 }
 
 impl BatchTracker {
-	pub fn queue_fetches(&mut self, feeds: Vec<i32>, db: Db, strats: StrategyList) -> JoinHandle<Vec<FetchResult>> {
+	pub async fn queue_fetches(&self, feeds: Vec<i32>, db: Db, strats: StrategyList) -> JoinHandle<Vec<FetchResult>> {
 		let (send, recv) = broadcast::channel(16);
 		
-		self.batches.push(TrackedBatch::from_listener(recv));
 		let listener = BroadcastListener::from_sender(send);
+		let tracker = TrackedBatch::from_listener(recv);
+		
+		//Scope to reduce lock time
+		{
+			let mut batches_lock = self.batches.write().await;
+			batches_lock.push(tracker);
+		}
 		
 		tokio::spawn(fetch_batch(feeds, listener, strats, db))	
 	}
