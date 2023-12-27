@@ -61,7 +61,7 @@ pub async fn fetch_one_feed(id: i32) -> Result<fetch::Model, ServerFnError> {
 		return Err(ServerFnError::ServerError(format!("No feed with id {id}")));
 	};
 	
-	let fetch = strats.run(conn, feed).await;
+	let fetch = strats.run(&conn, feed).await;
 	let fetch = match fetch {
 		Ok(f) => f,
 		Err(e) => {
