@@ -1,5 +1,5 @@
 mod common;
-use std::{collections::HashSet, time::Duration};
+use std::{collections::HashSet, time::Duration, ops::Deref};
 
 use common::{init, list, feed_strat_name};
 use acquire::{
@@ -129,12 +129,12 @@ async fn tracked() -> Result<(), anyhow::Error> {
 	let status = tracker.get_status(index).await?;
 	let lock = status.read().await;
 	
-	match *lock {
+	match lock.deref() {
 		BatchStatus::InProgress(status) => {
 			assert_eq!(2, status.done);
 			assert_eq!(2, status.total);
 		}
-		_ => panic!("BatchStatus not good"),
+		batch => panic!("BatchStatus not good: {batch:?}"),
 	}
 	
 	assert_eq!(1, feed1.find_related(fetch::Entity).count(&db).await? );
