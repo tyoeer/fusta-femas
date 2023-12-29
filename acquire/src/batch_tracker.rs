@@ -1,3 +1,4 @@
+use thiserror::Error;
 use tokio::{sync::{broadcast, RwLock}, task::JoinHandle};
 use sea_orm::DatabaseConnection as Db;
 use std::{sync::Arc, ops::DerefMut};
@@ -59,6 +60,7 @@ async fn update_status_loop(status: Arc<RwLock<BatchStatus>>, mut listener: List
 	}
 }
 
+
 #[non_exhaustive]
 #[derive(Debug)]
 pub struct TrackedBatch {
@@ -105,21 +107,38 @@ pub enum BatchStatus {
 	Finished(Vec<FetchResult>)
 }
 
+#[derive(Debug,Error)]
+pub enum GetStatusError {
+	#[error("Could not find batch at index {0}")]
+	NotFound(usize)
+}
+
 #[derive(Default, Debug, Clone)]
 pub struct BatchTracker {
 	batches: Arc<RwLock<Vec<TrackedBatch>>>,
 }
 
 impl BatchTracker {
-	pub async fn queue_fetches(&self, feeds: Vec<i32>, db: Db, strats: StrategyList) -> JoinHandle<Vec<FetchResult>> {
+	pub async fn queue_fetches(&self, feeds: Vec<i32>, db: Db, strats: StrategyList) -> usize {
 		let (tracker, listener) = TrackedBatch::create();
 		
 		//Scope to reduce lock time
-		{
+		let index = {
 			let mut batches_lock = self.batches.write().await;
 			batches_lock.push(tracker);
-		}
+			batches_lock.len() - 1
+		};
 		
-		tokio::spawn(fetch_batch(feeds, listener, strats, db))	
+		tokio::spawn(fetch_batch(feeds, listener, strats, db));
+		
+		index
+	}
+	
+	pub async fn get_status(&self, index: usize) -> Result<Arc<RwLock<BatchStatus>>, GetStatusError> {
+		let lock = self.batches.read().await;
+		let Some(batch) = lock.get(index) else {
+			return Err(GetStatusError::NotFound(index));
+		};
+		Ok(batch.status.clone())
 	}
 }

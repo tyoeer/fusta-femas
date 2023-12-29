@@ -1,12 +1,12 @@
 mod common;
-use std::collections::HashSet;
+use std::{collections::HashSet, time::Duration};
 
 use common::{init, list, feed_strat_name};
 use acquire::{
 	strategy::Strategy,
 	mock::MockStrat, 
 	RunError,
-	batch::{fetch_batch, BatchStatusUpdate}, batch_tracker::{BatchTracker, BroadcastListener}
+	batch::{fetch_batch, BatchStatusUpdate}, batch_tracker::{BatchTracker, BroadcastListener, BatchStatus}
 };
 use entities::prelude::*;
 use sea_orm::{ModelTrait, PaginatorTrait};
@@ -121,7 +121,21 @@ async fn tracked() -> Result<(), anyhow::Error> {
 	
 	let tracker = BatchTracker::default();
 	
-	tracker.queue_fetches(vec![feed1.id, feed2.id], db.clone(), strats).await.await?;
+	let index = tracker.queue_fetches(vec![feed1.id, feed2.id], db.clone(), strats).await;
+	//Wait for it to finish
+	//TODO better way of doing this
+	tokio::time::sleep(Duration::from_secs(5)).await;
+	
+	let status = tracker.get_status(index).await?;
+	let lock = status.read().await;
+	
+	match *lock {
+		BatchStatus::InProgress(status) => {
+			assert_eq!(2, status.done);
+			assert_eq!(2, status.total);
+		}
+		_ => panic!("BatchStatus not good"),
+	}
 	
 	assert_eq!(1, feed1.find_related(fetch::Entity).count(&db).await? );
 	assert_eq!(1, feed2.find_related(fetch::Entity).count(&db).await? );
