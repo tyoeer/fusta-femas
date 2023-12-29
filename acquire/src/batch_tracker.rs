@@ -45,16 +45,6 @@ impl Listener for BroadcastListener {
 	}
 }
 
-async fn update_status_loop(status: Arc<RwLock<BatchStatus>>, mut listener: ListenerAlias) {
-	loop {
-		let Ok(update) = listener.recv().await else {
-			//Nobody is sending updates, we can stop
-			break;
-		};
-		let mut lock = status.write().await;
-		let _old = std::mem::replace(lock.deref_mut(), BatchStatus::InProgress(update));
-	}
-}
 
 
 #[non_exhaustive]
@@ -62,35 +52,29 @@ async fn update_status_loop(status: Arc<RwLock<BatchStatus>>, mut listener: List
 pub struct TrackedBatch {
 	pub status: Arc<RwLock<BatchStatus>>,
 	pub listener: ListenerAlias,
-	///Tokio task that keeps updating status with the newest message from listener
-	pub updater: JoinHandle<()>,
+	///handle of the fetching task
+	pub fetch_handle: JoinHandle<Vec<FetchResult>>,
 }
 
 impl TrackedBatch {
-	pub fn create() -> (Self, impl Listener) {
+	pub fn new_fetch(
+		feeds: Vec<i32>,
+		strats: StrategyList,
+		db: Db,
+	) -> Self {
 		let tl = TrackingListener::default();
 		let status = tl.get_status();
 		let (send, recv) = broadcast::channel(16);
 		let bl = BroadcastListener::from_sender(send);
 		
-		let this = Self {
-			status,
-			listener: recv,
-			updater: tokio::spawn(async {}),
-		};
+		let listener = (tl, bl);
 		
-		(this, (tl, bl))
-	}
-	
-	#[deprecated]
-	pub fn from_listener(recv: ListenerAlias) -> Self {
-		let status = Arc::new(RwLock::new(BatchStatus::Starting));
-		let updater = tokio::spawn(update_status_loop(status.clone(), recv.resubscribe()));
+		let fetch_handle = tokio::spawn(fetch_batch(feeds, listener, strats, db));
 		
 		Self {
 			status,
 			listener: recv,
-			updater,
+			fetch_handle,
 		}
 	}
 }
@@ -116,18 +100,14 @@ pub struct BatchTracker {
 
 impl BatchTracker {
 	pub async fn queue_fetches(&self, feeds: Vec<i32>, db: Db, strats: StrategyList) -> usize {
-		let (tracker, listener) = TrackedBatch::create();
+		let tracker = TrackedBatch::new_fetch(feeds, strats, db);
 		
 		//Scope to reduce lock time
-		let index = {
+		{
 			let mut batches_lock = self.batches.write().await;
 			batches_lock.push(tracker);
 			batches_lock.len() - 1
-		};
-		
-		tokio::spawn(fetch_batch(feeds, listener, strats, db));
-		
-		index
+		}
 	}
 	
 	pub async fn get_status(&self, index: usize) -> Result<Arc<RwLock<BatchStatus>>, GetStatusError> {
