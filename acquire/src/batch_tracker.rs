@@ -5,6 +5,30 @@ use crate::{StrategyList, batch::{FetchResult, BatchStatusUpdate, fetch_batch, L
 
 type ListenerAlias = broadcast::Receiver<BatchStatusUpdate>;
 
+
+#[derive(Default)]
+pub struct TrackingListener {
+	status: Arc<RwLock<BatchStatus>>
+}
+
+impl TrackingListener {
+	pub fn get_status(&self) -> Arc<RwLock<BatchStatus>> {
+		self.status.clone()
+	}
+}
+
+impl Listener for TrackingListener {
+	fn fetch_finished(&mut self, update: BatchStatusUpdate) {
+		//TODO make Listener async so this doesn't turn into a race condition
+		let status = self.get_status();
+		tokio::spawn(async move {
+			let mut lock = status.write().await; 
+			let _old = std::mem::replace(lock.deref_mut(), BatchStatus::InProgress(update));
+		});
+	}
+}
+
+
 pub struct BroadcastListener {
 	sender: broadcast::Sender<BatchStatusUpdate>,
 }
@@ -45,6 +69,22 @@ pub struct TrackedBatch {
 }
 
 impl TrackedBatch {
+	pub fn create() -> (Self, impl Listener) {
+		let tl = TrackingListener::default();
+		let status = tl.get_status();
+		let (send, recv) = broadcast::channel(16);
+		let bl = BroadcastListener::from_sender(send);
+		
+		let this = Self {
+			status,
+			listener: recv,
+			updater: tokio::spawn(async {}),
+		};
+		
+		(this, (tl, bl))
+	}
+	
+	#[deprecated]
 	pub fn from_listener(recv: ListenerAlias) -> Self {
 		let status = Arc::new(RwLock::new(BatchStatus::Starting));
 		let updater = tokio::spawn(update_status_loop(status.clone(), recv.resubscribe()));
@@ -57,8 +97,9 @@ impl TrackedBatch {
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub enum BatchStatus {
+	#[default]
 	Starting,
 	InProgress(BatchStatusUpdate),
 	Finished(Vec<FetchResult>)
@@ -71,10 +112,7 @@ pub struct BatchTracker {
 
 impl BatchTracker {
 	pub async fn queue_fetches(&self, feeds: Vec<i32>, db: Db, strats: StrategyList) -> JoinHandle<Vec<FetchResult>> {
-		let (send, recv) = broadcast::channel(16);
-		
-		let listener = BroadcastListener::from_sender(send);
-		let tracker = TrackedBatch::from_listener(recv);
+		let (tracker, listener) = TrackedBatch::create();
 		
 		//Scope to reduce lock time
 		{

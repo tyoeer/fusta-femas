@@ -9,6 +9,12 @@ pub trait Listener {
 	fn fetch_finished(&mut self, status: BatchStatusUpdate);
 }
 
+impl<First: Listener, Second: Listener> Listener for (First, Second) {
+	fn fetch_finished(&mut self, status: BatchStatusUpdate) {
+		self.0.fetch_finished(status);
+		self.1.fetch_finished(status);
+	}
+}
 
 pub type FetchResult = Result<fetch::Model, RunIdError>;
 
