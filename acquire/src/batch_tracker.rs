@@ -4,16 +4,16 @@ use sea_orm::DatabaseConnection as Db;
 use std::{sync::Arc, ops::DerefMut};
 use crate::{StrategyList, batch::{FetchResult, BatchStatusUpdate, fetch_batch, Listener}};
 
-type ListenerAlias = broadcast::Receiver<BatchStatusUpdate>;
-
+type Receiver = broadcast::Receiver<BatchStatusUpdate>;
+type Sync<Item> = Arc<RwLock<Item>>;
 
 #[derive(Default)]
 pub struct TrackingListener {
-	status: Arc<RwLock<BatchStatus>>
+	status: Sync<BatchStatus>
 }
 
 impl TrackingListener {
-	pub fn get_status(&self) -> Arc<RwLock<BatchStatus>> {
+	pub fn get_status(&self) -> Sync<BatchStatus> {
 		self.status.clone()
 	}
 }
@@ -50,8 +50,8 @@ impl Listener for BroadcastListener {
 #[non_exhaustive]
 #[derive(Debug)]
 pub struct TrackedBatch {
-	pub status: Arc<RwLock<BatchStatus>>,
-	pub listener: ListenerAlias,
+	pub status: Sync<BatchStatus>,
+	pub listener: Receiver,
 	///handle of the fetching task
 	pub fetch_handle: JoinHandle<Vec<FetchResult>>,
 }
@@ -95,7 +95,7 @@ pub enum GetStatusError {
 
 #[derive(Default, Debug, Clone)]
 pub struct BatchTracker {
-	batches: Arc<RwLock<Vec<TrackedBatch>>>,
+	batches: Sync<Vec<TrackedBatch>>,
 }
 
 impl BatchTracker {
@@ -110,7 +110,7 @@ impl BatchTracker {
 		}
 	}
 	
-	pub async fn get_status(&self, index: usize) -> Result<Arc<RwLock<BatchStatus>>, GetStatusError> {
+	pub async fn get_status(&self, index: usize) -> Result<Sync<BatchStatus>, GetStatusError> {
 		let lock = self.batches.read().await;
 		let Some(batch) = lock.get(index) else {
 			return Err(GetStatusError::NotFound(index));
