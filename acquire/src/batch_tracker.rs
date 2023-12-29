@@ -20,12 +20,8 @@ impl TrackingListener {
 
 impl Listener for TrackingListener {
 	async fn fetch_finished(&mut self, update: BatchStatusUpdate) {
-		//TODO make Listener async so this doesn't turn into a race condition
-		let status = self.get_status();
-		tokio::spawn(async move {
-			let mut lock = status.write().await; 
-			let _old = std::mem::replace(lock.deref_mut(), BatchStatus::InProgress(update));
-		});
+		let mut lock = self.status.write().await; 
+		let _old = std::mem::replace(lock.deref_mut(), BatchStatus::InProgress(update));
 	}
 }
 
