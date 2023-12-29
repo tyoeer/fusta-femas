@@ -19,7 +19,7 @@ impl TrackingListener {
 }
 
 impl Listener for TrackingListener {
-	fn fetch_finished(&mut self, update: BatchStatusUpdate) {
+	async fn fetch_finished(&mut self, update: BatchStatusUpdate) {
 		//TODO make Listener async so this doesn't turn into a race condition
 		let status = self.get_status();
 		tokio::spawn(async move {
@@ -43,7 +43,7 @@ impl BroadcastListener {
 }
 
 impl Listener for BroadcastListener {
-	fn fetch_finished(&mut self, update: BatchStatusUpdate) {
+	async fn fetch_finished(&mut self, update: BatchStatusUpdate) {
 		//don't care of nobody is listening
 		let _ = self.sender.send(update);
 	}

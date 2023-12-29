@@ -4,15 +4,17 @@ use sea_orm::DatabaseConnection as Db;
 use crate::{StrategyList, strategy_list::RunIdError};
 
 
-pub trait Listener {
+#[trait_variant::make(Listener: Send)]
+pub trait LocalListener {
 	///Called when a single fetch has been finished
-	fn fetch_finished(&mut self, status: BatchStatusUpdate);
+	#[must_use] // warn if the .await is missing
+	async fn fetch_finished(&mut self, status: BatchStatusUpdate);
 }
 
-impl<First: Listener, Second: Listener> Listener for (First, Second) {
-	fn fetch_finished(&mut self, status: BatchStatusUpdate) {
-		self.0.fetch_finished(status);
-		self.1.fetch_finished(status);
+impl<First: Listener + Send, Second: Listener + Send> Listener for (First, Second) {
+	async fn fetch_finished(&mut self, status: BatchStatusUpdate) {
+		self.0.fetch_finished(status).await;
+		self.1.fetch_finished(status).await;
 	}
 }
 
@@ -90,7 +92,7 @@ pub async fn fetch_batch(
 		}
 		
 		//Don't care if nobody's listening
-		listener.fetch_finished(batch.status());
+		listener.fetch_finished(batch.status()).await;
 		
 		if batch.is_done() {
 			break;
