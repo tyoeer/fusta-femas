@@ -1,5 +1,5 @@
 use thiserror::Error;
-use tokio::{sync::{broadcast, RwLock}, task::JoinHandle};
+use tokio::{sync::{broadcast, RwLock}, task::{JoinHandle, JoinError}};
 use sea_orm::DatabaseConnection as Db;
 use std::{sync::Arc, ops::DerefMut};
 use crate::{StrategyList, batch::{FetchResult, BatchStatusUpdate, fetch_batch, Listener}};
@@ -53,7 +53,7 @@ pub struct TrackedBatch {
 	pub status: Sync<BatchStatus>,
 	pub listener: Receiver,
 	///handle of the fetching task
-	pub fetch_handle: JoinHandle<Vec<FetchResult>>,
+	pub fetch_handle: Sync<Option<JoinHandle<Vec<FetchResult>>>>,
 }
 
 impl TrackedBatch {
@@ -74,7 +74,7 @@ impl TrackedBatch {
 		Self {
 			status,
 			listener: recv,
-			fetch_handle,
+			fetch_handle: Arc::new(RwLock::new(Some(fetch_handle))),
 		}
 	}
 }
@@ -91,6 +91,16 @@ pub enum BatchStatus {
 pub enum GetStatusError {
 	#[error("Could not find batch at index {0}")]
 	NotFound(usize)
+}
+
+#[derive(Debug,Error)]
+pub enum AwaitFetchError {
+	#[error("Could not find batch at index {0}")]
+	NotFound(usize),
+	#[error(transparent)]
+	JoinError(#[from] JoinError),
+	#[error("There's no JoinHandle to await, presumably because it is already being awaited somewhere else")]
+	NoJoinHandle,
 }
 
 #[derive(Default, Debug, Clone)]
@@ -116,5 +126,30 @@ impl BatchTracker {
 			return Err(GetStatusError::NotFound(index));
 		};
 		Ok(batch.status.clone())
+	}
+	
+	///Ok(None) if it has already been awaited and its results are no longer here
+	pub async fn await_fetch(&self, index: usize) -> Result<Option<Vec<FetchResult>>, AwaitFetchError> {
+		//Scope to reduce lock time
+		let synced_maybe_handle = {
+			let lock = self.batches.read().await;
+			let Some(batch) = lock.get(index) else {
+				return Err(AwaitFetchError::NotFound(index));
+			};
+			batch.fetch_handle.clone()
+		};
+		
+		//Scope to reduce lock time
+		let maybe_handle = {
+			let mut lock = synced_maybe_handle.write().await;
+			lock.take()
+		};
+		
+		let Some(handle) = maybe_handle else {
+			return Err(AwaitFetchError::NoJoinHandle);
+		};
+		
+		let result = handle.await?;
+		Ok(Some(result))
 	}
 }

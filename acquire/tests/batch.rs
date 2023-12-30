@@ -1,5 +1,5 @@
 mod common;
-use std::{collections::HashSet, time::Duration, ops::Deref};
+use std::{collections::HashSet, ops::Deref};
 
 use common::{init, list, feed_strat_name};
 use acquire::{
@@ -122,9 +122,7 @@ async fn tracked() -> Result<(), anyhow::Error> {
 	let tracker = BatchTracker::default();
 	
 	let index = tracker.queue_fetches(vec![feed1.id, feed2.id], db.clone(), strats).await;
-	//Wait for it to finish
-	//TODO better way of doing this
-	tokio::time::sleep(Duration::from_secs(5)).await;
+	tracker.await_fetch(index).await?;
 	
 	let status = tracker.get_status(index).await?;
 	let lock = status.read().await;
