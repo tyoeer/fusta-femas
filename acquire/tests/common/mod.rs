@@ -64,7 +64,7 @@ pub async fn run_strategy(db: &DatabaseConnection, feed: &feed::Model, strategy:
 	Ok(fetch)
 }
 
-pub fn list(strat: impl Strategy + Send + Sync + 'static) -> StrategyList {
+pub fn single_strat_list(strat: impl Strategy + Send + Sync + 'static) -> StrategyList {
 	let mut list = StrategyList::new();
 	list.add(strat);
 	list

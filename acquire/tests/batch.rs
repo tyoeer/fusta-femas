@@ -1,7 +1,7 @@
 mod common;
 use std::{collections::HashSet, ops::Deref};
 
-use common::{init, list, feed_strat_name};
+use common::{init, single_strat_list, feed_strat_name};
 use acquire::{
 	strategy::Strategy,
 	mock::MockStrat, 
@@ -26,7 +26,7 @@ async fn basic() -> Result<(), RunError> {
 	let db = init().await?;
 	let strat = MockStrat::default();
 	let strat_name = strat.name();
-	let strats = list(strat);
+	let strats = single_strat_list(strat);
 	
 	let feed1 = feed_strat_name("ok", strat_name, &db).await?;
 	let feed2 = feed_strat_name("ok", strat_name, &db).await?;
@@ -48,7 +48,7 @@ async fn results() -> Result<(), RunError> {
 	let db = init().await?;
 	let strat = MockStrat::default();
 	let strat_name = strat.name();
-	let strats = list(strat);
+	let strats = single_strat_list(strat);
 	
 	let feed1 = feed_strat_name("ok", strat_name, &db).await?;
 	let feed2 = feed_strat_name("ok", strat_name, &db).await?;
@@ -86,7 +86,7 @@ async fn updates() -> Result<(), anyhow::Error> {
 	let db = init().await?;
 	let strat = MockStrat::default();
 	let strat_name = strat.name();
-	let strats = list(strat);
+	let strats = single_strat_list(strat);
 	
 	let feed1 = feed_strat_name("ok", strat_name, &db).await?;
 	let feed2 = feed_strat_name("ok", strat_name, &db).await?;
@@ -114,7 +114,7 @@ async fn tracked() -> Result<(), anyhow::Error> {
 	let db = init().await?;
 	let strat = MockStrat::default();
 	let strat_name = strat.name();
-	let strats = list(strat);
+	let strats = single_strat_list(strat);
 	
 	let feed1 = feed_strat_name("ok", strat_name, &db).await?;
 	let feed2 = feed_strat_name("ok", strat_name, &db).await?;

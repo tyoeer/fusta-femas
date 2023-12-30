@@ -1,5 +1,5 @@
 mod common;
-use common::{init, list, feed_strat_name};
+use common::{init, single_strat_list, feed_strat_name};
 use acquire::{
 	strategy::Strategy,
 	mock::MockStrat, RunError, strategy_list::RunIdError
@@ -12,7 +12,7 @@ async fn basic() -> Result<(), RunError> {
 	let db = init().await?;
 	let strat = MockStrat::default();
 	let strat_name = strat.name();
-	let strats = list(strat);
+	let strats = single_strat_list(strat);
 	let feed = feed_strat_name("ok", strat_name, &db).await?;
 	
 	let fetch = strats.run(&db, feed).await?;
@@ -28,7 +28,7 @@ async fn id() -> Result<(), RunIdError> {
 	let db = init().await?;
 	let strat = MockStrat::default();
 	let strat_name = strat.name();
-	let strats = list(strat);
+	let strats = single_strat_list(strat);
 	let feed = feed_strat_name("ok", strat_name, &db).await?;
 	
 	let fetch = strats.run_id(feed.id, &db).await?;
