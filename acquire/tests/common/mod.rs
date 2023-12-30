@@ -1,10 +1,11 @@
 //Not all tests use all the stuff in here, so they generate false warnings
 #![allow(dead_code)]
 
-use acquire::{strategy::{Strategy, self}, StrategyList};
+use acquire::{strategy::{Strategy, self}, StrategyList, mock::{FetchCommand, CommandStrat, MockStrat}};
 use sea_migration::{MigratorTrait, Migrator};
 use sea_orm::{DatabaseConnection, error::DbErr, Set, ActiveModelTrait, ActiveModelBehavior};
 use entities::{prelude::feed, entities::fetch};
+use tokio::sync::broadcast;
 
 pub async fn db() -> Result<DatabaseConnection, DbErr> {
 	let conn = sea_orm::Database::connect("sqlite::memory:").await?;
@@ -68,4 +69,16 @@ pub fn single_strat_list(strat: impl Strategy + Send + Sync + 'static) -> Strate
 	let mut list = StrategyList::new();
 	list.add(strat);
 	list
+}
+
+pub fn cmd_strats() -> (broadcast::Sender<FetchCommand>, StrategyList) {
+	let mut list = StrategyList::new();
+	
+	let cmd_strat = CommandStrat::new();
+	let sender = cmd_strat.sender();
+	
+	list.add(cmd_strat);
+	list.add(MockStrat::default());
+	
+	(sender, list)
 }

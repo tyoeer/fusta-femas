@@ -1,10 +1,13 @@
 mod common;
-use std::{collections::HashSet, ops::Deref};
+use std::{
+	collections::HashSet,
+	ops::Deref,
+};
 
-use common::{init, single_strat_list, feed_strat_name};
+use common::{init, single_strat_list, cmd_strats, feed_strat_name};
 use acquire::{
 	strategy::Strategy,
-	mock::MockStrat, 
+	mock::{MockStrat, FetchCommand}, 
 	RunError,
 	batch::{fetch_batch, BatchStatusUpdate}, batch_tracker::{BatchTracker, BroadcastListener, BatchStatus}
 };
@@ -12,6 +15,7 @@ use entities::prelude::*;
 use sea_orm::{ModelTrait, PaginatorTrait};
 use tokio::sync::broadcast;
 
+const CMD_STRAT: &str = "command strat";
 
 fn listener() -> (broadcast::Receiver<BatchStatusUpdate>, BroadcastListener) {
 	let (send, recv) = broadcast::channel(256);
@@ -137,6 +141,54 @@ async fn tracked() -> Result<(), anyhow::Error> {
 	
 	assert_eq!(1, feed1.find_related(fetch::Entity).count(&db).await? );
 	assert_eq!(1, feed2.find_related(fetch::Entity).count(&db).await? );
+	
+	Ok(())
+}
+
+///The updates as the TrackedListener tracks them look good
+#[tokio::test]
+#[tracing::instrument]
+async fn tracked_listener() -> Result<(), anyhow::Error> {
+	let db = init().await?;
+	let (cmd, strats) = cmd_strats();
+	
+	let feed1 = feed_strat_name("ok", CMD_STRAT, &db).await?;
+	let feed2 = feed_strat_name("ok", CMD_STRAT, &db).await?;
+	
+	let tracker = BatchTracker::default();
+	
+	let index = tracker.queue_fetches(vec![feed1.id, feed2.id], db.clone(), strats).await;
+	
+	let status = tracker.get_status(index).await?;
+	let mut recv = tracker.subscribe(index).await?;
+	
+	cmd.send(FetchCommand::Fetch(feed1.id))?;
+	cmd.send(FetchCommand::Parse(feed1.id))?;
+	//wait for it to be processed
+	recv.recv().await?;
+	
+	{ //Scope to reduce lock time
+		let status_lock = status.read().await;
+		let BatchStatus::InProgress(bsu) = status_lock.deref() else {
+			panic!("Wrong batch status {:?}", status_lock.deref());
+		};
+		assert_eq!(2, bsu.total);
+		assert_eq!(1, bsu.done);
+	}
+	
+	cmd.send(FetchCommand::Fetch(feed2.id))?;
+	cmd.send(FetchCommand::Parse(feed2.id))?;
+	//wait for it to be processed
+	recv.recv().await?;
+	
+	{ //Scope to reduce lock times
+		let status_lock = status.read().await;
+		let BatchStatus::InProgress(bsu) = status_lock.deref() else {
+			panic!("Wrong batch status {:?}", status_lock.deref());
+		};
+		assert_eq!(2, bsu.total);
+		assert_eq!(2, bsu.done);
+	}
 	
 	Ok(())
 }

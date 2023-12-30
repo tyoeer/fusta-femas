@@ -1,5 +1,6 @@
 use sea_orm::*;
 use entities::prelude::*;
+use tokio::sync::broadcast;
 use crate::strategy::{
 	Strategy,
 	EntryInfo
@@ -16,6 +17,7 @@ impl Strategy for MockStrat{
 	fn name(&self) -> &'static str {
 		"Mock test"
 	}
+	
 	async fn fetch(&self, conn: &DatabaseConnection, feed: &feed::Model) -> anyhow::Result<String> {
 		let mock_fetched = match feed.url.as_str() {
 			"ok" => "Mock ok".to_owned(),
@@ -52,6 +54,7 @@ impl Strategy for MockStrat{
 		};
 		Ok(mock_fetched)
 	}
+	
 	async fn parse(&self, data: &str) -> anyhow::Result<Vec<EntryInfo>> {
 		let entries = match data {
 			"Mock ok" => Vec::new(),
@@ -82,5 +85,71 @@ impl Strategy for MockStrat{
 		};
 		
 		Ok(entries)
+	}
+}
+
+
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FetchCommand {
+	Fetch(i32),
+	Parse(i32),
+}
+
+pub struct CommandStrat {
+	send: broadcast::Sender<FetchCommand>,
+	recv: broadcast::Receiver<FetchCommand>,
+}
+
+impl CommandStrat {
+	pub fn new() -> Self {
+		let (send, recv) = broadcast::channel(64);
+		Self {
+			send,
+			recv,
+		}
+	}
+	
+	pub fn sender(&self) -> broadcast::Sender<FetchCommand> {
+		self.send.clone()
+	}
+}
+
+impl Default for CommandStrat {
+	fn default() -> Self {
+		Self::new()
+	}
+}
+
+#[async_trait::async_trait]
+impl Strategy for CommandStrat {
+	fn name(&self) -> &'static str {
+		"commandable mock"
+	}
+	async fn fetch(&self, _conn: &DatabaseConnection, feed: &feed::Model) -> anyhow::Result<String> {
+		let id = feed.id;
+		
+		let mut recv = self.recv.resubscribe();
+		loop {
+			let mes = recv.recv().await?;
+			if mes==FetchCommand::Fetch(id) {
+				break;
+			}
+		}
+		
+		Ok(id.to_string())
+	}
+	async fn parse(&self, data: &str) -> anyhow::Result<Vec<EntryInfo>> {
+		let id = data.parse()?;
+				
+		let mut recv = self.recv.resubscribe();
+		loop {
+			let mes = recv.recv().await?;
+			if mes==FetchCommand::Parse(id) {
+				break;
+			}
+		}
+		
+		Ok(Vec::new())
 	}
 }
