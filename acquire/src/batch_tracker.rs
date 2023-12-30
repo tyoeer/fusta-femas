@@ -87,11 +87,9 @@ pub enum BatchStatus {
 	Finished(Vec<FetchResult>)
 }
 
-#[derive(Debug,Error)]
-pub enum GetStatusError {
-	#[error("Could not find batch at index {0}")]
-	NotFound(usize)
-}
+#[derive(Debug, Error)]
+#[error("Could not find batch at index {0}")]
+pub struct BatchNotFoundError(usize);
 
 #[derive(Debug,Error)]
 pub enum AwaitFetchError {
@@ -120,12 +118,20 @@ impl BatchTracker {
 		}
 	}
 	
-	pub async fn get_status(&self, index: usize) -> Result<Sync<BatchStatus>, GetStatusError> {
+	pub async fn get_status(&self, index: usize) -> Result<Sync<BatchStatus>, BatchNotFoundError> {
 		let lock = self.batches.read().await;
 		let Some(batch) = lock.get(index) else {
-			return Err(GetStatusError::NotFound(index));
+			return Err(BatchNotFoundError(index));
 		};
 		Ok(batch.status.clone())
+	}
+	
+	pub async fn subscribe(&self, index: usize) -> Result<broadcast::Receiver<BatchStatusUpdate>, BatchNotFoundError> {
+		let lock = self.batches.read().await;
+		let Some(batch) = lock.get(index) else {
+			return Err(BatchNotFoundError(index));
+		};
+		Ok(batch.listener.resubscribe())
 	}
 	
 	///Ok(None) if it has already been awaited and its results are no longer here
