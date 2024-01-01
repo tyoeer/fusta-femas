@@ -13,6 +13,9 @@ reset-db:
 # cargo leptos watch
 watch:
 	cargo leptos watch --hot-reload
+# cargo leptos serve
+up:
+	cargo leptos serve
 
 # Serve the alt database
 alt $DATABASE_URL="sqlite://.local/alt/db/alt.db?mode=rwc":
