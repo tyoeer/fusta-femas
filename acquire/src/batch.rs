@@ -21,9 +21,10 @@ impl<First: Listener + Send, Second: Listener + Send> Listener for (First, Secon
 
 pub type FetchResult = Result<fetch::Model, RunIdError>;
 
+#[non_exhaustive]
 pub struct Batch {
-	total: usize,
-	finished: Vec<FetchResult>,
+	pub total: usize,
+	pub finished: Vec<FetchResult>,
 }
 
 impl Batch {
@@ -72,7 +73,7 @@ pub fn fetch_batch(
 	listener: impl Listener,
 	strats: StrategyList,
 	db: Db
-) -> (Arc<RwLock<Batch>>, impl Future<Output = Vec<FetchResult>>) {
+) -> (Arc<RwLock<Batch>>, impl Future<Output=()>) {
 	let batch_sync = Arc::new(RwLock::new(Batch::new(feeds.len())));
 	let future = run_fetch_batch(feeds, batch_sync.clone(), listener, strats, db);
 	
@@ -84,7 +85,7 @@ pub async fn run_fetch_batch(
 	mut listener: impl Listener,
 	strats: StrategyList,
 	db: Db,
-) -> Vec<FetchResult> {
+) {
 	let (send, mut receive) = mpsc::channel(16);
 	
 	for id in feeds {
@@ -111,12 +112,7 @@ pub async fn run_fetch_batch(
 		if batch_lock.is_done() {
 			break;
 		}
-	}
-	
-	let mut batch_lock = batch_sync.write().await;
-	
-	//TODO don't return this like this
-	std::mem::take(&mut batch_lock.finished)
+	}	
 }
 
 ///Spawns a new task that fetches the feed, while sending update(s) along the channel

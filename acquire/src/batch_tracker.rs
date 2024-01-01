@@ -53,7 +53,7 @@ pub struct TrackedBatch {
 	pub status: Sync<BatchStatus>,
 	pub listener: Receiver,
 	///handle of the fetching task
-	pub fetch_handle: Sync<Option<JoinHandle<Vec<FetchResult>>>>,
+	pub fetch_handle: Sync<Option<JoinHandle<()>>>,
 }
 
 impl TrackedBatch {
@@ -136,8 +136,9 @@ impl BatchTracker {
 		Ok(batch.listener.resubscribe())
 	}
 	
+	//TODO Move None case into the error
 	///Ok(None) if it has already been awaited and its results are no longer here
-	pub async fn await_fetch(&self, index: usize) -> Result<Option<Vec<FetchResult>>, AwaitFetchError> {
+	pub async fn await_fetch(&self, index: usize) -> Result<Option<()>, AwaitFetchError> {
 		//Scope to reduce lock time
 		let synced_maybe_handle = {
 			let lock = self.batches.read().await;
@@ -157,7 +158,8 @@ impl BatchTracker {
 			return Err(AwaitFetchError::NoJoinHandle);
 		};
 		
-		let result = handle.await?;
-		Ok(Some(result))
+		handle.await?;
+		
+		Ok(Some(()))
 	}
 }

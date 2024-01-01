@@ -63,13 +63,15 @@ async fn results() -> Result<(), RunError> {
 	let (recv, listener) = listener();
 	std::mem::drop(recv); // don't care
 	
-	let (_batch, future) = fetch_batch(ids.clone(), listener, strats, db.clone());
-	let results = future.await;
+	let (batch, future) = fetch_batch(ids.clone(), listener, strats, db.clone());
+	future.await;
 	
-	assert_eq!(ids.len(), results.len());
+	let batch = batch.read().await;
+	
+	assert_eq!(ids.len(), batch.finished.len());
 	
 	let id_set = ids.iter().cloned().collect::<HashSet<i32>>();
-	let fetched_ids = results.iter()
+	let fetched_ids = batch.finished.iter()
 		.map(|fetch_res| {
 			match fetch_res {
 				Ok(fetch) => fetch.feed_id,
