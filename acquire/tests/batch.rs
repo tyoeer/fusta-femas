@@ -160,8 +160,7 @@ async fn batch_status() -> Result<(), anyhow::Error> {
 	let (mut recv, listener) = listener();
 	
 	let (batch_sync, future) = fetch_batch(vec![feed1.id, feed2.id], listener, strats, db.clone());
-	
-	future.await;
+	let join_handle = tokio::spawn(future);
 	
 	cmd.send(FetchCommand::Fetch(feed1.id))?;
 	cmd.send(FetchCommand::Parse(feed1.id))?;
@@ -184,6 +183,9 @@ async fn batch_status() -> Result<(), anyhow::Error> {
 		assert_eq!(2, lock.total);
 		assert_eq!(2, lock.finished.len());
 	}
+	
+	//just to be sure
+	join_handle.await?;
 	
 	Ok(())
 }
