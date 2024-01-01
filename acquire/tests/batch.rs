@@ -37,7 +37,8 @@ async fn basic() -> Result<(), RunError> {
 	
 	let (recv, listener) = listener();
 	
-	fetch_batch(vec![feed1.id, feed2.id], listener, strats, db.clone()).await;
+	let (_batch, future) = fetch_batch(vec![feed1.id, feed2.id], listener, strats, db.clone());
+	let _results = future.await;
 	
 	assert_eq!(1, feed1.find_related(fetch::Entity).count(&db).await? );
 	assert_eq!(1, feed2.find_related(fetch::Entity).count(&db).await? );
@@ -62,7 +63,8 @@ async fn results() -> Result<(), RunError> {
 	let (recv, listener) = listener();
 	std::mem::drop(recv); // don't care
 	
-	let results = fetch_batch(ids.clone(), listener, strats, db.clone()).await;
+	let (_batch, future) = fetch_batch(ids.clone(), listener, strats, db.clone());
+	let results = future.await;
 	
 	assert_eq!(ids.len(), results.len());
 	
@@ -97,7 +99,8 @@ async fn updates() -> Result<(), anyhow::Error> {
 	
 	let (mut recv, listener) = listener();
 	
-	fetch_batch(vec![feed1.id, feed2.id], listener, strats, db.clone()).await;
+	let (_batch, future) = fetch_batch(vec![feed1.id, feed2.id], listener, strats, db.clone());
+	let _results = future.await;
 	
 	assert_eq!(1, feed1.find_related(fetch::Entity).count(&db).await? );
 	assert_eq!(1, feed2.find_related(fetch::Entity).count(&db).await? );

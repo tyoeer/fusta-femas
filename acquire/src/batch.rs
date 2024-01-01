@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{sync::Arc, future::Future};
 use tokio::sync::{mpsc, RwLock};
 use entities::prelude::fetch;
 use sea_orm::DatabaseConnection as Db;
@@ -21,7 +21,7 @@ impl<First: Listener + Send, Second: Listener + Send> Listener for (First, Secon
 
 pub type FetchResult = Result<fetch::Model, RunIdError>;
 
-struct Batch {
+pub struct Batch {
 	total: usize,
 	finished: Vec<FetchResult>,
 }
@@ -67,13 +67,24 @@ Fetches all the feeds with the given ids in parallel (every feed gets spawned a 
 
 The returned results are probably in a different order then the feed ids. Check fetch.feed_id to get the corresponding feed.
 */
-pub async fn fetch_batch(
+pub fn fetch_batch(
 	feeds: Vec<i32>,
-	mut listener: impl Listener,
+	listener: impl Listener,
 	strats: StrategyList,
 	db: Db
-) -> Vec<FetchResult> {
+) -> (Arc<RwLock<Batch>>, impl Future<Output = Vec<FetchResult>>) {
 	let batch_sync = Arc::new(RwLock::new(Batch::new(feeds.len())));
+	let future = run_fetch_batch(feeds, batch_sync.clone(), listener, strats, db);
+	
+	(batch_sync, future)
+}
+pub async fn run_fetch_batch(
+	feeds: Vec<i32>,
+	batch_sync: Arc<RwLock<Batch>>,
+	mut listener: impl Listener,
+	strats: StrategyList,
+	db: Db,
+) -> Vec<FetchResult> {
 	let (send, mut receive) = mpsc::channel(16);
 	
 	for id in feeds {

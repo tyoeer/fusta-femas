@@ -69,7 +69,9 @@ impl TrackedBatch {
 		
 		let listener = (tl, bl);
 		
-		let fetch_handle = tokio::spawn(fetch_batch(feeds, listener, strats, db));
+		let (_batch, future) = fetch_batch(feeds, listener, strats, db);
+		
+		let fetch_handle = tokio::spawn(future);
 		
 		Self {
 			status,
