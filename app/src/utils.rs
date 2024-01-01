@@ -292,3 +292,31 @@ macro_rules! model {
 		}
 	};
 }
+
+/**
+Grabs a custom object the Leptos context, and puts it into scope.
+Does `return None` if the object isn't in the context.
+
+# Example
+
+```no_run
+# use app::object;
+struct CustomType;
+# fn test() -> Option<()> {
+let object = object!(CustomType);
+# return None;
+# }
+```
+
+*/
+#[macro_export]
+macro_rules! object {
+	($object:ty) => {
+		{
+			let Some(model) = ::leptos::use_context::<::leptos::RwSignal<$object>>() else {
+				return None;
+			};
+			model
+		}
+	};
+}
