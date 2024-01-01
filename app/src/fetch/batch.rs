@@ -32,8 +32,13 @@ pub fn BatchContext() -> impl IntoView {
 #[component]
 pub fn BatchInfo() -> impl IntoView {
 	let object = crate::object!(BatchStatus);
-	
-	Some(move || format!("{:?}", object.get()))
+	let total = move || object.get().total;
+	let done = move || object.get().done;
+	let text = move || format!("Finished: {} / {}", done(), total());
+	view! {
+		<div> {text} </div>
+		<progress max=total value=done/>
+	}.into()
 }
 
 #[server]
