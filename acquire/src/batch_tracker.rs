@@ -120,9 +120,7 @@ impl BatchTracker {
 		Ok(batch.listener.resubscribe())
 	}
 	
-	//TODO Move None case into the error
-	///Ok(None) if it has already been awaited and its results are no longer here
-	pub async fn await_fetch(&self, index: usize) -> Result<Option<()>, AwaitFetchError> {
+	pub async fn await_fetch(&self, index: usize) -> Result<(), AwaitFetchError> {
 		//Scope to reduce lock time
 		let synced_maybe_handle = {
 			let lock = self.batches.read().await;
@@ -144,6 +142,6 @@ impl BatchTracker {
 		
 		handle.await?;
 		
-		Ok(Some(()))
+		Ok(())
 	}
 }
