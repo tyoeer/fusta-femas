@@ -1,29 +1,17 @@
 use thiserror::Error;
-use tokio::{sync::{broadcast, RwLock}, task::{JoinHandle, JoinError}};
+use tokio::{
+	sync::{broadcast, RwLock},
+	task::{JoinHandle, JoinError}
+};
 use sea_orm::DatabaseConnection as Db;
-use std::{sync::Arc, ops::DerefMut};
-use crate::{StrategyList, batch::{FetchResult, BatchStatusUpdate, fetch_batch, Listener}};
+use std::sync::Arc;
+use crate::{
+	StrategyList,
+	batch::{Batch, FetchResult, BatchStatusUpdate, fetch_batch, Listener}
+};
 
 type Receiver = broadcast::Receiver<BatchStatusUpdate>;
 type Sync<Item> = Arc<RwLock<Item>>;
-
-#[derive(Default)]
-pub struct TrackingListener {
-	status: Sync<BatchStatus>
-}
-
-impl TrackingListener {
-	pub fn get_status(&self) -> Sync<BatchStatus> {
-		self.status.clone()
-	}
-}
-
-impl Listener for TrackingListener {
-	async fn fetch_finished(&mut self, update: BatchStatusUpdate) {
-		let mut lock = self.status.write().await; 
-		let _old = std::mem::replace(lock.deref_mut(), BatchStatus::InProgress(update));
-	}
-}
 
 
 pub struct BroadcastListener {
@@ -50,7 +38,7 @@ impl Listener for BroadcastListener {
 #[non_exhaustive]
 #[derive(Debug)]
 pub struct TrackedBatch {
-	pub status: Sync<BatchStatus>,
+	pub status: Sync<Batch>,
 	pub listener: Receiver,
 	///handle of the fetching task
 	pub fetch_handle: Sync<Option<JoinHandle<()>>>,
@@ -62,19 +50,15 @@ impl TrackedBatch {
 		strats: StrategyList,
 		db: Db,
 	) -> Self {
-		let tl = TrackingListener::default();
-		let status = tl.get_status();
 		let (send, recv) = broadcast::channel(16);
-		let bl = BroadcastListener::from_sender(send);
+		let listener = BroadcastListener::from_sender(send);
 		
-		let listener = (tl, bl);
-		
-		let (_batch, future) = fetch_batch(feeds, listener, strats, db);
+		let (batch, future) = fetch_batch(feeds, listener, strats, db);
 		
 		let fetch_handle = tokio::spawn(future);
 		
 		Self {
-			status,
+			status: batch,
 			listener: recv,
 			fetch_handle: Arc::new(RwLock::new(Some(fetch_handle))),
 		}
@@ -120,7 +104,7 @@ impl BatchTracker {
 		}
 	}
 	
-	pub async fn get_status(&self, index: usize) -> Result<Sync<BatchStatus>, BatchNotFoundError> {
+	pub async fn get_status(&self, index: usize) -> Result<Sync<Batch>, BatchNotFoundError> {
 		let lock = self.batches.read().await;
 		let Some(batch) = lock.get(index) else {
 			return Err(BatchNotFoundError(index));

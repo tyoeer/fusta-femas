@@ -22,6 +22,7 @@ impl<First: Listener + Send, Second: Listener + Send> Listener for (First, Secon
 pub type FetchResult = Result<fetch::Model, RunIdError>;
 
 #[non_exhaustive]
+#[derive(Debug)]
 pub struct Batch {
 	pub total: usize,
 	pub finished: Vec<FetchResult>,

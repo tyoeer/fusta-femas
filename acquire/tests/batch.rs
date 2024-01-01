@@ -1,15 +1,12 @@
 mod common;
-use std::{
-	collections::HashSet,
-	ops::Deref,
-};
+use std::collections::HashSet;
 
 use common::{init, single_strat_list, cmd_strats, feed_strat_name};
 use acquire::{
 	strategy::Strategy,
 	mock::{MockStrat, FetchCommand}, 
 	RunError,
-	batch::{fetch_batch, BatchStatusUpdate}, batch_tracker::{BatchTracker, BroadcastListener, BatchStatus}
+	batch::{fetch_batch, BatchStatusUpdate}, batch_tracker::{BatchTracker, BroadcastListener}
 };
 use entities::prelude::*;
 use sea_orm::{ModelTrait, PaginatorTrait};
@@ -136,13 +133,8 @@ async fn tracked() -> Result<(), anyhow::Error> {
 	let status = tracker.get_status(index).await?;
 	let lock = status.read().await;
 	
-	match lock.deref() {
-		BatchStatus::InProgress(status) => {
-			assert_eq!(2, status.done);
-			assert_eq!(2, status.total);
-		}
-		batch => panic!("BatchStatus not good: {batch:?}"),
-	}
+	assert_eq!(2, lock.total);
+	assert_eq!(2, lock.finished.len());
 	
 	assert_eq!(1, feed1.find_related(fetch::Entity).count(&db).await? );
 	assert_eq!(1, feed2.find_related(fetch::Entity).count(&db).await? );
@@ -173,12 +165,9 @@ async fn tracked_listener() -> Result<(), anyhow::Error> {
 	recv.recv().await?;
 	
 	{ //Scope to reduce lock time
-		let status_lock = status.read().await;
-		let BatchStatus::InProgress(bsu) = status_lock.deref() else {
-			panic!("Wrong batch status {:?}", status_lock.deref());
-		};
-		assert_eq!(2, bsu.total);
-		assert_eq!(1, bsu.done);
+		let lock = status.read().await;
+		assert_eq!(2, lock.total);
+		assert_eq!(1, lock.finished.len());
 	}
 	
 	cmd.send(FetchCommand::Fetch(feed2.id))?;
@@ -187,12 +176,9 @@ async fn tracked_listener() -> Result<(), anyhow::Error> {
 	recv.recv().await?;
 	
 	{ //Scope to reduce lock times
-		let status_lock = status.read().await;
-		let BatchStatus::InProgress(bsu) = status_lock.deref() else {
-			panic!("Wrong batch status {:?}", status_lock.deref());
-		};
-		assert_eq!(2, bsu.total);
-		assert_eq!(2, bsu.done);
+		let lock = status.read().await;
+		assert_eq!(2, lock.total);
+		assert_eq!(2, lock.finished.len());
 	}
 	
 	Ok(())
