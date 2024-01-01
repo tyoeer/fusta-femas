@@ -1,5 +1,5 @@
 use leptos::*;
-use leptos_router::{Route, ActionForm, Outlet};
+use leptos_router::{Route, ActionForm, Outlet, Redirect, A};
 use entities::prelude::*;
 use serde::{Serialize, Deserialize};
 use crate::utils;
@@ -52,14 +52,22 @@ pub async fn fetch_all() -> Result<usize, ServerFnError> {
 }
 
 #[component]
-pub fn FetchAllButton() -> impl IntoView {
+pub fn FetchAllButton(#[prop(default=false)] redirect: bool) -> impl IntoView {
 	let fetch_all = create_server_action::<FetchAll>();
+	let text = if redirect {"fetch all feeds"} else {"fetch all feeds in bg"};
 	view! {
 		<ActionForm action=fetch_all>
-			<utils::FormSubmit button="fetch all feeds" action=fetch_all/>
+			<utils::FormSubmit button=text action=fetch_all/>
 		</ActionForm>
 		<utils::FormResult action=fetch_all let:id>
-			{format!("Started fetch with id {id}")}
+			{
+				let url = format!("/fetch_batch/{id}");
+				if redirect {
+					view! { <Redirect path=url /> }
+				} else {
+					view! { <A href=url>{ format!("Started fetch with id {id}") }</A> }
+				}
+			}
 		</utils::FormResult>
 	}
 }
