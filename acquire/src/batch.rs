@@ -1,4 +1,5 @@
-use tokio::sync::mpsc;
+use std::sync::Arc;
+use tokio::sync::{mpsc, RwLock};
 use entities::prelude::fetch;
 use sea_orm::DatabaseConnection as Db;
 use crate::{StrategyList, strategy_list::RunIdError};
@@ -72,7 +73,7 @@ pub async fn fetch_batch(
 	strats: StrategyList,
 	db: Db
 ) -> Vec<FetchResult> {
-	let mut batch = Batch::new(feeds.len());
+	let batch_sync = Arc::new(RwLock::new(Batch::new(feeds.len())));
 	let (send, mut receive) = mpsc::channel(16);
 	
 	for id in feeds {
@@ -85,21 +86,26 @@ pub async fn fetch_batch(
 			panic!("No messages left, not sure what to do");
 		};
 		
+		let mut batch_lock = batch_sync.write().await;
+		
 		match mes {
 			BatchMessage::Done(result) => {
-				batch.add_done(result);
+				batch_lock.add_done(result);
 			}
 		}
 		
 		//Don't care if nobody's listening
-		listener.fetch_finished(batch.status()).await;
+		listener.fetch_finished(batch_lock.status()).await;
 		
-		if batch.is_done() {
+		if batch_lock.is_done() {
 			break;
 		}
 	}
 	
-	batch.finished
+	let mut batch_lock = batch_sync.write().await;
+	
+	//TODO don't return this like this
+	std::mem::take(&mut batch_lock.finished)
 }
 
 ///Spawns a new task that fetches the feed, while sending update(s) along the channel
