@@ -1,4 +1,3 @@
-use crate::error_template::{AppError, ErrorTemplate};
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
@@ -57,28 +56,39 @@ fn Nav() -> impl IntoView {
 	}
 }
 
+
+#[cfg(feature="ssr")]
+fn status_code(code: http::StatusCode) {
+	let response = use_context::<leptos_axum::ResponseOptions>().expect("response should be configured");
+	response.set_status(code);
+}
+
+
 #[component]
 pub fn ErrorsView(errors: RwSignal<Errors>) -> impl IntoView {
+	#[cfg(feature="ssr")]
+	status_code(http::StatusCode::INTERNAL_SERVER_ERROR);
 	view! {
 		<h1>ERROR</h1>
 		<ul>
-			<For
-				each = move || errors.get().into_iter()
-				key = |err| err.0.clone()
-				let:err
-			>
-				<li>
-					{err.1.to_string()}
-				</li>
-			</For>
+		<For
+		each = move || errors.get().into_iter()
+		key = |err| err.0.clone()
+		let:err
+		>
+		<li>
+		{err.1.to_string()}
+		</li>
+		</For>
 		</ul>
 	}
 }
 
 #[component]
 fn NotFound() -> impl IntoView {
+	#[cfg(feature="ssr")]
+	status_code(http::StatusCode::NOT_FOUND);
 	view! {
-		<Nav/>
 		<main>
 			<h1>"404 Not Found"</h1>
 			<p> "Did not find the page you're looking for" </p>
