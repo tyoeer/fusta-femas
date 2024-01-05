@@ -14,9 +14,7 @@ use acquire::batch::Batch;
 pub fn Routes() -> impl IntoView {
 	view! {
 		<Route path="fetch_batch" view=Outlet>
-			<Route path="/:id" view=BatchContext>
-				<Route path="" view=BatchInfo />
-			</Route>
+			<Route path="/:id" view=BatchContext />
 		</Route>
 	}
 }
@@ -33,7 +31,6 @@ pub fn BatchContext() -> impl IntoView {
 			<utils::AwaitOk future=move || getter(id) let:batch>
 				{
 					let signal = create_rw_signal(batch);
-					provide_context(signal);
 					let resource = create_resource(|| (), move |_| getter(id));
 					let handle_store = RwSignal::<Option<leptos_dom::helpers::TimeoutHandle>>::new(None);
 					//Repeatedly refetch status
@@ -62,7 +59,7 @@ pub fn BatchContext() -> impl IntoView {
 					});
 					
 					view! {
-						<Outlet/>
+						<BatchInfo batch=signal/>
 					}
 				}
 			</utils::AwaitOk>
@@ -71,15 +68,15 @@ pub fn BatchContext() -> impl IntoView {
 }
 
 #[component]
-pub fn BatchInfo() -> impl IntoView {
-	let object = crate::object!(BatchStatus);
+pub fn BatchInfo(#[prop(into)] batch: Signal<BatchStatus>) -> impl IntoView {
+	let object = batch;
 	let total = move || object.get().total;
 	let done = move || object.get().done;
 	let text = move || format!("Finished: {} / {}", done(), total());
 	view! {
 		<div> {text} </div>
 		<progress max=total value=done/>
-	}.into()
+	}
 }
 
 #[server]
