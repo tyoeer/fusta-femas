@@ -13,14 +13,16 @@ pub async fn get_strategies() -> Result<Vec<String>, ServerFnError> {
 pub fn Strategies() -> impl IntoView {
 	view! {
 		<Title text="Strategies" />
-		<utils::AwaitOk future=get_strategies let:strats>
-			<ul>
-				{
-					strats.into_iter()
-						.map(|e| view! {<li>{e}</li>})
-						.collect::<Vec<_>>()
-				}
-			</ul>
-		</utils::AwaitOk>
+		<main>
+			<utils::AwaitOk future=get_strategies let:strats>
+				<ul>
+					{
+						strats.into_iter()
+							.map(|e| view! {<li>{e}</li>})
+							.collect::<Vec<_>>()
+					}
+				</ul>
+			</utils::AwaitOk>
+		</main>
 	}
 }
