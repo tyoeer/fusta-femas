@@ -1,6 +1,8 @@
 use leptos::*;
 // use leptos_router::A;
 use entities::prelude::*;
+use leptos_meta::Title;
+use leptos_router::{Route, Outlet, A};
 use crate::table;
 use crate::utils;
 #[cfg(feature="ssr")]
@@ -75,6 +77,62 @@ impl Object for EntryOverview {
 }
 
 
+#[component(transparent)]
+pub fn Routes() -> impl IntoView {
+	view! {
+		<Route path="" view= || view! {
+			<Title text="Entries" />
+			<Sidebar />
+			<main>
+				<Outlet/>
+			</main>
+		}>
+			<utils::RouteAlias to="all"/>
+			<Route path="all" view=All />
+			<Route path="unviewed" view=Unviewed />
+		</Route>
+	}
+}
+
+#[component]
+pub fn Sidebar() -> impl IntoView {
+	view! {
+		<nav class="sidebar">
+			<ul>
+				<li>
+					<A href="all">All</A>
+				</li>
+				<li>
+					<A href="unviewed">Unviewed</A>
+				</li>
+			</ul>
+		</nav>
+	}
+}
+
+
+
+#[server]
+pub async fn unviewed() -> Result<Vec<EntryOverview>, ServerFnError> {
+	let conn = crate::extension!(DatabaseConnection);
+	let entries = EntryOverview::query(|q| {
+		q.filter(entry::Column::Viewed.eq(false))
+	})
+		.all(&conn)
+		.await?;
+	Ok(entries)
+}
+
+#[component]
+pub fn Unviewed() -> impl IntoView {
+	view! {
+		<utils::AwaitOk future=unviewed let:entries>
+			<Table entries/>
+		</utils::AwaitOk>
+	}
+}
+
+
 #[server]
 pub async fn all_entries() -> Result<Vec<EntryOverview>, ServerFnError> {
 	let conn = crate::extension!(DatabaseConnection);
@@ -85,13 +143,14 @@ pub async fn all_entries() -> Result<Vec<EntryOverview>, ServerFnError> {
 }
 
 #[component]
-pub fn Search() -> impl IntoView {
+pub fn All() -> impl IntoView {
 	view! {
 		<utils::AwaitOk future=all_entries let:entries>
 			<Table entries/>
 		</utils::AwaitOk>
 	}
 }
+
 
 #[component]
 pub fn Table(#[prop(into)] entries: MaybeSignal<Vec<EntryOverview>>) -> impl IntoView {
