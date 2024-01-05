@@ -1,5 +1,4 @@
 pub mod app;
-pub mod error_template;
 
 pub mod feeds;
 pub mod fetch;
