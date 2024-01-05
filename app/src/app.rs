@@ -71,15 +71,15 @@ pub fn ErrorsView(errors: RwSignal<Errors>) -> impl IntoView {
 	view! {
 		<h1>ERROR</h1>
 		<ul>
-		<For
-		each = move || errors.get().into_iter()
-		key = |err| err.0.clone()
-		let:err
-		>
-		<li>
-		{err.1.to_string()}
-		</li>
-		</For>
+			<For
+				each = move || errors.get().into_iter()
+				key = |err| err.0.clone()
+				let:err
+			>
+				<li>
+					{err.1.to_string()}
+				</li>
+			</For>
 		</ul>
 	}
 }
