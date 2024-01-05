@@ -21,14 +21,7 @@ pub fn App() -> impl IntoView {
 			}
 		}/>
 		
-		<Router set_is_routing fallback=|| {
-			let mut outside_errors = Errors::default();
-			outside_errors.insert_with_default_key(AppError::NotFound);
-			view! {
-				<ErrorTemplate outside_errors/>
-			}
-			.into_view()
-		}>
+		<Router set_is_routing fallback=|| NotFound().into_view()>
 			<ErrorBoundary fallback=|errors| view!{
 				<main>
 					<ErrorsView errors/>
@@ -79,6 +72,17 @@ pub fn ErrorsView(errors: RwSignal<Errors>) -> impl IntoView {
 				</li>
 			</For>
 		</ul>
+	}
+}
+
+#[component]
+fn NotFound() -> impl IntoView {
+	view! {
+		<Nav/>
+		<main>
+			<h1>"404 Not Found"</h1>
+			<p> "Did not find the page you're looking for" </p>
+		</main>
 	}
 }
 
