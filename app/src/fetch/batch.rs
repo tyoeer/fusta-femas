@@ -21,61 +21,74 @@ pub fn Routes() -> impl IntoView {
 
 const REFRESH_INTERVAL: Duration = Duration::from_millis(1000);
 
-#[component]
+#[component(transparent)]
 pub fn BatchContext() -> impl IntoView {
-	let getter = |id| get_batch_status(id as usize);
-	
-	utils::react_id(move |id| view! {
-		<leptos_meta::Title text=format!("batch {}", id) />
-		<main>
-			<utils::AwaitOk future=move || getter(id) let:batch>
-				{
-					let signal = create_rw_signal(batch);
-					let resource = create_resource(|| (), move |_| getter(id));
-					let handle_store = RwSignal::<Option<leptos_dom::helpers::TimeoutHandle>>::new(None);
-					//Repeatedly refetch status
-					create_effect(move |_| {
-						if let Some(handle) = handle_store.get() {
-							handle.clear();
+	utils::react_id(move |id| {
+		let resource = create_resource(
+			|| (),
+			move |_| get_batch_status(id as usize)
+		);
+		let handle_store = RwSignal::<Option<leptos_dom::helpers::TimeoutHandle>>::new(None);
+		//Repeatedly refetch status
+		create_effect(move |_| {
+			if let Some(handle) = handle_store.get() {
+				handle.clear();
+			}
+			if let Some(Ok(batch_status)) = resource.get() {
+				if !batch_status.is_finished() {
+					//Use timeout instead of interval to wait until it has updated and not overfetch the server
+					let handle_res = set_timeout_with_handle(move || resource.refetch(), REFRESH_INTERVAL);
+					match handle_res {
+						Ok(handle) => handle_store.set(Some(handle)),
+						Err(err) => {
+							tracing::error!(?err, "Error setting timeout");
 						}
-						if let Some(Ok(batch_status)) = resource.get() {
-							if !batch_status.is_finished() {
-								//Use timeout instead of interval to wait until it has updated and not overfetch the server
-								let handle_res = set_timeout_with_handle(move || resource.refetch(), REFRESH_INTERVAL);
-								match handle_res {
-									Ok(handle) => handle_store.set(Some(handle)),
-									Err(err) => {
-										tracing::error!(?err, "Error setting timeout");
-									}
-								}
-							}
-							signal.set(batch_status);
-						}
-					});
-					on_cleanup(move || {
-						if let Some(handle) = handle_store.get() {
-							handle.clear();
-						}
-					});
-					
-					view! {
-						<BatchInfo batch=signal/>
 					}
 				}
-			</utils::AwaitOk>
-		</main>
+			}
+		});
+		on_cleanup(move || {
+			if let Some(handle) = handle_store.get() {
+				handle.clear();
+			}
+		});
+		
+		
+		view! {
+			<leptos_meta::Title text=format!("batch {}", id) />
+			<main>
+				<Transition
+					fallback = || view! {<div>"Loading..."</div>}
+				>
+					<ErrorBoundary fallback = |errors| view!{ <crate::app::ErrorsView errors /> } >
+						{
+							move || resource.get().map(
+								|batch_res| batch_res.map(
+									|batch| view! { <BatchInfo batch/> }
+								)
+							)
+						}
+					</ErrorBoundary>
+				</Transition>
+			</main>
+		}
 	})
 }
 
 #[component]
-pub fn BatchInfo(#[prop(into)] batch: Signal<BatchStatus>) -> impl IntoView {
-	let object = batch;
-	let total = move || object.get().total;
-	let done = move || object.get().done;
+pub fn BatchInfo(#[prop(into)] batch: MaybeSignal<BatchStatus>) -> impl IntoView {
+	let total = { 
+		let batch = batch.clone();
+		move || batch.get().total
+	};
+	let done = { 
+		let batch = batch.clone();
+		move || batch.get().done
+	};
 	let text = move || format!("Finished: {} / {}", done(), total());
 	view! {
 		<div> {text} </div>
-		<progress max=total value=done/>
+		<progress max=batch.get().total value=batch.get().done/>
 	}
 }
 
