@@ -14,15 +14,53 @@ use acquire::batch::Batch;
 pub fn Routes() -> impl IntoView {
 	view! {
 		<Route path="fetch_batch" view=Outlet>
-			<Route path="/:id" view=BatchContext />
+			<Route path="/:id" view=UpdatingBatchPage />
 		</Route>
 	}
 }
 
+///Transportable batch status
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BatchStatus {
+	total: usize,
+	done: usize,
+	id: usize,
+}
+
+impl BatchStatus {
+	#[cfg(feature="ssr")]
+	pub fn from_id_batch(id: usize, batch: &Batch) -> Self {
+		Self {
+			total: batch.total,
+			done: batch.finished.len(),
+			id,
+		}
+	}
+	
+	pub fn is_finished(&self) -> bool {
+		self.total == self.done
+	}
+}
+
+
+#[server]
+pub async fn get_batch_status(batch_ref: usize) -> Result<BatchStatus, ServerFnError> {
+	let tracker = crate::extension!(acquire::batch_tracker::BatchTracker);
+	
+	let batch_sync = tracker.get_status(batch_ref).await?;
+	let status = { // Scope to reduce lock time
+		let batch_lock = batch_sync.read().await;
+		BatchStatus::from_id_batch(batch_ref, &batch_lock)
+	};
+	
+	Ok(status)
+}
+
+
 const REFRESH_INTERVAL: Duration = Duration::from_millis(1000);
 
 #[component(transparent)]
-pub fn BatchContext() -> impl IntoView {
+pub fn UpdatingBatchPage() -> impl IntoView {
 	utils::react_id(move |id| {
 		let resource = create_resource(
 			|| (),
@@ -86,6 +124,8 @@ pub fn BatchInfo(#[prop(into)] batch: MaybeSignal<BatchStatus>) -> impl IntoView
 	}
 }
 
+
+
 #[server]
 pub async fn fetch_all() -> Result<usize, ServerFnError> {
 	let db = crate::extension!(DatabaseConnection);
@@ -120,51 +160,4 @@ pub fn FetchAllButton(#[prop(default=false)] redirect: bool) -> impl IntoView {
 			}
 		</utils::FormResult>
 	}
-}
-
-///Transportable batch status
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct BatchStatus {
-	total: usize,
-	done: usize,
-	id: usize,
-}
-
-impl BatchStatus {
-	#[cfg(feature="ssr")]
-	pub fn from_id_batch(id: usize, batch: &Batch) -> Self {
-		Self {
-			total: batch.total,
-			done: batch.finished.len(),
-			id,
-		}
-	}
-	
-	pub fn is_finished(&self) -> bool {
-		self.total == self.done
-	}
-}
-
-impl Object for BatchStatus {
-	fn get_id(&self) -> i32 {
-		self.id as i32
-	}
-	
-	fn get_object_name() -> &'static str {
-		"batch_fetch"
-	}
-}
-
-
-#[server]
-pub async fn get_batch_status(batch_ref: usize) -> Result<BatchStatus, ServerFnError> {
-	let tracker = crate::extension!(acquire::batch_tracker::BatchTracker);
-	
-	let batch_sync = tracker.get_status(batch_ref).await?;
-	let status = { // Scope to reduce lock time
-		let batch_lock = batch_sync.read().await;
-		BatchStatus::from_id_batch(batch_ref, &batch_lock)
-	};
-	
-	Ok(status)
 }
