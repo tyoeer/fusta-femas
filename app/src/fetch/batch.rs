@@ -77,17 +77,11 @@ pub fn BatchContext() -> impl IntoView {
 
 #[component]
 pub fn BatchInfo(#[prop(into)] batch: MaybeSignal<BatchStatus>) -> impl IntoView {
-	let total = { 
-		let batch = batch.clone();
-		move || batch.get().total
-	};
-	let done = { 
-		let batch = batch.clone();
-		move || batch.get().done
-	};
-	let text = move || format!("Finished: {} / {}", done(), total());
 	view! {
-		<div> {text} </div>
+		<div> {format!("Finished: {} / {}",
+			batch.get().done,
+			batch.get().total,
+		)} </div>
 		<progress max=batch.get().total value=batch.get().done/>
 	}
 }
