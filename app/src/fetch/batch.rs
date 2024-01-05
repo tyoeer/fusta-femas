@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use leptos::*;
 use leptos_router::{Route, ActionForm, Outlet, Redirect, A};
 use entities::prelude::*;
@@ -19,14 +21,53 @@ pub fn Routes() -> impl IntoView {
 	}
 }
 
+const REFRESH_INTERVAL: Duration = Duration::from_millis(1000);
+
 #[component]
 pub fn BatchContext() -> impl IntoView {
 	let getter = |id| get_batch_status(id as usize);
-	view! {
-		<utils::ObjectContext getter>
-			""
-		</utils::ObjectContext>
-	}
+	
+	utils::react_id(move |id| view! {
+		<leptos_meta::Title text=format!("batch {}", id) />
+		<main>
+			<utils::AwaitOk future=move || getter(id) let:batch>
+				{
+					let signal = create_rw_signal(batch);
+					provide_context(signal);
+					let resource = create_resource(|| (), move |_| getter(id));
+					let handle_store = RwSignal::<Option<leptos_dom::helpers::TimeoutHandle>>::new(None);
+					//Repeatedly refetch status
+					create_effect(move |_| {
+						if let Some(handle) = handle_store.get() {
+							handle.clear();
+						}
+						if let Some(Ok(batch_status)) = resource.get() {
+							if !batch_status.is_finished() {
+								//Use timeout instead of interval to wait until it has updated and not overfetch the server
+								let handle_res = set_timeout_with_handle(move || resource.refetch(), REFRESH_INTERVAL);
+								match handle_res {
+									Ok(handle) => handle_store.set(Some(handle)),
+									Err(err) => {
+										tracing::error!(?err, "Error setting timeout");
+									}
+								}
+							}
+							signal.set(batch_status);
+						}
+					});
+					on_cleanup(move || {
+						if let Some(handle) = handle_store.get() {
+							handle.clear();
+						}
+					});
+					
+					view! {
+						<Outlet/>
+					}
+				}
+			</utils::AwaitOk>
+		</main>
+	})
 }
 
 #[component]
@@ -93,6 +134,10 @@ impl BatchStatus {
 			done: batch.finished.len(),
 			id,
 		}
+	}
+	
+	pub fn is_finished(&self) -> bool {
+		self.total == self.done
 	}
 }
 
