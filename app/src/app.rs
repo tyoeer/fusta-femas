@@ -85,15 +85,11 @@ pub fn ErrorsView(errors: RwSignal<Errors>) -> impl IntoView {
 /// Renders the template home page
 #[component]
 fn HomePage() -> impl IntoView {
-	// Creates a reactive value to update the button
-	let (count, set_count) = create_signal(0);
-	let on_click = move |_| set_count.update(|count| *count += 1);
-
 	view! {
-		<Title text="Home" />
-		<h1>"Welcome to Leptos!"</h1>
-		<button on:click=on_click>"Click Me: " {count}</button>
-		<crate::fetch::batch::FetchAllButton redirect=true/>
-		<crate::fetch::batch::FetchAllButton />
+		<main>
+			<h1>"Welcome to Fusta Femas"</h1>
+			<crate::fetch::batch::FetchAllButton redirect=true/>
+			<crate::fetch::batch::FetchAllButton />
+		</main>
 	}
 }
