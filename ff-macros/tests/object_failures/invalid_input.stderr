@@ -1,0 +1,5 @@
+error: enums aren't supported
+ --> tests/object_failures/invalid_input.rs:4:1
+  |
+4 | enum Test {}
+  | ^^^^

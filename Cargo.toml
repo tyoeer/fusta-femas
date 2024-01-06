@@ -9,6 +9,7 @@ members = [
 	"client-entrypoint",
 	"server-setup",
 	"server-entrypoint",
+	"ff-macros",
 ]
 
 [workspace.dependencies]

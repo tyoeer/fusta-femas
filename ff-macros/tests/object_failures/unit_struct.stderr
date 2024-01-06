@@ -1,0 +1,5 @@
+error: unit struct has no possible id field
+ --> tests/object_failures/unit_struct.rs:4:1
+  |
+4 | struct Test;
+  | ^^^^^^^^^^^^

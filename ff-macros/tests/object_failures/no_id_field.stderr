@@ -1,0 +1,6 @@
+error: no id field
+ --> tests/object_failures/no_id_field.rs:5:2
+  |
+5 | /     not_id: i32,
+6 | |     also_not_id: bool,
+  | |______________________^
