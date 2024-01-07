@@ -1,12 +1,13 @@
 #[cfg(feature = "orm")]
 use sea_orm::entity::prelude::*;
+use ff_macros::Object;
 use serde::{Deserialize, Serialize};
 
 use crate::time_fields as time;
-use crate::traits;
+use crate as entities;
 
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, bevy_reflect::Reflect)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Object, bevy_reflect::Reflect)]
 #[reflect(from_reflect = false)]
 #[cfg_attr(feature="orm", derive(DeriveEntityModel) )]
 #[cfg_attr(feature="orm", sea_orm(table_name = "fetch_entry") )]
@@ -17,17 +18,6 @@ pub struct Model {
 	pub id: i32,
 	pub created_at: time::PrimitiveDateTime,
 	pub updated_at: time::PrimitiveDateTime,
-}
-
-
-impl traits::Object for Model {
-	fn get_id(&self) -> i32 {
-		self.id
-	}
-	
-	fn get_object_name() -> &'static str {
-		"fetch_entry"
-	}
 }
 
 

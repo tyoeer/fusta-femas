@@ -997,6 +997,7 @@ dependencies = [
  "bevy_reflect",
  "cfg-if",
  "derive_more",
+ "ff-macros",
  "sea-orm",
  "serde",
  "time",
