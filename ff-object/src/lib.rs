@@ -1,3 +1,7 @@
+///Stuff dealing with the fields an object can have
+pub mod fields;
+
+
 ///Represents an object which is stored in a row in the database
 pub trait Object {
 	fn get_id(&self) -> i32;
