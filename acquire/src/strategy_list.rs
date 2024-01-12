@@ -81,7 +81,7 @@ impl StrategyList {
 
 impl std::fmt::Debug for StrategyList {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		let names = self.iter_strats().map(|s| s.name()).collect::<String>();
+		let names = self.iter_strats().map(|s| s.name()).collect::<Vec<_>>();
 		f.debug_struct("StrategyList").field("names", &names).finish()
 	}
 }
