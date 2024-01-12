@@ -163,6 +163,7 @@ dependencies = [
  "bevy_reflect",
  "cfg-if",
  "entities",
+ "ff-object",
  "http",
  "leptos",
  "leptos_axum",

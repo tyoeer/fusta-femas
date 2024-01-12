@@ -147,7 +147,7 @@ pub fn ObjectContext<
 		// Required by AwaitOk for some reason
 		Clone +
 		//To get the name for the title
-		entities::prelude::Object +
+		ff_object::Object +
 		//Not quite sure why necessary, but otherwise gives a "may not live long enough" error
 		'static,
 	Future:

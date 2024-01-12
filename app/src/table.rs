@@ -200,7 +200,7 @@ pub fn ObjectFieldValueList<Object: Struct + Typed>(
 }
 
 #[component]
-pub fn ObjectLinkValues<Object: Struct + Typed + Clone + entities::Object>(
+pub fn ObjectLinkValues<Object: Struct + Typed + Clone + ff_object::Object>(
 	#[prop(into)] items: MaybeSignal<Vec<Object>>,
 ) -> impl IntoView {
 	view! {
@@ -222,7 +222,7 @@ pub fn ObjectLinkValues<Object: Struct + Typed + Clone + entities::Object>(
 
 ///A table of objects where each row is a link
 #[component]
-pub fn ObjectTable<Object: Struct + Typed + Clone + entities::Object>(
+pub fn ObjectTable<Object: Struct + Typed + Clone + ff_object::Object>(
 	#[prop(into)] items: MaybeSignal<Vec<Object>>,
 ) -> impl IntoView {
 	view! {

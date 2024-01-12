@@ -53,7 +53,7 @@ impl FetchOverview {
 	}
 }
 
-impl Object for FetchOverview {
+impl ff_object::Object for FetchOverview {
 	fn get_id(&self) -> i32 {
 		self.id
 	}

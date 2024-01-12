@@ -66,7 +66,7 @@ impl EntryOverview {
 	}
 }
 
-impl Object for EntryOverview {
+impl ff_object::Object for EntryOverview {
 	fn get_id(&self) -> i32 {
 		self.id
 	}
