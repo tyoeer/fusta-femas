@@ -7,7 +7,7 @@ use proc_macro_error::proc_macro_error;
 
 mod object;
 /**
-Generates an impl for acquire::traits::Object.
+Generates an impl for [ff_objects::Object].
 
 Id field selection:
 1. first field named "id"

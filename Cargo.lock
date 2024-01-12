@@ -998,6 +998,7 @@ dependencies = [
  "cfg-if",
  "derive_more",
  "ff-macros",
+ "ff-object",
  "sea-orm",
  "serde",
  "time",
@@ -1055,13 +1056,17 @@ checksum = "25cbce373ec4653f1a01a31e8a5e5ec0c622dc27ff9c4e6606eefef5cbbed4a5"
 name = "ff-macros"
 version = "0.1.0"
 dependencies = [
- "entities",
+ "ff-object",
  "proc-macro-error",
  "proc-macro2",
  "quote",
  "syn 2.0.48",
  "trybuild",
 ]
+
+[[package]]
+name = "ff-object"
+version = "0.1.0"
 
 [[package]]
 name = "finl_unicode"

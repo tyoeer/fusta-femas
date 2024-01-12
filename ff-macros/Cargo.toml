@@ -15,4 +15,4 @@ proc-macro-error = "1.0.4"
 [dev-dependencies]
 trybuild = "1.0.88"
 
-entities = {path="../entities"}
+ff-object = {path="../ff-object"}

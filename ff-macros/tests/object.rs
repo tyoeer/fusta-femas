@@ -1,4 +1,4 @@
-use entities::prelude::Object;
+use ff_object::Object;
 
 const FAILURES_PATH: &str = "tests/object_failures/*.rs";
 

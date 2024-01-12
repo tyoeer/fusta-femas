@@ -18,7 +18,7 @@ impl ObjectDerive {
 		}
 	}
 	fn default_trait_path() -> TypePath {
-		parse2(quote!{ entities::traits::Object }).expect("hardcoded path should be valid")
+		parse2(quote!{ ::ff_object::Object }).expect("hardcoded path should be valid")
 	}
 }
 
