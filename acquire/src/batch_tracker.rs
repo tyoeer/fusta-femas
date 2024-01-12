@@ -4,6 +4,7 @@ use tokio::{
 	task::{JoinHandle, JoinError}
 };
 use sea_orm::DatabaseConnection as Db;
+use tracing::Instrument;
 use std::sync::Arc;
 use crate::{
 	StrategyList,
@@ -45,15 +46,18 @@ pub struct TrackedBatch {
 }
 
 impl TrackedBatch {
+	///`log_identifier` gets added to to the [tracing::Span] of the underlying [Future](std::future::Future) as "id"
 	pub fn new_fetch(
 		feeds: Vec<i32>,
 		strats: StrategyList,
 		db: Db,
+		log_identifier: impl tracing::Value,
 	) -> Self {
 		let (send, recv) = broadcast::channel(16);
 		let listener = BroadcastListener::from_sender(send);
 		
 		let (batch, future) = fetch_batch(feeds, listener, strats, db);
+		let future = future.instrument(tracing::info_span!("tracked batch", id=log_identifier));
 		
 		let fetch_handle = tokio::spawn(future);
 		
@@ -94,13 +98,15 @@ pub struct BatchTracker {
 
 impl BatchTracker {
 	pub async fn queue_fetches(&self, feeds: Vec<i32>, db: Db, strats: StrategyList) -> usize {
-		let tracker = TrackedBatch::new_fetch(feeds, strats, db);
 		
 		//Scope to reduce lock time
 		{
 			let mut batches_lock = self.batches.write().await;
+			
+			let id = batches_lock.len();
+			let tracker = TrackedBatch::new_fetch(feeds, strats, db, id);
 			batches_lock.push(tracker);
-			batches_lock.len() - 1
+			id
 		}
 	}
 	

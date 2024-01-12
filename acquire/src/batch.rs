@@ -80,6 +80,8 @@ pub fn fetch_batch(
 	
 	(batch_sync, future)
 }
+
+#[tracing::instrument(skip(listener))]
 pub async fn run_fetch_batch(
 	feeds: Vec<i32>,
 	batch_sync: Arc<RwLock<Batch>>,
@@ -87,6 +89,8 @@ pub async fn run_fetch_batch(
 	strats: StrategyList,
 	db: Db,
 ) {
+	tracing::info!("starting batch fetch");
+	
 	let (send, mut receive) = mpsc::channel(16);
 	
 	for id in feeds {
@@ -113,7 +117,9 @@ pub async fn run_fetch_batch(
 		if batch_lock.is_done() {
 			break;
 		}
-	}	
+	}
+	
+	tracing::info!("finished batch fetch");
 }
 
 ///Spawns a new task that fetches the feed, while sending update(s) along the channel
