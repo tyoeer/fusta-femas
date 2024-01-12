@@ -7,6 +7,8 @@ use crate::table;
 use crate::utils;
 #[cfg(feature="ssr")]
 use sea_orm::*;
+#[cfg(feature="ssr")]
+use ff_object::View;
 
 
 #[derive(
@@ -31,10 +33,9 @@ pub struct EntryOverview {
 }
 
 #[cfg(feature="ssr")]
-type Entity = entry::Entity;
-
-#[cfg(feature="ssr")]
-impl EntryOverview {
+impl ff_object::View for EntryOverview {
+	type Entity = entry::Entity;
+	
 	fn columns() -> impl Iterator<Item = impl sea_orm::ColumnTrait> {
 		entry::Column::iter().filter(|column| {
 			use entry::Column::*;
@@ -42,30 +43,10 @@ impl EntryOverview {
 		})
 	}
 	
-	fn order(query: Select<Entity>) -> Select<Entity> {
+	fn order(query: Select<Self::Entity>) -> Select<Self::Entity> {
 		query
 			.order_by_desc(entry::Column::ProducedDate)
 			.order_by_desc(entry::Column::ProducedTime)
-	}
-	
-	
-	pub fn query(modifier: impl FnOnce(Select<Entity>) -> Select<Entity>) -> sea_orm::Selector<SelectModel<Self>> {
-		let query = Entity::find();
-		let query = modifier(query);
-		Self::from_query(query)
-	}
-	
-	
-	pub fn from_query(query: Select<Entity>) -> sea_orm::Selector<SelectModel<Self>> {
-		let query = Self::order(query);
-		let query = Self::select_only_columns(query);
-		query.into_model::<Self>()
-	}
-	
-	fn select_only_columns(query: Select<Entity>) -> Select<Entity> {
-		query
-			.select_only()
-			.columns(Self::columns())
 	}
 }
 

@@ -5,6 +5,8 @@ use crate::table::*;
 use crate::utils;
 #[cfg(feature="ssr")]
 use sea_orm::*;
+#[cfg(feature="ssr")]
+use ff_object::View;
 
 use crate::fetch::search::FetchOverview;
 use crate::entry::search::EntryOverview;

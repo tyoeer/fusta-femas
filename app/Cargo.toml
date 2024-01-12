@@ -39,6 +39,7 @@ ssr = [
 	"dep:axum",
 	"dep:acquire",
 	"entities/server",
+	"ff-object/server",
 	"dep:sea-orm",
 	"dep:tokio",
 ]

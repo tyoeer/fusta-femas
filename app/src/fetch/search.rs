@@ -5,6 +5,9 @@ use entities::prelude::*;
 // use crate::utils;
 #[cfg(feature="ssr")]
 use sea_orm::*;
+#[cfg(feature="ssr")]
+use ff_object::View;
+
 
 #[derive(
 	Clone, Debug, PartialEq, Eq,
@@ -26,40 +29,16 @@ pub struct FetchOverview {
 	pub updated_at: time_fields::PrimitiveDateTime,
 }
 
-#[cfg(feature="ssr")]
-type Entity = fetch::Entity;
 
 #[cfg(feature="ssr")]
-impl FetchOverview {
+impl View for FetchOverview {
+	type Entity = fetch::Entity;
+	
 	fn columns() -> impl Iterator<Item = impl sea_orm::ColumnTrait> {
 		fetch::Column::iter().filter(|column| {
 			use fetch::Column::*;
 			!matches!(column, Content | Error | Log )
 		})
-	}
-	
-	fn order(query: Select<Entity>) -> Select<Entity> {
-		query
-	}
-		
-	
-	pub fn query(modifier: impl FnOnce(Select<Entity>) -> Select<Entity>) -> sea_orm::Selector<SelectModel<Self>> {
-		let query = Entity::find();
-		let query = modifier(query);
-		Self::from_query(query)
-	}
-	
-	
-	pub fn from_query(query: Select<Entity>) -> sea_orm::Selector<SelectModel<Self>> {
-		let query = Self::order(query);
-		let query = Self::select_only_columns(query);
-		query.into_model::<Self>()
-	}
-	
-	fn select_only_columns(query: Select<Entity>) -> Select<Entity> {
-		query
-			.select_only()
-			.columns(Self::columns())
 	}
 }
 

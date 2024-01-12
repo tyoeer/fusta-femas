@@ -6,6 +6,8 @@ use crate::fetch::search::FetchOverview;
 use crate::utils;
 #[cfg(feature="ssr")]
 use sea_orm::*;
+#[cfg(feature="ssr")]
+use ff_object::View;
 
 #[component(transparent)]
 pub fn Routes() -> impl IntoView {
