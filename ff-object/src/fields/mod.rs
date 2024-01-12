@@ -3,3 +3,6 @@ mod core;
 pub use core::Field;
 pub use core::DynField;
 
+///Stuff relating to the objects that have the fields
+mod object;
+pub use object::FieldListable;

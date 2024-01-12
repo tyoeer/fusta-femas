@@ -3,7 +3,7 @@ use bevy_reflect::Reflect;
 
 ///Trait for structs that can be used to access a field in an object
 pub trait Field {
-	type Object;
+	type Object: ?Sized;
 	type FieldType: ?Sized;
 	
 	fn name(&self) -> &str;
@@ -20,7 +20,7 @@ pub struct DynField<Object> {
 }
 
 impl<Object> DynField<Object> {
-	pub fn new(
+	pub const fn new(
 		name: Cow<'static, str>,
 		get: fn(&Object) -> &dyn Reflect,
 		get_mut: fn(&mut Object) -> &mut dyn Reflect,
@@ -48,12 +48,27 @@ impl<Object> Field for DynField<Object> {
 	}
 }
 
+impl<Object> Field for &DynField<Object> {
+	type Object = Object;
+	type FieldType = dyn Reflect;
+	
+	fn name(&self) -> &str {
+		self.name.as_ref()
+	}
+	fn get<'object>(&self, object: &'object Self::Object) -> &'object Self::FieldType {
+		(self.get)(object)
+	}
+	fn get_mut<'object>(&self, object: &'object mut Self::Object) -> &'object mut Self::FieldType {
+		(self.get_mut)(object)
+	}
+}
+
 ///Builds a DynField struct for the given field on the given object
 #[macro_export]
 macro_rules! dyn_field {
 	($field:ident, $object:ty) => {
 		$crate::fields::DynField::<$object>::new(
-			stringify!($field).into(),
+			std::borrow::Cow::Borrowed(stringify!($field)),
 			|obj| &obj.$field,
 			|obj| &mut obj.$field,
 		)
