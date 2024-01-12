@@ -4,7 +4,6 @@ use ff_macros::Object;
 use serde::{Deserialize, Serialize};
 
 use crate::time_fields as time;
-use crate as entities;
 
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Object, bevy_reflect::Reflect)]
