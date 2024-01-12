@@ -1057,6 +1057,7 @@ checksum = "25cbce373ec4653f1a01a31e8a5e5ec0c622dc27ff9c4e6606eefef5cbbed4a5"
 name = "ff-macros"
 version = "0.1.0"
 dependencies = [
+ "bevy_reflect",
  "ff-object",
  "proc-macro-error",
  "proc-macro2",
@@ -1069,6 +1070,7 @@ dependencies = [
 name = "ff-object"
 version = "0.1.0"
 dependencies = [
+ "bevy_reflect",
  "sea-orm",
 ]
 

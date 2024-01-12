@@ -6,6 +6,9 @@ use syn::{
 use proc_macro_error::proc_macro_error;
 
 mod object;
+mod field_list;
+
+
 /**
 Generates an impl for [ff_objects::Object].
 
@@ -21,6 +24,19 @@ Object name selection:
 pub fn object_derive(input: TokenStream) -> TokenStream {
 	let input = parse_macro_input!(input as DeriveInput);
 	object::ObjectDerive::from(input)
+		.generate()
+		.into()
+}
+
+
+/**
+Generates an impl for [ff_objects::fields::FieldListable].
+*/
+#[proc_macro_error]
+#[proc_macro_derive(FieldList)]
+pub fn field_list_derive(input: TokenStream) -> TokenStream {
+	let input = parse_macro_input!(input as DeriveInput);
+	field_list::FieldListDerive::from(input)
 		.generate()
 		.into()
 }

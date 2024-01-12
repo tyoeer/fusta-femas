@@ -14,5 +14,6 @@ proc-macro-error = "1.0.4"
 
 [dev-dependencies]
 trybuild = "1.0.88"
+bevy_reflect = "0.12.1"
 
 ff-object = {path="../ff-object"}

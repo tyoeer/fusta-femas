@@ -1,0 +1,5 @@
+error: enums aren't supported
+ --> tests/field_list_failures/not_struct.rs:4:1
+  |
+4 | enum Test {}
+  | ^^^^
