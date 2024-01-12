@@ -27,29 +27,39 @@ pub struct FetchOverview {
 }
 
 #[cfg(feature="ssr")]
+type Entity = fetch::Entity;
+
+#[cfg(feature="ssr")]
 impl FetchOverview {
-	fn base_query() -> sea_orm::Select<fetch::Entity> {
-		fetch::Entity::find()
-			.select_only()
-			.columns(fetch::Column::iter().filter(|column| {
-				use fetch::Column::*;
-				!matches!(column, Content | Error | Log )
-			}))
-	}
-		
-	pub fn from_query(query: Select<fetch::Entity>) -> sea_orm::Selector<SelectModel<Self>> {
-		query
-			.select_only()
-			.columns(fetch::Column::iter().filter(|column| {
-				use fetch::Column::*;
-				!matches!(column, Content | Error | Log )
-			}))
-			.into_model::<Self>()
+	fn columns() -> impl Iterator<Item = impl sea_orm::ColumnTrait> {
+		fetch::Column::iter().filter(|column| {
+			use fetch::Column::*;
+			!matches!(column, Content | Error | Log )
+		})
 	}
 	
-	pub fn query(modifier: impl FnOnce(Select<fetch::Entity>) -> Select<fetch::Entity>)-> sea_orm::Selector<SelectModel<Self>> {
-		modifier(Self::base_query())
-			.into_model::<Self>()
+	fn order(query: Select<Entity>) -> Select<Entity> {
+		query
+	}
+		
+	
+	pub fn query(modifier: impl FnOnce(Select<Entity>) -> Select<Entity>) -> sea_orm::Selector<SelectModel<Self>> {
+		let query = Entity::find();
+		let query = modifier(query);
+		Self::from_query(query)
+	}
+	
+	
+	pub fn from_query(query: Select<Entity>) -> sea_orm::Selector<SelectModel<Self>> {
+		let query = Self::order(query);
+		let query = Self::select_only_columns(query);
+		query.into_model::<Self>()
+	}
+	
+	fn select_only_columns(query: Select<Entity>) -> Select<Entity> {
+		query
+			.select_only()
+			.columns(Self::columns())
 	}
 }
 

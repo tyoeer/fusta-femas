@@ -31,38 +31,41 @@ pub struct EntryOverview {
 }
 
 #[cfg(feature="ssr")]
+type Entity = entry::Entity;
+
+#[cfg(feature="ssr")]
 impl EntryOverview {
-	fn base_query() -> sea_orm::Select<entry::Entity> {
-		entry::Entity::find()
-			.select_only()
-			.columns(entry::Column::iter().filter(|column| {
-				use entry::Column::*;
-				!matches!(column, ViewUrl | EmbedUrl )
-			}))
+	fn columns() -> impl Iterator<Item = impl sea_orm::ColumnTrait> {
+		entry::Column::iter().filter(|column| {
+			use entry::Column::*;
+			!matches!(column, ViewUrl | EmbedUrl )
+		})
 	}
 	
-	pub fn from_query(query: Select<entry::Entity>) -> sea_orm::Selector<SelectModel<Self>> {
+	fn order(query: Select<Entity>) -> Select<Entity> {
+		query
+			.order_by_desc(entry::Column::ProducedDate)
+			.order_by_desc(entry::Column::ProducedTime)
+	}
+	
+	
+	pub fn query(modifier: impl FnOnce(Select<Entity>) -> Select<Entity>) -> sea_orm::Selector<SelectModel<Self>> {
+		let query = Entity::find();
+		let query = modifier(query);
+		Self::from_query(query)
+	}
+	
+	
+	pub fn from_query(query: Select<Entity>) -> sea_orm::Selector<SelectModel<Self>> {
+		let query = Self::order(query);
+		let query = Self::select_only_columns(query);
+		query.into_model::<Self>()
+	}
+	
+	fn select_only_columns(query: Select<Entity>) -> Select<Entity> {
 		query
 			.select_only()
-			.columns(entry::Column::iter().filter(|column| {
-				use entry::Column::*;
-				!matches!(column, ViewUrl | EmbedUrl )
-			}))
-			.into_model::<Self>()
-	}
-	
-	pub fn query(modifier: impl FnOnce(Select<entry::Entity>) -> Select<entry::Entity>) -> sea_orm::Selector<SelectModel<Self>> {
-		Self::query_unordered( |query| {
-			let query = query
-				.order_by_desc(entry::Column::ProducedDate)
-				.order_by_desc(entry::Column::ProducedTime);
-			modifier(query)
-		} )
-	}
-	
-	pub fn query_unordered(modifier: impl FnOnce(Select<entry::Entity>) -> Select<entry::Entity>) -> sea_orm::Selector<SelectModel<Self>> {
-		modifier(Self::base_query())
-			.into_model::<Self>()
+			.columns(Self::columns())
 	}
 }
 
