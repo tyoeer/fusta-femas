@@ -3,6 +3,4 @@ pub use crate::entities::feed;
 pub use crate::entities::fetch;
 pub use crate::entities::fetch_entry;
 
-pub use crate::traits::Object;
-
 pub use crate::time_fields as time_fields;
