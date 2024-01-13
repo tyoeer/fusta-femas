@@ -55,8 +55,7 @@ pub async fn add_table(man: &SchemaManager<'_>, tcs: &mut TableCreateStatement) 
 			.not_null()
 			.default(Expr::current_timestamp()),
 	);
-	tracing::info!("{}", tcs.to_string(SqliteQueryBuilder));
-
+	
 	man.create_table(tcs.to_owned()).await?;
 
 	// Trigger for updated_at
