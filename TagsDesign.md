@@ -25,24 +25,23 @@ Generates SQL that selects this tag
 Tag:
 - id, updated_at, created_at,
 - title
-
-AutoTag: Tag:
 - type
+	- "feed" (manual)
+	- "feed_and_entries" (manual for feeds, entries inherit from feed)
+	- "entry" (manual)
 - config
 	- E.g. how much older something is
-
-ManualTag: Tag:
+	- nullable
 
 FeedTag:
 - id, updated_at, created_at,
 - feed_id
-- manual_tag_id
-- applies_to_entries
+- tag_id
 
 EntryTag:
 - id, updated_at, created_at,
 - entry_id
-- manual_tag_id
+- tag_id
 
 ## Questions
 
@@ -51,13 +50,23 @@ EntryTag:
 	- That might perhaps get confusing though
 		- E.g. favorite feed vs favorite entry
 
-## Todo
+## Todo MVP
+
+- Tags in DB
 - Create tag
 	- Label
 	- Type
 		- manual for now
+- List tags
 - Add manual tag to feed
 - Search that allows filtering by tag
+
+## Followup todo
+
+- List feeds for a given tags
+- Add entry tag inheritance
+	- Requires system for automatic tags
+- Add entry manual tags
 
 ## Followup ideas
 
