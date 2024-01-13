@@ -3,7 +3,9 @@ use bevy_reflect::Reflect;
 
 ///Trait for structs that can be used to access a field in an object
 pub trait Field {
+	///The type we can access a field of
 	type Object: ?Sized;
+	///The type of the field we're accessing
 	type FieldType: ?Sized;
 	
 	fn name(&self) -> &str;
@@ -63,7 +65,22 @@ impl<Object> Field for &DynField<Object> {
 	}
 }
 
-///Builds a DynField struct for the given field on the given object
+/**
+Builds a DynField struct for the given field on the given type
+
+# Example
+```
+# use ff_object::dyn_field;
+# use ff_object::fields::*;
+struct TestStruct { test_field: i32 }
+
+let field/*: DynField*/ = dyn_field!(test_field, TestStruct);
+# let _field_type_check: DynField = field;
+
+let test = TestStruct { test_field: 2 };
+assert_eq!(2, *field.get(&test).downcast_ref().unwrap());
+```
+*/
 #[macro_export]
 macro_rules! dyn_field {
 	($field:ident, $object:ty) => {
