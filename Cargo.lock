@@ -3003,6 +3003,7 @@ name = "server-entrypoint"
 version = "0.1.0"
 dependencies = [
  "app",
+ "sea-migration",
  "server-setup",
  "tokio",
 ]
@@ -3016,6 +3017,7 @@ dependencies = [
  "leptos",
  "leptos_axum",
  "sea-orm",
+ "sea-orm-migration",
  "tower",
  "tower-http",
  "tracing",

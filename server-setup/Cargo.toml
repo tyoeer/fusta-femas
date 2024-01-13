@@ -13,3 +13,4 @@ tracing-subscriber = {workspace = true, features = ["env-filter"]}
 tracing = {workspace = true}
 dotenvy = {version = "0.15"}
 sea-orm = {workspace = true}
+sea-orm-migration = {version = "0.12"}

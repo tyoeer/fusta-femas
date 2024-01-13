@@ -8,6 +8,7 @@ use axum::{
 };
 use leptos::*;
 use leptos_axum::{generate_route_list, LeptosRoutes, handle_server_fns};
+use sea_orm_migration::MigratorTrait;
 use tower::ServiceExt;
 use tower_http::services::ServeDir;
 use tracing::level_filters::LevelFilter;
@@ -27,7 +28,7 @@ async fn get_static_file(uri: Uri, root: &str) -> Result<Response, (StatusCode, 
 }
 
 
-pub async fn run<View>(app: fn() -> View, extend: impl FnOnce(Router) -> Router) where
+pub async fn run<Migrator: MigratorTrait, View>(app: fn() -> View, extend: impl FnOnce(Router) -> Router) where
 	View: IntoView + 'static
 {
 	//We want backtraces for errors while fetching
@@ -60,6 +61,9 @@ pub async fn run<View>(app: fn() -> View, extend: impl FnOnce(Router) -> Router)
 	
 	let db_url = std::env::var("DATABASE_URL").expect("DATABASE_URL not set");
 	let conn = sea_orm::Database::connect(db_url).await.expect("failed connecting to db");
+	
+	//Keep migrations as a generic/function parameter to prevent recompilation whenever migrations change
+	Migrator::up(&conn, None).await.expect("failed running database migrations");
 	
 	/*
 		This can't be moved into it's own function because a function returning this would return
