@@ -39,16 +39,18 @@ Run `just binstall` to install the requirements with [`cargo binstall`](https://
 
 ### Database management
 
-- Set up a development database with `just reset-db`
 - Update entities:
 	- Update model in [`entities`](/entities/)
 	- Add migration in [`sea-migration`](/sea-migration/)
+		- `sea migrate -d sea-migration generate [[NAME]]`
+		- Add the new migration in `migrations()` in [`sea-migration/src/lib.rs`](sea-migration/src/lib.rs)
 	- You could use the following command to check if the models about match
 		- `sea generate entity --lib -o entities/src --with-serde both`
 		- It loses a lot of type information though
 			- `time::PrimitveDateTime`
 			- enums
 			- https://github.com/SeaQL/sea-orm/issues/924
+- You can reset the database with `just reset-db`
 
 ### Alt database
 
@@ -56,7 +58,7 @@ I wanted to use Fusta Femas already while still developing it, before building a
 
 To serve the current codebase with the alt database, run `just alt`.
 
-To reset/create the database, run `just reset-alt-db`
+To reset the database, run `just reset-alt-db`
 
 ## Useful links
 
