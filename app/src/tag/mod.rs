@@ -4,7 +4,7 @@ use leptos_meta::Title;
 
 
 pub mod new;
-// pub mod details;
+pub mod details;
 pub mod search;
 
 
@@ -21,7 +21,7 @@ pub fn Routes() -> impl IntoView {
 				<Route path="" view=search::Search />
 				<Route path="/new" view=new::TagCreator />
 			</Route>
-			// <details::Routes />
+			<details::Routes />
 		</Route>
 	}
 }
