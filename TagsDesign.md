@@ -52,12 +52,12 @@ EntryTag:
 
 ## Todo MVP
 
-- Tags in DB
-- Create tag
++ Tags in DB
++ Create tag
 	- Label
 	- Type
 		- manual for now
-- List tags
++ List tags
 - Add manual tag to feed
 - Search that allows filtering by tag
 
