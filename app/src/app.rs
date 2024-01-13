@@ -36,6 +36,7 @@ pub fn App() -> impl IntoView {
 						<crate::fetch::Routes />
 						<crate::fetch::batch::Routes />
 						<crate::entry::Routes />
+						<crate::tag::Routes />
 						<Route path="/strats" view=crate::strategies::Strategies />
 					</Routes>
 				</div>
@@ -51,6 +52,7 @@ fn Nav() -> impl IntoView {
 			<A href="">Home</A>
 			<A href="entry">Entries</A>
 			<A href="feed">Feeds</A>
+			<A href="tag">Tags</A>
 			<A href="strats">Strategies</A>
 		</nav>
 	}

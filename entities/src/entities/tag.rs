@@ -21,6 +21,12 @@ pub struct Model {
 	pub updated_at: time::PrimitiveDateTime,
 }
 
+//TODO better way for this, probably using a newtype
+pub fn types() -> impl Iterator<Item=String> {
+	[
+		"feed",
+	].into_iter().map(|str| str.to_owned())
+}
 
 cfg_if::cfg_if! { if #[cfg(feature = "orm")] {
 
