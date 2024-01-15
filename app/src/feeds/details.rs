@@ -175,6 +175,16 @@ pub async fn get_tags(feed_id: i32) -> Result<Vec<tag::Model>, ServerFnError> {
 }
 
 #[server]
+pub async fn get_available_tags(feed_id: i32) -> Result<Vec<tag::Model>, ServerFnError> {
+	let conn = crate::extension!(DatabaseConnection);
+	
+	tag::Entity::find()
+		.all(&conn)
+		.await
+		.map_err(|e| e.into())
+}
+
+#[server]
 async fn add_tag(feed_id: i32, tag_id: i32) -> Result<(), ServerFnError> {
 	let conn = crate::extension!(DatabaseConnection);
 	
@@ -202,8 +212,17 @@ pub fn Tags() -> impl IntoView {
 	view! {
 		<ActionForm action=add_tag>
 			<input type="hidden" name="feed_id" value=feed_id/>
-			<label for="tag_input"> "id:" </label>
-			<input type="number" name="tag_id" id="tag_input" size=50/>
+			<select name="tag_id">
+				<utils::AwaitOk future=move || get_available_tags(feed_id()) let:tags>
+					<For
+						each=move || tags.clone()
+						key=|tag| tag.id
+						let:tag
+					>
+						<option value=tag.id> {tag.title} </option>
+					</For>
+				</utils::AwaitOk>
+			</select>
 			
 			<utils::FormSubmit action=add_tag button="add tag"/>
 		</ActionForm>
