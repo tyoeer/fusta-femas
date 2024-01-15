@@ -44,6 +44,19 @@ Run `just binstall` to install the requirements with [`cargo binstall`](https://
 	- Add migration in [`sea-migration`](/sea-migration/)
 		- `sea migrate -d sea-migration generate [[NAME]]`
 		- Add the new migration in `migrations()` in [`sea-migration/src/lib.rs`](sea-migration/src/lib.rs)
+	- In case of new model:
+		- Add it in the entities prelude
+	- Many to many relations:
+		```rust
+		impl Related<to::Entity> for from::Entity {
+			fn to() -> RelationDef {
+				between::Relation::To.def()
+			}
+			fn via() -> Option<RelationDef> {
+				Some(between::Relation::From.def().rev())
+			}
+		}
+		```
 	- You could use the following command to check if the models about match
 		- `sea generate entity --lib -o entities/src --with-serde both`
 		- It loses a lot of type information though
