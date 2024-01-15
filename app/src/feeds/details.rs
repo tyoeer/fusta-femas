@@ -194,6 +194,11 @@ pub fn Tags() -> impl IntoView {
 	let add_tag = create_server_action::<AddTag>();
 	let feed_id = move || feed.get().id;
 	
+	let resource = Resource::new(
+		move || (feed_id(), add_tag.version().get()),
+		|(feed_id, _)| get_tags(feed_id)
+	);
+	
 	view! {
 		<ActionForm action=add_tag>
 			<input type="hidden" name="feed_id" value=feed_id/>
@@ -202,8 +207,19 @@ pub fn Tags() -> impl IntoView {
 			
 			<utils::FormSubmit action=add_tag button="add tag"/>
 		</ActionForm>
-		<utils::AwaitOk future=move || get_tags(feed_id()) let:tags>
-			<crate::tag::search::Table tags />
-		</utils::AwaitOk>
+		
+		<Transition
+			fallback = || view! {<div>"Loading..."</div>}
+		>
+			<ErrorBoundary fallback = |errors| view!{ <crate::app::ErrorsView errors /> } >
+				{
+					move || resource.get().map(
+						|tags_res| tags_res.map(
+							|tags| view! { <crate::tag::search::Table tags /> }
+						)
+					)
+				}
+			</ErrorBoundary>
+		</Transition>
 	}.into()
 }
