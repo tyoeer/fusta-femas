@@ -18,8 +18,15 @@ pub async fn all_tags() -> Result<Vec<tag::Model>, ServerFnError> {
 pub fn Search() -> impl IntoView {
 	view! {
 		<utils::AwaitOk future=all_tags let:tags>
-			<ObjectTable items = tags />
+			<Table tags />
 		</utils::AwaitOk>
 		<A href="new">Create new tag</A>
+	}
+}
+
+#[component]
+pub fn Table(#[prop(into)] tags: MaybeSignal<Vec<tag::Model>>) -> impl IntoView {
+	view! {
+		<ObjectTable items = tags />
 	}
 }

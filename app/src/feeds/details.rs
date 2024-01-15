@@ -20,6 +20,7 @@ pub fn Routes() -> impl IntoView {
 			<Route path="about" view=FeedInfo/>
 			<Route path="fetches" view=Fetches/>
 			<Route path="entries" view=Entries/>
+			<Route path="tags" view=Tags/>
 		</Route>
 	}
 }
@@ -46,6 +47,9 @@ pub fn Sidebar() -> impl IntoView {
 				</li>
 				<li>
 					<A href="entries">Entries</A>
+				</li>
+				<li>
+					<A href="tags">Tags</A>
 				</li>
 			</ul>
 		</nav>
@@ -115,6 +119,7 @@ pub fn FeedInfo() -> impl IntoView {
 	}.into()
 }
 
+
 #[server]
 pub async fn get_fetches(feed_id: i32) -> Result<Vec<FetchOverview>, ServerFnError> {
 	let conn = crate::extension!(DatabaseConnection);
@@ -135,6 +140,7 @@ pub fn Fetches() -> impl IntoView {
 	}.into()
 }
 
+
 #[server]
 pub async fn get_entries(feed_id: i32) -> Result<Vec<EntryOverview>, ServerFnError> {
 	let conn = crate::extension!(DatabaseConnection);
@@ -153,6 +159,28 @@ pub fn Entries() -> impl IntoView {
 	view! {
 		<utils::AwaitOk future=move || get_entries(feed.get().id) let:entries>
 			<crate::entry::search::Table entries />
+		</utils::AwaitOk>
+	}.into()
+}
+
+
+#[server]
+pub async fn get_tags(feed_id: i32) -> Result<Vec<tag::Model>, ServerFnError> {
+	let conn = crate::extension!(DatabaseConnection);
+	<feed::Entity as Related<tag::Entity>>::find_related()
+		.filter(feed::Column::Id.eq(feed_id))
+		.all(&conn)
+		.await
+		.map_err(|e| e.into())
+}
+
+#[component]
+pub fn Tags() -> impl IntoView {
+	let feed = crate::model!(feed);
+	
+	view! {
+		<utils::AwaitOk future=move || get_tags(feed.get().id) let:tags>
+			<crate::tag::search::Table tags />
 		</utils::AwaitOk>
 	}.into()
 }
