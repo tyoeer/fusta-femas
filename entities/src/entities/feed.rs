@@ -30,6 +30,8 @@ pub enum Relation {
 	Entry,
 	#[sea_orm(has_many = "super::fetch::Entity")]
 	Fetch,
+	#[sea_orm(has_many = "super::feed_tag::Entity")]
+	FeedTag,
 }
 
 impl Related<super::entry::Entity> for Entity {
@@ -41,6 +43,12 @@ impl Related<super::entry::Entity> for Entity {
 impl Related<super::fetch::Entity> for Entity {
 	fn to() -> RelationDef {
 		Relation::Fetch.def()
+	}
+}
+
+impl Related<super::feed_tag::Entity> for Entity {
+	fn to() -> RelationDef {
+		Relation::FeedTag.def()
 	}
 }
 
