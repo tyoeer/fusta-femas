@@ -134,6 +134,56 @@ pub fn AwaitOk<
 	}
 }
 
+/**
+Takes in a Resource that returns a [Result], and only renders it's children with the Ok variant using a [Transition]
+*/
+#[component]
+pub fn TransitionOk<ResourceIn, ResourceOk,	ResourceErr, ChildrenView, Children>(
+	resource: Resource<ResourceIn, Result<ResourceOk, ResourceErr>>,
+	#[prop(into)]
+	fallback: ViewFn,
+	children: Children,
+) -> impl IntoView where
+	ResourceIn:
+		//Required to do anything useful with Resource
+		Clone +
+		//Required for Resource
+		'static,
+	ResourceErr:
+		//Required so the Result is IntoView and can be rendered and caught by the error boundary
+		Into<leptos::error::Error>,
+	Result<ResourceOk, ResourceErr>:
+		//So we can give children ownership
+		Clone +
+		//Required for Resource
+		'static,
+	Option<Result<ChildrenView, ResourceErr>>:
+		//This should be covered by other bounds, but this way we double check and hopefully have a nicer error message
+		IntoView,
+	ChildrenView:
+		IntoView + Clone +
+		//Not quite sure why this one is required
+		'static,
+	Children:
+		Fn(ResourceOk) -> ChildrenView +
+		//Wanted by await
+		'static,
+{
+	//Not doing this causes a lifetime error I don't get, and this is what Await does, so it seems fine
+	let children_stored = store_value(children);
+	view! {
+		<Transition fallback >
+			<ErrorBoundary fallback = |errors| view!{ <crate::app::ErrorsView errors /> } >
+				{ move || resource.get().map(
+					|resource_res| resource_res.map(
+						|resource_ok| children_stored.with_value(|children| children(resource_ok))
+					)
+				) }
+			</ErrorBoundary>
+		</Transition>
+	}
+}
+
 
 /**
 Renders an outlet in a `<main>` with a [`RwSignal`](leptos::RwSignal)`<Object>` in the context.

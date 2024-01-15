@@ -264,20 +264,12 @@ pub fn Tags() -> impl IntoView {
 			<utils::FormSubmit action=add_tag button="add tag"/>
 		</ActionForm>
 		
-		<Transition
+		<utils::TransitionOk
 			fallback = || view! {<div>"Loading..."</div>}
+			resource = feed_tags
+			let:tags
 		>
-			<ErrorBoundary fallback = |errors| view!{ <crate::app::ErrorsView errors /> } >
-				{
-					move || feed_tags.get().map(
-						|tags_res| tags_res.map(
-							|tags| view! {
-								<crate::tag::search::Table tags />
-							}
-						)
-					)
-				}
-			</ErrorBoundary>
-		</Transition>
+			<crate::tag::search::Table tags />
+		</utils::TransitionOk>
 	}.into()
 }

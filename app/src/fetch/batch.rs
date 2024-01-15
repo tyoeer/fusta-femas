@@ -95,19 +95,13 @@ pub fn UpdatingBatchPage() -> impl IntoView {
 		view! {
 			<leptos_meta::Title text=format!("batch {}", id) />
 			<main>
-				<Transition
+				<utils::TransitionOk
 					fallback = || view! {<div>"Loading..."</div>}
+					resource
+					let:batch
 				>
-					<ErrorBoundary fallback = |errors| view!{ <crate::app::ErrorsView errors /> } >
-						{
-							move || resource.get().map(
-								|batch_res| batch_res.map(
-									|batch| view! { <BatchInfo batch/> }
-								)
-							)
-						}
-					</ErrorBoundary>
-				</Transition>
+					<BatchInfo batch/>
+				</utils::TransitionOk>
 			</main>
 		}
 	})
