@@ -179,6 +179,15 @@ pub async fn get_available_tags(feed_id: i32) -> Result<Vec<tag::Model>, ServerF
 	let conn = crate::extension!(DatabaseConnection);
 	
 	tag::Entity::find()
+		.filter(
+			tag::Column::Id.not_in_subquery(
+				<feed::Entity as Related<tag::Entity>>::find_related()
+					.filter(feed::Column::Id.eq(feed_id))
+					.select_only()
+					.select_column(tag::Column::Id)
+					.into_query()
+			)
+		)
 		.all(&conn)
 		.await
 		.map_err(|e| e.into())
@@ -204,24 +213,52 @@ pub fn Tags() -> impl IntoView {
 	let add_tag = create_server_action::<AddTag>();
 	let feed_id = move || feed.get().id;
 	
-	let resource = Resource::new(
-		move || (feed_id(), add_tag.version().get()),
+	let resource_input = move || (feed_id(), add_tag.version().get());
+	
+	let feed_tags = Resource::new(
+		resource_input,
 		|(feed_id, _)| get_tags(feed_id)
+	);
+	
+	let available_tags = Resource::new(
+		resource_input,
+		|(feed_id, _)| get_available_tags(feed_id)
 	);
 	
 	view! {
 		<ActionForm action=add_tag>
 			<input type="hidden" name="feed_id" value=feed_id/>
 			<select name="tag_id">
-				<utils::AwaitOk future=move || get_available_tags(feed_id()) let:tags>
-					<For
-						each=move || tags.clone()
-						key=|tag| tag.id
-						let:tag
-					>
-						<option value=tag.id> {tag.title} </option>
-					</For>
-				</utils::AwaitOk>
+				<Suspense
+					fallback = || view!{ <option selected=true disabled=true> "Loading..." </option> }
+				>
+					<ErrorBoundary fallback = |errors| view!{ <crate::app::ErrorsView errors /> } >
+						{
+							move || available_tags.get().map(
+								|tags_res| tags_res.map(
+									|tags| view! {
+										<For
+											each=move || tags.clone()
+											key=|tag| tag.id
+											let:tag
+										>
+											<option value=tag.id> {tag.title} </option>
+										</For>
+									}
+								)
+							)
+						}
+					</ErrorBoundary>
+				</Suspense>
+				// <utils::AwaitOk future=move || get_available_tags(feed_id()) let:tags>
+				// 	<For
+				// 		each=move || tags.clone()
+				// 		key=|tag| tag.id
+				// 		let:tag
+				// 	>
+				// 		<option value=tag.id> {tag.title} </option>
+				// 	</For>
+				// </utils::AwaitOk>
 			</select>
 			
 			<utils::FormSubmit action=add_tag button="add tag"/>
@@ -232,9 +269,11 @@ pub fn Tags() -> impl IntoView {
 		>
 			<ErrorBoundary fallback = |errors| view!{ <crate::app::ErrorsView errors /> } >
 				{
-					move || resource.get().map(
+					move || feed_tags.get().map(
 						|tags_res| tags_res.map(
-							|tags| view! { <crate::tag::search::Table tags /> }
+							|tags| view! {
+								<crate::tag::search::Table tags />
+							}
 						)
 					)
 				}
