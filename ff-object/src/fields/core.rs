@@ -74,11 +74,11 @@ Builds a DynField struct for the given field on the given type
 # use ff_object::fields::*;
 struct TestStruct { test_field: i32 }
 
-let field/*: DynField*/ = dyn_field!(test_field, TestStruct);
-# let _field_type_check: DynField = field;
+let field/*: DynField<TestStruct>*/ = dyn_field!(test_field, TestStruct);
+# let field: DynField<TestStruct> = field; // type check
 
 let test = TestStruct { test_field: 2 };
-assert_eq!(2, *field.get(&test).downcast_ref().unwrap());
+assert_eq!(2, *field.get(&test).downcast_ref::<i32>().unwrap());
 ```
 */
 #[macro_export]
