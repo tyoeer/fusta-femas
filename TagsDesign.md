@@ -58,12 +58,16 @@ EntryTag:
 	- Type
 		- manual for now
 + List tags
-- Add manual tag to feed
+- FeedTag in DB
+- Add tag to feed (FeedTag creation)
 - Search that allows filtering by tag
-
+	- Search system with filters
+	- Tags filter
 ## Followup todo
 
 - List feeds for a given tags
+- List tags for a given feed
+- Batch fetch filtered feed search
 - Add entry tag inheritance
 	- Requires system for automatic tags
 - Add entry manual tags
