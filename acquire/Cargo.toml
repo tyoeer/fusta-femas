@@ -22,4 +22,4 @@ trait-variant = "0.1.0"
 
 [dev-dependencies]
 sea-migration = {path="../sea-migration"}
-sea-orm-macros = "0.12.6"
+sea-orm-macros = "0.12.11"
