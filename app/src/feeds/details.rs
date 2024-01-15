@@ -174,12 +174,35 @@ pub async fn get_tags(feed_id: i32) -> Result<Vec<tag::Model>, ServerFnError> {
 		.map_err(|e| e.into())
 }
 
+#[server]
+async fn add_tag(feed_id: i32, tag_id: i32) -> Result<(), ServerFnError> {
+	let conn = crate::extension!(DatabaseConnection);
+	
+	let mut feed_tag = feed_tag::ActiveModel::new();
+	feed_tag.feed_id = Set(feed_id);
+	//TODO validate tag id
+	feed_tag.tag_id = Set(tag_id);
+	
+	feed_tag.insert(&conn).await?;
+	
+	Ok(())
+}
+
 #[component]
 pub fn Tags() -> impl IntoView {
 	let feed = crate::model!(feed);
+	let add_tag = create_server_action::<AddTag>();
+	let feed_id = move || feed.get().id;
 	
 	view! {
-		<utils::AwaitOk future=move || get_tags(feed.get().id) let:tags>
+		<ActionForm action=add_tag>
+			<input type="hidden" name="feed_id" value=feed_id/>
+			<label for="tag_input"> "id:" </label>
+			<input type="number" name="tag_id" id="tag_input" size=50/>
+			
+			<utils::FormSubmit action=add_tag button="add tag"/>
+		</ActionForm>
+		<utils::AwaitOk future=move || get_tags(feed_id()) let:tags>
 			<crate::tag::search::Table tags />
 		</utils::AwaitOk>
 	}.into()
