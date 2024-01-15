@@ -58,7 +58,7 @@ EntryTag:
 	- Type
 		- manual for now
 + List tags
-- FeedTag in DB
++ FeedTag in DB
 - Add tag to feed (FeedTag creation)
 - Search that allows filtering by tag
 	- Search system with filters

@@ -52,6 +52,15 @@ impl Related<super::feed_tag::Entity> for Entity {
 	}
 }
 
+impl Related<super::tag::Entity> for Entity {
+	fn to() -> RelationDef {
+		super::feed_tag::Relation::Tag.def()
+	}
+	fn via() -> Option<RelationDef> {
+		Some(super::feed_tag::Relation::Feed.def().rev())
+	}
+}
+
 impl ActiveModelBehavior for ActiveModel {}
 
 
