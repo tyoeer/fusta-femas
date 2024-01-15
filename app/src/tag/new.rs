@@ -29,7 +29,7 @@ pub fn TagCreator() -> impl IntoView {
 					<input class="object_value" type="text" name="title" id="title_input" size=50/>
 				</li>
 				<li class="object_fieldvalue">
-					<label class="object_field" for="kind_input"> strategy </label>
+					<label class="object_field" for="kind_input"> type </label>
 					<select class="object_value" name="kind" id="kind_input">
 						<For
 							each=tag::types
