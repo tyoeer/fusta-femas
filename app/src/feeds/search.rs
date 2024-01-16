@@ -56,3 +56,12 @@ pub async fn all_feeds() -> Result<Vec<feed::Model>, ServerFnError> {
 	let feeds = feed::Entity::find().all(&conn).await?;
 	Ok(feeds)
 }
+
+#[component]
+pub fn All() -> impl IntoView {
+	view! {
+		<utils::AwaitOk future=all_feeds let:feeds>
+			<ObjectTable items = feeds />
+		</utils::AwaitOk>
+	}
+}
