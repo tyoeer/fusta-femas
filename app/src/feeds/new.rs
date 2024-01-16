@@ -1,5 +1,6 @@
 use leptos::*;
 use leptos_router::{ActionForm, A};
+#[cfg(feature="ssr")]
 use entities::prelude::*;
 use crate::utils;
 #[cfg(feature="ssr")]

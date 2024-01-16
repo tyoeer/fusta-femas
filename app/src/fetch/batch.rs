@@ -2,6 +2,7 @@ use std::time::Duration;
 
 use leptos::*;
 use leptos_router::{Route, ActionForm, Outlet, Redirect, A};
+#[cfg(feature="ssr")]
 use entities::prelude::*;
 use serde::{Serialize, Deserialize};
 use crate::utils;
