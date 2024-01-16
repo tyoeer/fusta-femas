@@ -13,12 +13,16 @@ struct SearchParameters {
 }
 
 #[server]
-pub async fn search(params: SearchParameters) -> Result<Vec<feed::Model>, ServerFnError> {
+pub async fn search(params: Option<SearchParameters>) -> Result<Vec<feed::Model>, ServerFnError> {
 	let mut query = feed::Entity::find();
-	if let Some(tag_id) = params.tag {
-		query = query
-			.inner_join(tag::Entity)
-			.filter(tag::Column::Id.eq(tag_id));
+	//Params is an Option because it gets serialised into nothingness when empty
+	//TODO figure out a better way of doing this
+	if let Some(params) = params {
+		if let Some(tag_id) = params.tag {
+			query = query
+				.inner_join(tag::Entity)
+				.filter(tag::Column::Id.eq(tag_id));
+		}
 	}
 	let conn = crate::extension!(DatabaseConnection);
 	let feeds = query.all(&conn).await?;
@@ -39,7 +43,7 @@ pub fn Search() -> impl IntoView {
 		
 		{
 			params_res_memo.get().map(|params| view!{
-				<utils::AwaitOk future=move || search(params.clone()) let:feeds>
+				<utils::AwaitOk future=move || search(Some(params.clone())) let:feeds>
 					<ObjectTable items = feeds />
 				</utils::AwaitOk>
 			})
