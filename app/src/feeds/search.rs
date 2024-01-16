@@ -41,13 +41,13 @@ pub fn Search() -> impl IntoView {
 			<input type="submit" value="search" />
 		</form>
 		
-		{
+		{ move || {
 			params_res_memo.get().map(|params| view!{
 				<utils::AwaitOk future=move || search(Some(params.clone())) let:feeds>
 					<ObjectTable items = feeds />
 				</utils::AwaitOk>
 			})
-		}
+		} }
 		
 		<A href="new">Create new feed</A>
 	}
