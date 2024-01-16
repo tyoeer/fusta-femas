@@ -95,13 +95,13 @@ pub fn UpdatingBatchPage() -> impl IntoView {
 		view! {
 			<leptos_meta::Title text=format!("batch {}", id) />
 			<main>
-				<utils::TransitionOk
+				<utils::ResourceOk
 					fallback = || view! {<div>"Loading..."</div>}
 					resource
 					let:batch
 				>
 					<BatchInfo batch/>
-				</utils::TransitionOk>
+				</utils::ResourceOk>
 			</main>
 		}
 	})

@@ -138,11 +138,14 @@ pub fn AwaitOk<
 Takes in a Resource that returns a [Result], and only renders it's children with the Ok variant using a [Transition]
 */
 #[component]
-pub fn TransitionOk<ResourceIn, ResourceOk,	ResourceErr, ChildrenView, Children>(
+pub fn ResourceOk<ResourceIn, ResourceOk,	ResourceErr, ChildrenView, Children>(
 	resource: Resource<ResourceIn, Result<ResourceOk, ResourceErr>>,
 	#[prop(into)]
 	fallback: ViewFn,
 	children: Children,
+	///Whether to use a [Suspense] or a [Transition]
+	#[prop(default=false)]
+	suspense: bool,
 ) -> impl IntoView where
 	ResourceIn:
 		//Required to do anything useful with Resource
@@ -171,16 +174,30 @@ pub fn TransitionOk<ResourceIn, ResourceOk,	ResourceErr, ChildrenView, Children>
 {
 	//Not doing this causes a lifetime error I don't get, and this is what Await does, so it seems fine
 	let children_stored = store_value(children);
-	view! {
-		<Transition fallback >
-			<ErrorBoundary fallback = |errors| view!{ <crate::app::ErrorsView errors /> } >
-				{ move || resource.get().map(
-					|resource_res| resource_res.map(
-						|resource_ok| children_stored.with_value(|children| children(resource_ok))
-					)
-				) }
-			</ErrorBoundary>
-		</Transition>
+	if suspense {
+		view! {
+			<Suspense fallback >
+				<ErrorBoundary fallback = |errors| view!{ <crate::app::ErrorsView errors /> } >
+					{ move || resource.get().map(
+						|resource_res| resource_res.map(
+							|resource_ok| children_stored.with_value(|children| children(resource_ok))
+						)
+					) }
+				</ErrorBoundary>
+			</Suspense>
+		}
+	} else {
+		view! {
+			<Transition fallback >
+				<ErrorBoundary fallback = |errors| view!{ <crate::app::ErrorsView errors /> } >
+					{ move || resource.get().map(
+						|resource_res| resource_res.map(
+							|resource_ok| children_stored.with_value(|children| children(resource_ok))
+						)
+					) }
+				</ErrorBoundary>
+			</Transition>
+		}
 	}
 }
 

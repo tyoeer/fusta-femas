@@ -229,47 +229,31 @@ pub fn Tags() -> impl IntoView {
 		<ActionForm action=add_tag>
 			<input type="hidden" name="feed_id" value=feed_id/>
 			<select name="tag_id">
-				<Suspense
+				<utils::ResourceOk
 					fallback = || view!{ <option selected=true disabled=true> "Loading..." </option> }
+					resource = available_tags
+					suspense = true
+					let:tags
 				>
-					<ErrorBoundary fallback = |errors| view!{ <crate::app::ErrorsView errors /> } >
-						{
-							move || available_tags.get().map(
-								|tags_res| tags_res.map(
-									|tags| view! {
-										<For
-											each=move || tags.clone()
-											key=|tag| tag.id
-											let:tag
-										>
-											<option value=tag.id> {tag.title} </option>
-										</For>
-									}
-								)
-							)
-						}
-					</ErrorBoundary>
-				</Suspense>
-				// <utils::AwaitOk future=move || get_available_tags(feed_id()) let:tags>
-				// 	<For
-				// 		each=move || tags.clone()
-				// 		key=|tag| tag.id
-				// 		let:tag
-				// 	>
-				// 		<option value=tag.id> {tag.title} </option>
-				// 	</For>
-				// </utils::AwaitOk>
+					<For
+						each=move || tags.clone()
+						key=|tag| tag.id
+						let:tag
+					>
+						<option value=tag.id> {tag.title} </option>
+					</For>
+				</utils::ResourceOk>
 			</select>
 			
 			<utils::FormSubmit action=add_tag button="add tag"/>
 		</ActionForm>
 		
-		<utils::TransitionOk
+		<utils::ResourceOk
 			fallback = || view! {<div>"Loading..."</div>}
 			resource = feed_tags
 			let:tags
 		>
 			<crate::tag::search::Table tags />
-		</utils::TransitionOk>
+		</utils::ResourceOk>
 	}.into()
 }
