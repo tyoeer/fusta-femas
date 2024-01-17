@@ -79,7 +79,10 @@ pub fn ErrorsView(errors: RwSignal<Errors>) -> impl IntoView {
 				let:err
 			>
 				<li>
-					{err.1.to_string()}
+					{
+						tracing::error!(error=?err.1, "Caught error: \"{}\"", err.1.to_string());
+						err.1.to_string()
+					}
 				</li>
 			</For>
 		</ul>
