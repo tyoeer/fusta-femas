@@ -10,23 +10,14 @@ Terminology:
 
 */
 
+use std::marker::PhantomData;
+
 use leptos::*;
 use leptos_router::A;
-use bevy_reflect::{
-	prelude::*,
-	Typed, TypeInfo, StructInfo,
-};
+use bevy_reflect::prelude::*;
 
+use ff_object::fields::{FieldListable, Field};
 use entities::prelude as entities;
-
-pub fn struct_info<Type: Struct + Typed>() -> &'static StructInfo {
-	if let TypeInfo::Struct(info) = Type::type_info() {
-		info
-	} else {
-		unreachable!("Type guard should have guaranteed \"{}\" was a struct", Type::type_path());
-	}
-}
-
 
 /**
 Turns a reflected value into a string to display
@@ -119,13 +110,16 @@ pub fn Reflected<'a>(value: &'a dyn Reflect, #[prop(default = false)] short: boo
 
 
 
+//TODO find way to get rid of PhantomData requirements
 #[component]
-pub fn ObjectFieldList(struct_info: &'static StructInfo) -> impl IntoView {
+pub fn ObjectFieldList<Object: FieldListable<dyn Reflect>>(
+	#[prop(optional)] _ignore: PhantomData<Object>,
+) -> impl IntoView {
 	view! {
 		<li class="object_field_list">
 			{
-				struct_info.field_names().iter().map(|name| {
-					view! {<span class="object_field">{*name}</span>}
+				Object::iter_fields().map(|field| {
+					view! {<span class="object_field">{field.name()}</span>}
 				}).collect::<Vec<_>>()
 			}
 		</li>
@@ -133,8 +127,8 @@ pub fn ObjectFieldList(struct_info: &'static StructInfo) -> impl IntoView {
 }
 
 #[component]
-pub fn ObjectValues<Object: Struct, 'object>(object: &'object Object) -> impl IntoView {
-	object.iter_fields().map(|field| {
+pub fn ObjectValues<Object: FieldListable<dyn Reflect>, 'object>(object: &'object Object) -> impl IntoView {
+	object.iter_values().map(|field| {
 		view! {
 			<span class="object_value"><Reflected value=field short=true/></span>
 		}
@@ -150,25 +144,24 @@ The tuple components are:
 pub type FieldValueOverwrites<Object> = Vec<(&'static str, bool, fn(&Object) -> View)>;
 
 #[component]
-pub fn ObjectFieldValues<Object: Struct + Typed>(
+pub fn ObjectFieldValues<Object: FieldListable<dyn Reflect> + 'static>(
 	#[prop(into)]
 	object: MaybeSignal<Object>,
 	#[prop(optional)]
 	overloads: FieldValueOverwrites<Object>,
 ) -> impl IntoView {
-	let struct_info = struct_info::<Object>();
 	move || object.with(|object| {
-		object.iter_fields().zip(struct_info.field_names()).map(|(value, field)| {
+		object.iter_field_values().map(|(field, value)| {
 			if let Some(overload) = overloads
 				.iter()
-				.find( |(overload_field, _, _)| field == overload_field )
+				.find( |(overload_field, _, _)| field == *overload_field )
 			{
 				if overload.1 {
 					overload.2(object)
 				} else {
 					view! {
 						<li class="object_fieldvalue">
-							<span class="object_field"> {*field} </span>
+							<span class="object_field"> {field} </span>
 							<span class="object_value"> {overload.2(object)} </span>
 						</li>
 					}.into_view()
@@ -176,7 +169,7 @@ pub fn ObjectFieldValues<Object: Struct + Typed>(
 			} else {
 				view! {
 					<li class="object_fieldvalue">
-						<span class="object_field"> {*field} </span>
+						<span class="object_field"> {field} </span>
 						<span class="object_value"> <Reflected value/> </span>
 					</li>
 				}.into_view()
@@ -186,7 +179,7 @@ pub fn ObjectFieldValues<Object: Struct + Typed>(
 }
 
 #[component]
-pub fn ObjectFieldValueList<Object: Struct + Typed>(
+pub fn ObjectFieldValueList<Object: FieldListable<dyn Reflect> + 'static>(
 	#[prop(into)]
 	object: MaybeSignal<Object>,
 	#[prop(optional)]
@@ -200,7 +193,7 @@ pub fn ObjectFieldValueList<Object: Struct + Typed>(
 }
 
 #[component]
-pub fn ObjectLinkValues<Object: Struct + Typed + Clone + ff_object::Object>(
+pub fn ObjectLinkValues<Object: FieldListable<dyn Reflect> + Clone + ff_object::Object + 'static>(
 	#[prop(into)] items: MaybeSignal<Vec<Object>>,
 ) -> impl IntoView {
 	view! {
@@ -222,12 +215,12 @@ pub fn ObjectLinkValues<Object: Struct + Typed + Clone + ff_object::Object>(
 
 ///A table of objects where each row is a link
 #[component]
-pub fn ObjectTable<Object: Struct + Typed + Clone + ff_object::Object>(
+pub fn ObjectTable<Object: FieldListable<dyn Reflect> + Clone + ff_object::Object + 'static>(
 	#[prop(into)] items: MaybeSignal<Vec<Object>>,
 ) -> impl IntoView {
 	view! {
 		<ul class="object_list object_table">
-			<ObjectFieldList struct_info={struct_info::<Object>()} />
+			<ObjectFieldList<Object> />
 			<ObjectLinkValues items />
 		</ul>
 	}
