@@ -14,6 +14,7 @@ use ff_object::View;
 #[derive(
 	Clone, Debug, PartialEq, Eq,
 	serde::Serialize, serde::Deserialize,
+	ff_macros::FieldList,
 	bevy_reflect::Reflect
 )]
 #[cfg_attr(feature="ssr", derive(FromQueryResult))]

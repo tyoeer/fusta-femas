@@ -14,6 +14,7 @@ tokio = {workspace = true, optional = true}
 # shared
 entities = {path = "../entities"}
 ff-object = {path="../ff-object"}
+ff-macros = {path="../ff-macros"}
 leptos = { workspace = true }
 leptos_meta = { workspace = true }
 leptos_router = { workspace = true }
