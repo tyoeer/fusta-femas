@@ -93,7 +93,7 @@ impl FieldListDerive {
 		quote! {
 			
 			impl #crate_path::fields::FieldListable<#field_type> for #struct_name {
-				fn iter_fields() -> impl Iterator<Item = impl #crate_path::fields::Field<Object=Self, FieldType=#field_type> > {
+				fn iter_fields() -> impl Iterator<Item = &'static (impl #crate_path::fields::Field<Object=Self, FieldType=#field_type> + 'static) > {
 					//const item to prevent duplication
 					const FIELDS: &[#crate_path::fields::DynField<#struct_name>] = &[
 						#(#fields)*

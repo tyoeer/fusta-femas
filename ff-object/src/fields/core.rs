@@ -61,20 +61,6 @@ impl<Object> Field for DynField<Object> {
 	}
 }
 
-impl<Object> Field for &DynField<Object> {
-	type Object = Object;
-	type FieldType = dyn Reflect;
-	
-	fn name(&self) -> &str {
-		self.name.as_ref()
-	}
-	fn get<'object>(&self, object: &'object Self::Object) -> &'object Self::FieldType {
-		(self.get)(object)
-	}
-	fn get_mut<'object>(&self, object: &'object mut Self::Object) -> &'object mut Self::FieldType {
-		(self.get_mut)(object)
-	}
-}
 
 /**
 Builds a DynField struct for the given field on the given type
