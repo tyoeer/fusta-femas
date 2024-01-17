@@ -37,7 +37,17 @@ pub fn Search() -> impl IntoView {
 	view! {
 		<form method="get">
 			<label for="tag">"tag"</label>
-			<input type="number" name="tag" id="tag" />
+			<select name="tag" id="tag">
+				<utils::AwaitOk future=crate::tag::search::all_tags let:tags>
+					<For
+						each=move || tags.clone()
+						key=|tag| tag.id
+						let:tag
+					>
+						<option value=tag.id> {tag.title} </option>
+					</For>
+				</utils::AwaitOk>
+			</select>
 			<input type="submit" value="search" />
 		</form>
 		
