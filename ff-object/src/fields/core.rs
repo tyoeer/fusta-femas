@@ -15,10 +15,21 @@ pub trait Field {
 
 
 /// dyn [Field] with a static known sized, so they don't have to be boxed
+#[derive(Debug)]
 pub struct DynField<Object> {
 	name: Cow<'static, str>,
 	get: fn(&Object) -> &dyn Reflect,
 	get_mut: fn(&mut Object) -> &mut dyn Reflect,
+}
+
+impl<Object> Clone for DynField<Object> {
+	fn clone(&self) -> Self {
+		Self {
+			name: self.name.clone(),
+			get: self.get,
+			get_mut: self.get_mut,
+		}
+	}
 }
 
 impl<Object> DynField<Object> {
