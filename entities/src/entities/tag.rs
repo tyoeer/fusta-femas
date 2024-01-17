@@ -1,12 +1,12 @@
 #[cfg(feature = "orm")]
 use sea_orm::entity::prelude::*;
-use ff_macros::Object;
+use ff_macros::{Object, FieldList};
 use serde::{Deserialize, Serialize};
 
 use crate::time_fields as time;
 
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Object, bevy_reflect::Reflect)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Object, FieldList, bevy_reflect::Reflect)]
 #[reflect(from_reflect = false)]
 #[cfg_attr(feature="orm", derive(DeriveEntityModel) )]
 #[cfg_attr(feature="orm", sea_orm(table_name = "tag") )]
