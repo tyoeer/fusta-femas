@@ -9,7 +9,7 @@ publish = false
 ff-macros = {path="../ff-macros"}
 ff-object = {path="../ff-object"}
 cfg-if = "1"
-time = {workspace = true, features = ["serde","macros","formatting"]}
+time = {workspace = true}
 serde = {workspace = true}
 
 sea-orm = {workspace = true, optional = true}
