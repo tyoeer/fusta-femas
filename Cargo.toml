@@ -27,6 +27,9 @@ tracing = "0.1.37"
 tokio = "1.35.1"
 tracing-subscriber = "0.3.17"
 
+[workspace.lints.clippy]
+tabs_in_doc_comments = false
+
 [[workspace.metadata.leptos]]
 name = "fusta-femas"
 bin-package = "server-entrypoint"

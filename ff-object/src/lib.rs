@@ -1,6 +1,9 @@
 ///Stuff dealing with the fields an object can have
 pub mod fields;
 
+mod object_ref;
+pub use object_ref::ObjRef;
+
 
 ///Represents an object which is stored in a row in the database
 pub trait Object {
