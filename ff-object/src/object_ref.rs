@@ -22,7 +22,15 @@ impl<Model, Id: Clone> Clone for ObjRef<Model, Id> {
 	fn clone(&self) -> Self {
 		Self::new(self.id())
 	}
-} 
+}
+
+impl<Model, Id: Clone + PartialEq> PartialEq for ObjRef<Model, Id> {
+	fn eq(&self, other: &Self) -> bool {
+		self.id == other.id
+	}
+}
+
+impl<Model, Id: Clone + Eq> Eq for ObjRef<Model, Id> {}
 
 impl<Model, Id: Clone> ObjRef<Model, Id> {
 	pub fn new(id: Id) -> Self {
