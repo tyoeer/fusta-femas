@@ -52,6 +52,9 @@ pub struct Model {
 }
 
 
+pub type Ref = ff_object::ObjRef<Model>;
+
+
 cfg_if::cfg_if! { if #[cfg(feature = "orm")] {
 
 
