@@ -175,14 +175,13 @@ pub async fn get_tags(feed_id: i32) -> Result<Vec<tag::Model>, ServerFnError> {
 }
 
 #[server]
-pub async fn get_available_tags(feed_id: i32) -> Result<Vec<tag::Model>, ServerFnError> {
+pub async fn get_available_tags(feed: feed::Ref) -> Result<Vec<tag::Model>, ServerFnError> {
 	let conn = crate::extension!(DatabaseConnection);
 	
 	tag::Entity::find()
 		.filter(
 			tag::Column::Id.not_in_subquery(
-				<feed::Entity as Related<tag::Entity>>::find_related()
-					.filter(feed::Column::Id.eq(feed_id))
+				feed.find_related::<tag::Entity>()
 					.select_only()
 					.select_column(tag::Column::Id)
 					.into_query()
@@ -212,8 +211,10 @@ pub fn Tags() -> impl IntoView {
 	let feed = crate::model!(feed);
 	let add_tag = create_server_action::<AddTag>();
 	let feed_id = move || feed.get().id;
+	let feed_ref = move || feed::Ref::from(feed.get());
 	
 	let resource_input = move || (feed_id(), add_tag.version().get());
+	let resource_input_ref = move || (feed_ref(), add_tag.version().get());
 	
 	let feed_tags = Resource::new(
 		resource_input,
@@ -221,8 +222,8 @@ pub fn Tags() -> impl IntoView {
 	);
 	
 	let available_tags = Resource::new(
-		resource_input,
-		|(feed_id, _)| get_available_tags(feed_id)
+		resource_input_ref,
+		|(feed_ref, _)| get_available_tags(feed_ref)
 	);
 	
 	view! {
