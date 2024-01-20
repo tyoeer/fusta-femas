@@ -225,27 +225,37 @@ pub fn Tags() -> impl IntoView {
 	);
 	
 	view! {
-		<ActionForm action=add_tag>
-			<input type="hidden" name="feed_id" value=move || feed_ref().id()/>
-			<select name="tag_id">
-				<utils::ResourceOk
-					fallback = || view!{ <option selected=true disabled=true> "Loading..." </option> }
-					resource = available_tags
-					suspense = true
-					let:tags
-				>
-					<For
-						each=move || tags.clone()
-						key=|tag| tag.id
-						let:tag
-					>
-						<option value=tag.id> {tag.title} </option>
-					</For>
-				</utils::ResourceOk>
-			</select>
-			
-			<utils::FormSubmit action=add_tag button="add tag"/>
-		</ActionForm>
+		<utils::ResourceOk
+			fallback = || view!{ <option selected=true disabled=true> "Loading..." </option> }
+			resource = available_tags
+			suspense = true
+			let:tags
+		>
+			{
+				//TODO surely there's a better way to do this
+				let tags_stored = store_value(tags);
+				view! {
+					<Show when = move || !tags_stored.with_value(|tags| tags.is_empty())>
+						<ActionForm action=add_tag>
+							<input type="hidden" name="feed_id" value=move || feed_ref().id()/>
+							<select name="tag_id">
+								<For
+									each=move || tags_stored.get_value()
+									key=|tag| tag.id
+									let:tag
+								>
+									<option value=tag.id> {tag.title} </option>
+								</For>
+							</select>
+							<utils::FormSubmit action=add_tag button="add tag"/>
+						</ActionForm>
+					</Show>
+					<Show when=move || tags_stored.with_value(|tags| tags.is_empty())>
+						<p> "No tags left to add" </p>
+					</Show>
+				}
+			}
+		</utils::ResourceOk>
 		
 		<utils::ResourceOk
 			fallback = || view! {<div>"Loading..."</div>}
