@@ -1,5 +1,5 @@
 use leptos::*;
-use leptos_router::{A, Params, use_query};
+use leptos_router::{Params, use_query};
 use entities::prelude::*;
 use serde::{Serialize, Deserialize};
 use crate::table::*;
@@ -57,9 +57,7 @@ pub fn Search() -> impl IntoView {
 					<ObjectTable items = feeds />
 				</utils::AwaitOk>
 			})
-		} }
-		
-		<A href="new">Create new feed</A>
+		} }	
 	}
 }
 
