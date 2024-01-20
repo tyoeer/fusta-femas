@@ -1,5 +1,5 @@
 use leptos::*;
-use leptos_router::{A, Params, IntoParam, use_query};
+use leptos_router::{A, Params, use_query};
 use entities::prelude::*;
 use serde::{Serialize, Deserialize};
 use crate::table::*;

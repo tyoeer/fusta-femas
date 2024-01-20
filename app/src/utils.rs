@@ -1,5 +1,5 @@
 use leptos::*;
-use leptos_router::{use_params, Outlet, Params, IntoParam, ParamsError};
+use leptos_router::{use_params, Outlet, Params, ParamsError};
 
 
 ///Formats a url so it properly links, e.g. adds https:// in front of it.
