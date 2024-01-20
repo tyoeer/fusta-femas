@@ -142,10 +142,10 @@ pub fn Fetches() -> impl IntoView {
 
 
 #[server]
-pub async fn get_entries(feed_id: i32) -> Result<Vec<EntryOverview>, ServerFnError> {
+pub async fn get_entries(feed: feed::Ref) -> Result<Vec<EntryOverview>, ServerFnError> {
 	let conn = crate::extension!(DatabaseConnection);
 	EntryOverview::query( |query|
-		query.filter(entry::Column::FeedId.eq(feed_id))
+		feed.filter_related(query)
 	)
 		.all(&conn)
 		.await
@@ -157,7 +157,7 @@ pub fn Entries() -> impl IntoView {
 	let feed = crate::model!(feed);
 	
 	view! {
-		<utils::AwaitOk future=move || get_entries(feed.get().id) let:entries>
+		<utils::AwaitOk future=move || get_entries(feed.get().into()) let:entries>
 			<crate::entry::search::Table entries />
 		</utils::AwaitOk>
 	}.into()
