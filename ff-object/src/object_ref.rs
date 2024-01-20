@@ -114,6 +114,13 @@ impl<Model: ModelTrait> ObjRef<
 		<Entity<Model> as Related<RelatedEntity>>::find_related()
 	}
 	
+	///Returns a query filtered to this object.
+	pub fn find(&self) -> Select<Entity<Model>> {
+		let query = Self::query_entity();
+		//We're querying ourselves
+		self.filter_unchecked(query)
+	}
+	
 	///Returns a query returning rows related to the referenced object.
 	pub fn find_related<RelatedEntity: EntityTrait>(&self) -> Select<RelatedEntity> where Entity<Model>: Related<RelatedEntity> {
 		let query = Self::query_related_entity::<RelatedEntity>();
