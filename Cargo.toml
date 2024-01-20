@@ -14,7 +14,7 @@ members = [
 ]
 
 [workspace.dependencies]
-leptos = "0.5.4"
+leptos = "0.5.7"
 leptos_meta = "0.5"
 leptos_router = "0.5"
 leptos_axum = "0.5"
