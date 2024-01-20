@@ -100,7 +100,10 @@ impl<Model: ModelTrait> ObjRef<
 		self.filter_unchecked(query)
 	}
 	
-	///Creates a new query for our Entity. Does not filter.
+	/**
+	Creates a new query for our Entity.
+	Does not filter, use [`find()`](ObjRef::find) for that.
+	*/
 	pub fn query_entity() -> Select<Entity<Model>> {
 		<Entity::<Model> as EntityTrait>::find()
 	}
@@ -108,7 +111,7 @@ impl<Model: ModelTrait> ObjRef<
 	/**
 	Creates a new query for an object related to our Entity.
 	Joins the query to our Entity/table.
-	Does not filter, use [`find_related`](find_related) for that.
+	Does not filter, use [`find_related()`](ObjRef::find_related) for that.
 	*/
 	pub fn query_related_entity<RelatedEntity: EntityTrait>() -> Select<RelatedEntity> where Entity<Model>: Related<RelatedEntity> {
 		<Entity<Model> as Related<RelatedEntity>>::find_related()
