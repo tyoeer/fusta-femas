@@ -14,3 +14,6 @@ bevy_reflect = "0.12.1"
 server = ["orm"]
 
 orm = ["dep:sea-orm"]
+
+[lints]
+workspace = true
