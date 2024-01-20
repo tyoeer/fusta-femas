@@ -94,12 +94,13 @@ impl<Model: ModelTrait> ObjRef<
 		query
 	}
 	
-	///Filters to the query to row related to the referenced object.
+	///Joins the query to our Entity and then filters it to the object we're referencing
 	pub fn filter_related<SelectBaseEntity: Related<Entity<Model>> + EntityTrait>(&self, query: Select<SelectBaseEntity>) -> Select<SelectBaseEntity> {
 		let query = query.inner_join(Entity::<Model>::default());
 		self.filter_unchecked(query)
 	}
 	
+	///Creates a new query for our Entity. Does not filter.
 	pub fn query_entity() -> Select<Entity<Model>> {
 		<Entity::<Model> as EntityTrait>::find()
 	}
