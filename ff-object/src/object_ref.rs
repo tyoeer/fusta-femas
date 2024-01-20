@@ -104,4 +104,20 @@ impl<Model: ModelTrait> ObjRef<
 	pub fn query_entity() -> Select<Entity<Model>> {
 		<Entity::<Model> as EntityTrait>::find()
 	}
+	
+	/**
+	Creates a new query for an object related to our Entity.
+	Joins the query to our Entity/table.
+	Does not filter, use [`find_related`](find_related) for that.
+	*/
+	pub fn query_related_entity<RelatedEntity: EntityTrait>() -> Select<RelatedEntity> where Entity<Model>: Related<RelatedEntity> {
+		<Entity<Model> as Related<RelatedEntity>>::find_related()
+	}
+	
+	///Returns a query returning rows related to the referenced object.
+	pub fn find_related<RelatedEntity: EntityTrait>(&self) -> Select<RelatedEntity> where Entity<Model>: Related<RelatedEntity> {
+		let query = Self::query_related_entity::<RelatedEntity>();
+		// query_related_entity should have already joined the table
+		self.filter_unchecked(query)
+	}
 }
