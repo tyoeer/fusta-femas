@@ -28,7 +28,7 @@ tokio = "1.35.1"
 tracing-subscriber = "0.3.17"
 
 [workspace.lints.clippy]
-tabs_in_doc_comments = false
+tabs_in_doc_comments = "allow"
 
 [[workspace.metadata.leptos]]
 name = "fusta-femas"
