@@ -58,13 +58,13 @@ pub fn Sidebar() -> impl IntoView {
 
 
 #[server]
-pub async fn fetch_one_feed(id: i32) -> Result<fetch::Model, ServerFnError> {
+pub async fn fetch_one_feed(feed_ref: feed::Ref) -> Result<fetch::Model, ServerFnError> {
 	let conn = crate::extension!(DatabaseConnection);
 	let strats = crate::extension!(acquire::strategy_list::StrategyList);
 	
-	let feed = feed::Entity::find_by_id(id).one(&conn).await?;
-	let Some(feed) = feed else {
-		return Err(ServerFnError::ServerError(format!("No feed with id {id}")));
+	let maybe_feed = feed_ref.find().one(&conn).await?;
+	let Some(feed) = maybe_feed else {
+		return Err(ServerFnError::ServerError(format!("No feed with id {}", feed_ref.id())));
 	};
 	
 	let fetch = strats.run(&conn, feed).await;
@@ -80,11 +80,11 @@ pub async fn fetch_one_feed(id: i32) -> Result<fetch::Model, ServerFnError> {
 }
 
 #[component]
-pub fn FetchFeedButton(#[prop(into)] id: MaybeSignal<i32>) -> impl IntoView {
+pub fn FetchFeedButton(#[prop(into)] feed: MaybeSignal<feed::Ref>) -> impl IntoView {
 	let fetch_one = create_server_action::<FetchOneFeed>();
 	view! {
 		<ActionForm action=fetch_one>
-			<input type="hidden" name="id" value=id/>
+			<input type="hidden" name="id" value=move || feed.get().id()/>
 			<utils::FormSubmit button="fetch" action=fetch_one/>
 		</ActionForm>
 		<utils::FormResult action=fetch_one let:fetch>
@@ -107,7 +107,8 @@ pub async fn get_feed(id: i32) -> Result<feed::Model, ServerFnError> {
 #[component]
 pub fn FeedInfo() -> impl IntoView {
 	let feed = crate::model!(feed);
-	let (id, _) = slice!(feed.id);
+	let feed_ref = move || feed.get().into();
+	let feed_ref = feed_ref.into_signal();
 	let (url, _) = slice!(feed.url);
 	
 	use feed::Model as FeedModel;
@@ -115,15 +116,15 @@ pub fn FeedInfo() -> impl IntoView {
 	view! {
 		<ObjectFieldValueList<FeedModel> object=feed />
 		<a href=move || feed.get().url target="_blank"> {url} </a>
-		<FetchFeedButton id />
+		<FetchFeedButton feed=feed_ref />
 	}.into()
 }
 
 
 #[server]
-pub async fn get_fetches(feed_id: i32) -> Result<Vec<FetchOverview>, ServerFnError> {
+pub async fn get_fetches(feed: feed::Ref) -> Result<Vec<FetchOverview>, ServerFnError> {
 	let conn = crate::extension!(DatabaseConnection);
-	FetchOverview::query(|q| q.filter(fetch::Column::FeedId.eq(feed_id)))
+	FetchOverview::query(|q| feed.filter_related(q))
 		.all(&conn)
 		.await
 		.map_err(|e| e.into())
@@ -134,7 +135,7 @@ pub fn Fetches() -> impl IntoView {
 	let feed = crate::model!(feed);
 	
 	view! {
-		<utils::AwaitOk future=move || get_fetches(feed.get().id) let:fetches>
+		<utils::AwaitOk future=move || get_fetches(feed.get().into()) let:fetches>
 			<ObjectTable items = fetches />
 		</utils::AwaitOk>
 	}.into()
@@ -165,10 +166,9 @@ pub fn Entries() -> impl IntoView {
 
 
 #[server]
-pub async fn get_tags(feed_id: i32) -> Result<Vec<tag::Model>, ServerFnError> {
+pub async fn get_tags(feed: feed::Ref) -> Result<Vec<tag::Model>, ServerFnError> {
 	let conn = crate::extension!(DatabaseConnection);
-	<feed::Entity as Related<tag::Entity>>::find_related()
-		.filter(feed::Column::Id.eq(feed_id))
+	feed.find_related::<tag::Entity>()
 		.all(&conn)
 		.await
 		.map_err(|e| e.into())
@@ -210,25 +210,23 @@ async fn add_tag(feed_id: i32, tag_id: i32) -> Result<(), ServerFnError> {
 pub fn Tags() -> impl IntoView {
 	let feed = crate::model!(feed);
 	let add_tag = create_server_action::<AddTag>();
-	let feed_id = move || feed.get().id;
 	let feed_ref = move || feed::Ref::from(feed.get());
 	
-	let resource_input = move || (feed_id(), add_tag.version().get());
-	let resource_input_ref = move || (feed_ref(), add_tag.version().get());
+	let resource_input = move || (feed_ref(), add_tag.version().get());
 	
 	let feed_tags = Resource::new(
 		resource_input,
-		|(feed_id, _)| get_tags(feed_id)
+		|(feed_ref, _)| get_tags(feed_ref)
 	);
 	
 	let available_tags = Resource::new(
-		resource_input_ref,
+		resource_input,
 		|(feed_ref, _)| get_available_tags(feed_ref)
 	);
 	
 	view! {
 		<ActionForm action=add_tag>
-			<input type="hidden" name="feed_id" value=feed_id/>
+			<input type="hidden" name="feed_id" value=move || feed_ref().id()/>
 			<select name="tag_id">
 				<utils::ResourceOk
 					fallback = || view!{ <option selected=true disabled=true> "Loading..." </option> }
