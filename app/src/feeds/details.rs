@@ -3,6 +3,7 @@ use leptos_router::{Route, ActionForm, A};
 use entities::prelude::*;
 use crate::table::*;
 use crate::utils;
+use ff_object::{Object, ref_signal};
 #[cfg(feature="ssr")]
 use sea_orm::*;
 #[cfg(feature="ssr")]
@@ -107,8 +108,7 @@ pub async fn get_feed(id: i32) -> Result<feed::Model, ServerFnError> {
 #[component]
 pub fn FeedInfo() -> impl IntoView {
 	let feed = crate::model!(feed);
-	let feed_ref = move || feed.get().into();
-	let feed_ref = feed_ref.into_signal();
+	let feed_ref = ref_signal(feed);
 	let (url, _) = slice!(feed.url);
 	
 	use feed::Model as FeedModel;
@@ -132,10 +132,10 @@ pub async fn get_fetches(feed: feed::Ref) -> Result<Vec<FetchOverview>, ServerFn
 
 #[component]
 pub fn Fetches() -> impl IntoView {
-	let feed = crate::model!(feed);
+	let feed_ref = ref_signal(crate::model!(feed));
 	
 	view! {
-		<utils::AwaitOk future=move || get_fetches(feed.get().into()) let:fetches>
+		<utils::AwaitOk future=move || get_fetches(feed_ref.get()) let:fetches>
 			<ObjectTable items = fetches />
 		</utils::AwaitOk>
 	}.into()
@@ -158,7 +158,7 @@ pub fn Entries() -> impl IntoView {
 	let feed = crate::model!(feed);
 	
 	view! {
-		<utils::AwaitOk future=move || get_entries(feed.get().into()) let:entries>
+		<utils::AwaitOk future=move || get_entries(feed.get().get_ref()) let:entries>
 			<crate::entry::search::Table entries />
 		</utils::AwaitOk>
 	}.into()
@@ -210,9 +210,9 @@ async fn add_tag(feed_id: i32, tag_id: i32) -> Result<(), ServerFnError> {
 pub fn Tags() -> impl IntoView {
 	let feed = crate::model!(feed);
 	let add_tag = create_server_action::<AddTag>();
-	let feed_ref = move || feed::Ref::from(feed.get());
+	let feed_ref = ref_signal(feed);
 	
-	let resource_input = move || (feed_ref(), add_tag.version().get());
+	let resource_input = move || (feed_ref.get(), add_tag.version().get());
 	
 	let feed_tags = Resource::new(
 		resource_input,
@@ -237,7 +237,7 @@ pub fn Tags() -> impl IntoView {
 				view! {
 					<Show when = move || !tags_stored.with_value(|tags| tags.is_empty())>
 						<ActionForm action=add_tag>
-							<input type="hidden" name="feed_id" value=move || feed_ref().id()/>
+							<input type="hidden" name="feed_id" value=move || feed_ref.get().id()/>
 							<select name="tag_id">
 								<For
 									each=move || tags_stored.get_value()
