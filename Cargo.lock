@@ -1072,6 +1072,7 @@ name = "ff-object"
 version = "0.1.0"
 dependencies = [
  "bevy_reflect",
+ "leptos",
  "sea-orm",
  "serde",
 ]

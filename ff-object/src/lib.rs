@@ -5,12 +5,27 @@ mod object_ref;
 pub use object_ref::ObjRef;
 
 
+use leptos::{
+	SignalWith,
+	Signal,
+	IntoSignal,
+};
+
 ///Represents an object which is stored in a row in the database
 pub trait Object {
 	fn get_id(&self) -> i32;
 	fn get_object_name() -> &'static str where Self: Sized;
+	
+	fn get_ref(&self) -> ObjRef<Self> where Self: Sized {
+		self.get_id().into()
+	}
 }
 
+use Object as ObjectTrait;
+pub fn ref_signal<Object: ObjectTrait>(object: impl SignalWith<Value=Object> + 'static) -> Signal<ObjRef<Object>> {
+	let closure = move || object.with(|object| object.get_ref());
+	closure.into_signal()
+}
 
 #[cfg(feature="orm")]
 use sea_orm::{

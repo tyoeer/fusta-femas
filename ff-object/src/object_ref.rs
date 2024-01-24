@@ -1,4 +1,5 @@
-use std::marker::PhantomData;
+use core::fmt;
+use std::{marker::PhantomData, fmt::Display};
 use serde::{Serialize, Deserialize};
 
 use super::Object;
@@ -57,6 +58,18 @@ impl<Model, Id: Clone> ObjRef<Model, Id> {
 impl<Model: Object> From<Model> for ObjRef<Model> {
 	fn from(model: Model) -> Self {
 		Self::new(model.get_id())
+	}
+}
+
+impl<Model, Id: Clone> From<Id> for ObjRef<Model, Id> {
+	fn from(id: Id) -> Self {
+		Self::new(id)
+	}
+}
+
+impl<Model: Object, Id: Clone + Display> Display for ObjRef<Model, Id> {
+	fn fmt(&self, fmt: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+		write!(fmt, "{}({})", Model::get_object_name(), self.id)
 	}
 }
 
