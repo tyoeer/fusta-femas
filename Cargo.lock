@@ -1623,9 +1623,9 @@ dependencies = [
 
 [[package]]
 name = "leptos_axum"
-version = "0.5.4"
+version = "0.5.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6283fd19b98f4f7535b80a32064747028fbf4f88ceac4e2a24e9a7d5ed6caf5a"
+checksum = "cbfb557aa186ab4c3a693d3e23402805d879ead5d25096a4ab3fca06ee7688b4"
 dependencies = [
  "axum",
  "cfg-if",
@@ -1707,9 +1707,9 @@ dependencies = [
 
 [[package]]
 name = "leptos_integration_utils"
-version = "0.5.4"
+version = "0.5.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c2dbbd7d721bcdd9aa7b20987063de41314c836a3ac67e263ca489857e337dec"
+checksum = "fddda3a3b768dad90f80fb56ac6e250bc5c60755f8e3df225913aba4364ed7ee"
 dependencies = [
  "futures",
  "leptos",
@@ -1785,14 +1785,14 @@ dependencies = [
 
 [[package]]
 name = "leptos_router"
-version = "0.5.4"
+version = "0.5.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c1a2ff8b8e8ae8b17efd8be2a407f7f83ed57c5243f70f2d03e6635f9ff61848"
+checksum = "b31087173c60e25c329a1c6786756dd9ee97750b378622df4d780db160a09040"
 dependencies = [
  "cached",
  "cfg-if",
  "gloo-net",
- "itertools 0.11.0",
+ "itertools 0.12.0",
  "js-sys",
  "lazy_static",
  "leptos",
