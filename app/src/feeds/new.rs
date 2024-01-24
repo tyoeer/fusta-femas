@@ -1,6 +1,5 @@
 use leptos::*;
 use leptos_router::{ActionForm, A};
-#[cfg(feature="ssr")]
 use entities::prelude::*;
 use crate::utils;
 #[cfg(feature="ssr")]
@@ -8,7 +7,7 @@ use sea_orm::*;
 
 
 #[server]
-pub async fn new_feed(name: String, url: String, strategy: String) -> Result<i32, ServerFnError> {
+pub async fn new_feed(name: String, url: String, strategy: String) -> Result<feed::Ref, ServerFnError> {
 	let conn = crate::extension!(DatabaseConnection);
 	let mut new = feed::ActiveModel::new();
 	new.name = Set(name);
@@ -16,7 +15,7 @@ pub async fn new_feed(name: String, url: String, strategy: String) -> Result<i32
 	//TODO validate
 	new.strategy = Set(strategy);
 	let inserted = new.insert(&conn).await?;
-	Ok(inserted.id)
+	Ok(inserted.id.into())
 }
 
 #[component]
@@ -53,7 +52,7 @@ pub fn FeedCreator() -> impl IntoView {
 		</ActionForm>
 		
 		<utils::FormResult action=new_feed let:id>
-			<A href=format!("/feed/{}", id)>"Created: " {id.to_string()}</A>
+			<A href=format!("/feed/{}", id.id())>"Created: " {id.to_string()}</A>
 		</utils::FormResult>
 	}
 }
