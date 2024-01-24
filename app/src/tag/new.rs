@@ -8,14 +8,14 @@ use sea_orm::*;
 
 
 #[server]
-pub async fn new_tag(title: String, kind: String) -> Result<i32, ServerFnError> {
+pub async fn new_tag(title: String, kind: String) -> Result<tag::Ref, ServerFnError> {
 	let conn = crate::extension!(DatabaseConnection);
 	let mut new = tag::ActiveModel::new();
 	new.title = Set(title);
 	//TODO validate
 	new.kind = Set(kind);
 	let inserted = new.insert(&conn).await?;
-	Ok(inserted.id)
+	Ok(inserted.id.into())
 }
 
 #[component]
@@ -45,8 +45,8 @@ pub fn TagCreator() -> impl IntoView {
 			<utils::FormSubmit button="create" action=new_tag/>
 		</ActionForm>
 		
-		<utils::FormResult action=new_tag let:id>
-			<A href=format!("/tag/{}", id)>"Created: " {id.to_string()}</A>
+		<utils::FormResult action=new_tag let:tag_ref>
+			<A href=format!("/tag/{}", tag_ref.id())>"Created: " {tag_ref.to_string()}</A>
 		</utils::FormResult>
 	}
 }
