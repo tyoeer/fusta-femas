@@ -18,10 +18,10 @@ up:
 	cargo leptos serve
 
 # Serve the alt database
-alt $FUSTA_FEMAS_DATABASE_PATH=".local/alt/db/alt.db" $DATABASE_URL="sqlite://.local/alt/db/alt.db?mode=rwc":
+alt $FUSTA_FEMAS_DATABASE_PATH=".local-ff-data/alt/alt.db" $DATABASE_URL="sqlite://.local-ff-data/alt/alt.db?mode=rwc":
 	cargo leptos serve
 
 # DANGEROUS Rebuilds the database from migrations
 [confirm]
-reset-alt-db $DATABASE_URL="sqlite://.local/alt/db/alt.db?mode=rwc":
+reset-alt-db $DATABASE_URL="sqlite://.local-ff-data/alt/alt.db?mode=rwc":
 	sea migrate -d sea-migration fresh
