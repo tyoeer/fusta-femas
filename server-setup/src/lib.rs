@@ -14,6 +14,12 @@ use tower_http::services::ServeDir;
 use tracing::level_filters::LevelFilter;
 use tracing_subscriber::{fmt, EnvFilter, registry, prelude::*};
 
+
+
+mod config;
+
+
+
 async fn get_static_file(uri: Uri, root: &str) -> Result<Response, (StatusCode, String)> {
 	let req = Request::builder().uri(uri.clone()).body(Body::empty()).unwrap();
 	// `ServeDir` implements `tower::Service` so we can call it with `tower::ServiceExt::oneshot`
@@ -50,17 +56,22 @@ pub async fn run<Migrator: MigratorTrait, View>(app: fn() -> View, extend: impl 
 		.with(fmt_layer)
 		.with(filter)
 		.init();
+	
+	
+	let settings = config::Settings::load();
+	
+	tracing::info!(?settings);
+	
 	// Setting get_configuration(None) means we'll be using cargo-leptos's env values
 	// For deployment these variables are:
 	// <https://github.com/leptos-rs/start-axum#executing-a-server-on-a-remote-machine-without-the-toolchain>
 	// Alternately a file can be specified such as Some("Cargo.toml")
 	// The file would need to be included with the executable when moved to deployment
-	let conf = get_configuration(None).await.unwrap();
-	let leptos_options = conf.leptos_options;
+	let leptos_config = get_configuration(None).await.unwrap();
+	let leptos_options = leptos_config.leptos_options;
 	let addr = leptos_options.site_addr;
 	
-	let db_url = std::env::var("DATABASE_URL").expect("DATABASE_URL not set");
-	let conn = sea_orm::Database::connect(db_url).await.expect("failed connecting to db");
+	let conn = sea_orm::Database::connect(settings.database_url).await.expect("failed connecting to db");
 	
 	//Keep migrations as a generic/function parameter to prevent recompilation whenever migrations change
 	Migrator::up(&conn, None).await.expect("failed running database migrations");
