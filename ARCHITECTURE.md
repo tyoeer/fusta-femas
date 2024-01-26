@@ -47,11 +47,10 @@ In rough order in which they depend on each other:
 - [`ARCHITECTURE.md`](ARCHITECTURE.md): High level overview of Fusta Femas and everything in this repository. If you want to find which code is responsible for something, start here.
 - [`README.md`](README.md): Project introduction and miscellaneous info dump.
 - [`InitialDesign.md`](InitialDesign.md): Original idea and design sketch. Can be removed after tags are done.
+- [`TagsDesign.md`](TagsDesign.md): Design notes for tags.
 
 # Dev storage
 
-- [`dev-db/`](dev-db/): Folder to contain the database files used during development.
-- [`.env`](.env): Tells Fusta Femas to use [`dev-db/`](dev-db/).
-- [`.gitignore`](.gitignore): Settings to not commit [`dev-db/`](dev-db/).
-- [`.local/`](.local/): Folder to contain more stuff that shouldn't be committed into the repo.
-	- [`alt/`](.local/alt/): Folder to contain stuff for [the alt database](README.md#alt-database)
+- [`.local-ff-data/`](.local-ff-data/): Folder to contain ff data that for during development
+	- [`dev/`](.local-ff-data/dev/): Stuff for during normal development.
+	- [`alt/`](.local-ff-data/alt/): Stuff for [the alt database](README.md#alt-database)
