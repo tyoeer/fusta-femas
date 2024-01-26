@@ -9,7 +9,7 @@ use sea_orm::*;
 
 #[derive(Debug,Clone,PartialEq,Eq, Params, Serialize,Deserialize)]
 struct SearchParameters {
-	tag: Option<i32>,
+	tag: Option<tag::Ref>,
 }
 
 #[server]
@@ -18,10 +18,8 @@ pub async fn search(params: Option<SearchParameters>) -> Result<Vec<feed::Model>
 	//Params is an Option because it gets serialised into nothingness when empty
 	//TODO figure out a better way of doing this
 	if let Some(params) = params {
-		if let Some(tag_id) = params.tag {
-			query = query
-				.inner_join(tag::Entity)
-				.filter(tag::Column::Id.eq(tag_id));
+		if let Some(tag) = params.tag {
+			query = tag.filter_related(query);
 		}
 	}
 	let conn = crate::extension!(DatabaseConnection);
