@@ -18,7 +18,7 @@ up:
 	cargo leptos serve
 
 # Serve the alt database
-alt $FUSTA_FEMAS_DATABASE_PATH=".local-ff-data/alt/alt.db" $DATABASE_URL="sqlite://.local-ff-data/alt/alt.db?mode=rwc":
+alt $FUSTA_FEMAS_DATA_PATH=".local-ff-data/alt/":
 	cargo leptos serve
 
 # DANGEROUS Rebuilds the database from migrations
