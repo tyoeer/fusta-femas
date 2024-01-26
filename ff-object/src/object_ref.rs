@@ -1,5 +1,5 @@
 use core::fmt;
-use std::{marker::PhantomData, fmt::Display};
+use std::{fmt::Display, marker::PhantomData, str::FromStr};
 use serde::{Serialize, Deserialize};
 
 use super::Object;
@@ -64,6 +64,14 @@ impl<Model: Object> From<Model> for ObjRef<Model> {
 impl<Model, Id: Clone> From<Id> for ObjRef<Model, Id> {
 	fn from(id: Id) -> Self {
 		Self::new(id)
+	}
+}
+
+impl<Model, Id: Clone + FromStr> FromStr for ObjRef<Model, Id> {
+	type Err = <Id as FromStr>::Err;
+	
+	fn from_str(str: &str) -> Result<Self, Self::Err> {
+		<Id as FromStr>::from_str(str).map(|id| Self::new(id) )
 	}
 }
 
