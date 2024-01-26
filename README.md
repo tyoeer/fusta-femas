@@ -63,7 +63,8 @@ Run `just binstall` to install the requirements with [`cargo binstall`](https://
 			- `time::PrimitveDateTime`
 			- enums
 			- https://github.com/SeaQL/sea-orm/issues/924
-- You can reset the database with `just reset-db`
+- You can reset the database by removing all files starting with `content.db`, Fusta Femas will recreate it on startup
+- When using `sea migrate` subcommands that connect to the database, don't forget to set the `DATABASE_URL` environment variable to `.local-ff-data/[profile]/content.db`
 
 ### Alt database
 
