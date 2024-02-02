@@ -3014,6 +3014,7 @@ dependencies = [
 name = "server-entrypoint"
 version = "0.1.0"
 dependencies = [
+ "acquire",
  "app",
  "sea-migration",
  "server-setup",
@@ -3024,6 +3025,7 @@ dependencies = [
 name = "server-setup"
 version = "0.1.0"
 dependencies = [
+ "acquire",
  "axum",
  "dotenvy",
  "envy",

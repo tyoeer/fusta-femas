@@ -17,7 +17,7 @@ use tracing_subscriber::{fmt, EnvFilter, registry, prelude::*};
 
 
 mod config;
-
+pub mod setup;
 
 
 async fn get_static_file(uri: Uri, root: &str) -> Result<Response, (StatusCode, String)> {

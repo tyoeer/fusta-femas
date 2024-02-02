@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+acquire = {path = "../acquire"}
 axum = {workspace = true}
 leptos = {workspace = true, features = ["ssr"]}
 leptos_axum = {workspace = true}
