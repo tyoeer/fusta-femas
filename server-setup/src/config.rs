@@ -1,11 +1,11 @@
-use std::path::PathBuf;
+use std::{fs, path::PathBuf};
 
 use serde::Deserialize;
 
 
 const ENVIRONMENT_VARIABLE_PREFIX: &str = "FUSTA_FEMAS_";
 const DEFAULT_DATABASE_FILE: &str = "content.db";
-
+const STRATEGY_CONFIG_FOLDER: &str = "strategy-config";
 
 #[derive(Clone, Deserialize)]
 pub struct Config {
@@ -30,6 +30,31 @@ pub struct Settings {
 impl Settings {
 	pub fn load() -> Self {
 		Config::load().into()
+	}
+	
+	pub fn get_strategy_config_path(&self) -> PathBuf {
+		let mut path = self.data_path.clone();
+		path.push(STRATEGY_CONFIG_FOLDER);
+		path
+	}
+	
+	///Returned Ok(bool) is whether or not it had to create 1 or more folders
+	pub fn ensure_folders_exist(&self) -> std::io::Result<bool> {
+		let mut created = false;
+		
+		let data_path = self.data_path.as_path();
+		if !data_path.try_exists()? {
+			fs::create_dir(data_path)?;
+			created = true;
+		}
+		
+		let strats_config_path = self.get_strategy_config_path();
+		if !strats_config_path.try_exists()? {
+			fs::create_dir(strats_config_path)?;
+			created = true;
+		}
+		
+		Ok(created)
 	}
 }
 

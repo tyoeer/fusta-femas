@@ -103,6 +103,18 @@ pub async fn run<Migrator: MigratorTrait, View>(app: fn() -> View, extend: impl 
 	let settings = config::Settings::load();
 	tracing::info!(?settings);
 	
+	let res = settings.ensure_folders_exist();
+	match res {
+		Ok(true) => {
+			tracing::info!("Notice: created data storage (sub)folder(s)");
+		}
+		Ok(false) => (), // nothing happened, don't care
+		Err(err) => {
+			tracing::error!(?err, "Error ensuring data storage folders exists");
+			panic!("{1}: {:?}", err, "ensuring data storage folders exist should work");
+		}
+	}
+	
 	let db_conn = sea_orm::Database::connect(settings.database_url).await.expect("failed connecting to db");
 	//Keep migrations as a generic/function parameter to prevent recompilation whenever migrations change
 	Migrator::up(&db_conn, None).await.expect("failed running database migrations");
