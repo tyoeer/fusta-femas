@@ -33,15 +33,35 @@ async fn get_static_file(uri: Uri, root: &str) -> Result<Response, (StatusCode, 
 	}
 }
 
+pub fn setup_leptos_routing<View: IntoView + 'static>(app: fn() -> View, leptos_options: LeptosOptions) -> Router {
+	/*
+		This can't be moved into it's own function because a function returning this would return
+		impl Fn(State<AppState>, Uri, Request<Body>) -> impl Future<Output = AxumResponse>
+		which has a return-position impl trait in a Fn trait, which isn't allowed yet:
+		https://github.com/rust-lang/rust/issues/99697
+	*/
+	//Returns the file at the uri if it exists, otherwise renders the app
+	let file_or_app_handler = move |State(state): State<LeptosOptions>, uri: Uri, req: Request<Body>| async move {
+		let res = get_static_file(uri.clone(), &state.site_root).await.unwrap();
 
-pub async fn run<Migrator: MigratorTrait, View>(app: fn() -> View, extend: impl FnOnce(Router) -> Router) where
-	View: IntoView + 'static
-{
-	//We want backtraces for errors while fetching
-	std::env::set_var("RUST_BACKTRACE", "1");
+		if res.status() == axum::http::StatusCode::OK {
+			res.into_response()
+		} else {
+			let handler = leptos_axum::render_app_to_stream(state, app);
+			handler(req).await.into_response()
+		}
+	};
 	
-	dotenvy::dotenv().ok();
-	
+	// build our application with a route
+	Router::new()
+		.route("/api/*fn_name", get(handle_server_fns).post(handle_server_fns))
+		.leptos_routes(&leptos_options, generate_route_list(app), app)
+		// .fallback(file_and_error_handler)
+		.fallback(file_or_app_handler)
+		.with_state(leptos_options)
+}
+
+pub fn setup_logging() {
 	let fmt_layer = fmt::layer()
 		.event_format(fmt::format().pretty());
 	let maybe_env_filter = EnvFilter::builder()
@@ -56,6 +76,21 @@ pub async fn run<Migrator: MigratorTrait, View>(app: fn() -> View, extend: impl 
 		.with(fmt_layer)
 		.with(filter)
 		.init();
+}
+
+fn setup_environment() {
+	//We want backtraces for errors while fetching
+	std::env::set_var("RUST_BACKTRACE", "1");
+	
+	dotenvy::dotenv().ok();
+}
+
+pub async fn run<Migrator: MigratorTrait, View>(app: fn() -> View, extend: impl FnOnce(Router) -> Router) where
+	View: IntoView + 'static
+{
+	setup_environment();
+	//The log filter depends on the environment
+	setup_logging();
 	
 	
 	let settings = config::Settings::load();
@@ -76,31 +111,7 @@ pub async fn run<Migrator: MigratorTrait, View>(app: fn() -> View, extend: impl 
 	//Keep migrations as a generic/function parameter to prevent recompilation whenever migrations change
 	Migrator::up(&conn, None).await.expect("failed running database migrations");
 	
-	/*
-		This can't be moved into it's own function because a function returning this would return
-		impl Fn(State<AppState>, Uri, Request<Body>) -> impl Future<Output = AxumResponse>
-		which has a return-position impl trait in a Fn trait, which isn't allowed yet:
-		https://github.com/rust-lang/rust/issues/99697
-	*/
-	//Returns the file at the uri if it exists, otherwise renders the app
-	let file_or_app_handler = move |State(state): State<LeptosOptions>, uri: Uri, req: Request<Body>| async move {
-		let res = get_static_file(uri.clone(), &state.site_root).await.unwrap();
-
-		if res.status() == axum::http::StatusCode::OK {
-			res.into_response()
-		} else {
-			let handler = leptos_axum::render_app_to_stream(state, app);
-			handler(req).await.into_response()
-		}
-	};
-	
-	// build our application with a route
-	let app = Router::new()
-		.route("/api/*fn_name", get(handle_server_fns).post(handle_server_fns))
-		.leptos_routes(&leptos_options, generate_route_list(app), app)
-		// .fallback(file_and_error_handler)
-		.fallback(file_or_app_handler)
-		.with_state(leptos_options)
+	let app = setup_leptos_routing(app, leptos_options)
 		.layer(Extension(conn))
 	;
 	
