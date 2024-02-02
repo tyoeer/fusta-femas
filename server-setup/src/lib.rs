@@ -20,6 +20,9 @@ mod config;
 pub mod setup;
 
 
+const DEFAULT_LOG_FILTER: &str = "debug,hyper=info,sqlx=warn";
+
+
 async fn get_static_file(uri: Uri, root: &str) -> Result<Response, (StatusCode, String)> {
 	let req = Request::builder().uri(uri.clone()).body(Body::empty()).unwrap();
 	// `ServeDir` implements `tower::Service` so we can call it with `tower::ServiceExt::oneshot`
@@ -41,7 +44,11 @@ pub fn setup_leptos_routing<View: IntoView + 'static>(app: fn() -> View, leptos_
 		https://github.com/rust-lang/rust/issues/99697
 	*/
 	//Returns the file at the uri if it exists, otherwise renders the app
-	let file_or_app_handler = move |State(state): State<LeptosOptions>, uri: Uri, req: Request<Body>| async move {
+	let file_or_app_handler = move |
+		State(state): State<LeptosOptions>,
+		uri: Uri,
+		req: Request<Body>
+	| async move {
 		let res = get_static_file(uri.clone(), &state.site_root).await.unwrap();
 
 		if res.status() == axum::http::StatusCode::OK {
@@ -68,9 +75,11 @@ pub fn setup_logging() {
 		.with_default_directive(LevelFilter::WARN.into())
 		.try_from_env();
 	let filter = maybe_env_filter.unwrap_or_else(|_|
-		EnvFilter::builder()
-			.parse("debug,hyper=info,sqlx=warn")
-			.expect("hardcoded log filter should be correct")
+		{
+			EnvFilter::builder()
+					.parse(DEFAULT_LOG_FILTER)
+					.expect("hardcoded log filter should be correct")
+		}
 	);
 	registry()
 		.with(fmt_layer)
@@ -79,10 +88,9 @@ pub fn setup_logging() {
 }
 
 fn setup_environment() {
+	dotenvy::dotenv().ok();
 	//We want backtraces for errors while fetching
 	std::env::set_var("RUST_BACKTRACE", "1");
-	
-	dotenvy::dotenv().ok();
 }
 
 pub async fn run<Migrator: MigratorTrait, View>(app: fn() -> View, extend: impl FnOnce(Router) -> Router) where
@@ -92,36 +100,29 @@ pub async fn run<Migrator: MigratorTrait, View>(app: fn() -> View, extend: impl 
 	//The log filter depends on the environment
 	setup_logging();
 	
-	
 	let settings = config::Settings::load();
-	
 	tracing::info!(?settings);
 	
-	// Setting get_configuration(None) means we'll be using cargo-leptos's env values
-	// For deployment these variables are:
-	// <https://github.com/leptos-rs/start-axum#executing-a-server-on-a-remote-machine-without-the-toolchain>
-	// Alternately a file can be specified such as Some("Cargo.toml")
-	// The file would need to be included with the executable when moved to deployment
+	let db_conn = sea_orm::Database::connect(settings.database_url).await.expect("failed connecting to db");
+	//Keep migrations as a generic/function parameter to prevent recompilation whenever migrations change
+	Migrator::up(&db_conn, None).await.expect("failed running database migrations");
+	
+	// A path of `None` means it uses environment values, see
+	// https://github.com/leptos-rs/start-axum#executing-a-server-on-a-remote-machine-without-the-toolchain
 	let leptos_config = get_configuration(None).await.unwrap();
 	let leptos_options = leptos_config.leptos_options;
-	let addr = leptos_options.site_addr;
+	let serve_address = leptos_options.site_addr;
 	
-	let conn = sea_orm::Database::connect(settings.database_url).await.expect("failed connecting to db");
+	let router = setup_leptos_routing(app, leptos_options)
+		.layer(Extension(db_conn));
 	
-	//Keep migrations as a generic/function parameter to prevent recompilation whenever migrations change
-	Migrator::up(&conn, None).await.expect("failed running database migrations");
-	
-	let app = setup_leptos_routing(app, leptos_options)
-		.layer(Extension(conn))
-	;
-	
-	let app = extend(app);
+	let router = extend(router);
 	
 	// run our app with hyper
 	// `axum::Server` is a re-export of `hyper::Server`
-	tracing::info!("listening on http://{}", &addr);
-	Server::bind(&addr)
-		.serve(app.into_make_service())
+	tracing::info!("listening on http://{}", &serve_address);
+	Server::bind(&serve_address)
+		.serve(router.into_make_service())
 		.await
 		.unwrap();
 }
