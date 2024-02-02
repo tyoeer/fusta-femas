@@ -18,6 +18,8 @@ impl Setup {
 		self.strategies.add(strategy);
 	}
 	pub fn extend(self, router: Router) -> Router {
+		tracing::info!("Setting up strategies: {:?}", self.strategies);
+		
 		router
 			.layer(Extension(self.strategies))
 			.layer(Extension(BatchTracker::default()))
