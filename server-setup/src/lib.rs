@@ -100,6 +100,9 @@ pub async fn run<Migrator: MigratorTrait, View>(app: fn() -> View, extend: impl 
 	//The log filter depends on the environment
 	setup_logging();
 	
+	let setup_span = &tracing::info_span!("Server setup/startup");
+	let setup_span_guard = setup_span.enter();
+	
 	let settings = config::Settings::load();
 	tracing::info!(?settings);
 	
@@ -129,6 +132,8 @@ pub async fn run<Migrator: MigratorTrait, View>(app: fn() -> View, extend: impl 
 		.layer(Extension(db_conn));
 	
 	let router = extend(router);
+	
+	drop(setup_span_guard);
 	
 	// run our app with hyper
 	// `axum::Server` is a re-export of `hyper::Server`
