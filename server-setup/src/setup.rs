@@ -50,6 +50,9 @@ impl Setup {
 		for strat in self.strategies.iter_strats() {
 			let mut path = base_path.join(strat.name());
 			path.set_extension(STRATEGY_CONFIG_FILE_EXTENSION);
+			if path.try_exists()? {
+				continue;
+			}
 			let file = File::create(path)?;
 			let mut serializer = strategy_serializer(file)?;
 			let mut erased = <dyn erased_serde::Serializer>::erase(&mut serializer);
