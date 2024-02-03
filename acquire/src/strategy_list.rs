@@ -48,6 +48,9 @@ impl StrategyList {
 	pub fn add(&mut self, strat: impl Strategy + Send + 'static) {
 		self.list.push(Arc::new(strat));
 	}
+	pub fn add_from_container(&mut self, strat: impl Into<Arc<dyn Strategy + Send + Sync>>) {
+		self.list.push(strat.into());
+	}
 	
 	pub fn get_by_name(&self, name: &str) -> Result<&Arc<dyn Strategy + Send + Sync>, NotFoundError> {
 		self.list.iter()

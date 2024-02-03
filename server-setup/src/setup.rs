@@ -34,20 +34,20 @@ pub enum StrategyIError {
 	Serde(#[from] erased_serde::Error)
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Default)]
 pub struct Setup {
-	pub strategies: StrategyList,
+	pub strategies: Vec<Box<dyn Strategy + Send + Sync>>,
 }
 
 impl Setup {
 	pub fn add_strategy(&mut self, strategy: impl Strategy + Send + 'static) {
-		self.strategies.add(strategy);
+		self.strategies.push(Box::new(strategy));
 	}
 	
 	pub fn save_strategy_configurations(&self, settings: &Settings) -> Result<(), StrategyIError> {
 		let base_path = settings.get_strategy_config_path();
 		
-		for strat in self.strategies.iter_strats() {
+		for strat in &self.strategies {
 			let mut path = base_path.join(strat.name());
 			path.set_extension(STRATEGY_CONFIG_FILE_EXTENSION);
 			if path.try_exists()? {
@@ -63,10 +63,15 @@ impl Setup {
 	}
 	
 	pub fn extend(self, router: Router) -> Router {
-		tracing::info!("Setting up strategies: {:?}", self.strategies);
+		let mut strat_list = StrategyList::new();
+		for strat in self.strategies {
+			strat_list.add_from_container(strat);
+		}
+		
+		tracing::info!("Setting up strategies: {:?}", strat_list);
 		
 		router
-			.layer(Extension(self.strategies))
+			.layer(Extension(strat_list))
 			.layer(Extension(BatchTracker::default()))
 	}
 	
