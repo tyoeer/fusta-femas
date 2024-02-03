@@ -30,6 +30,7 @@ pub fn strategy_serializer<Writer: Write>(writer: Writer) -> ron::Result<ron::Se
 #[error(transparent)]
 pub enum StrategyIError {
 	Ron(#[from] ron::Error),
+	RonSpanned(#[from] ron::error::SpannedError),
 	Io(#[from] IoError),
 	Serde(#[from] erased_serde::Error)
 }
@@ -44,19 +45,23 @@ impl Setup {
 		self.strategies.push(Box::new(strategy));
 	}
 	
-	pub fn save_strategy_configurations(&self, settings: &Settings) -> Result<(), StrategyIError> {
+	pub fn saveload_strategy_configurations(&mut self, settings: &Settings) -> Result<(), StrategyIError> {
 		let base_path = settings.get_strategy_config_path();
 		
-		for strat in &self.strategies {
+		for strat in &mut self.strategies {
 			let mut path = base_path.join(strat.name());
 			path.set_extension(STRATEGY_CONFIG_FILE_EXTENSION);
 			if path.try_exists()? {
-				continue;
+				let text = std::fs::read_to_string(path)?;
+				let mut deserializer = ron::Deserializer::from_str(&text)?;
+				let mut erased = <dyn erased_serde::Deserializer>::erase(&mut deserializer);
+				strat.deserialize_replace(&mut erased)?;
+			} else {
+				let file = File::create(path)?;
+				let mut serializer = strategy_serializer(file)?;
+				let mut erased = <dyn erased_serde::Serializer>::erase(&mut serializer);
+				strat.serialize(&mut erased)?;
 			}
-			let file = File::create(path)?;
-			let mut serializer = strategy_serializer(file)?;
-			let mut erased = <dyn erased_serde::Serializer>::erase(&mut serializer);
-			strat.serialize(&mut erased)?;
 		}
 		
 		Ok(())

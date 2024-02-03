@@ -93,7 +93,7 @@ fn setup_environment() {
 	std::env::set_var("RUST_BACKTRACE", "1");
 }
 
-pub async fn run<Migrator: MigratorTrait, View>(app: fn() -> View, setup: setup::Setup) where
+pub async fn run<Migrator: MigratorTrait, View>(app: fn() -> View, mut setup: setup::Setup) where
 	View: IntoView + 'static
 {
 	setup_environment();
@@ -120,7 +120,7 @@ pub async fn run<Migrator: MigratorTrait, View>(app: fn() -> View, setup: setup:
 		}
 	}
 	
-	let res = setup.save_strategy_configurations(&settings);
+	let res = setup.saveload_strategy_configurations(&settings);
 	if let Err(err) = res {
 		tracing::error!(?err, "Error saving strategy configurations");
 		panic!("{1}: {:?}", err, "saving strategy configurations should work");
