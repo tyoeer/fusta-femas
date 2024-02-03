@@ -327,7 +327,7 @@ let conn = extension!(DatabaseConnection);
 #[macro_export]
 macro_rules! extension {
 	($extension:ty) => {
-		leptos_axum::extractor::<axum::Extension<$extension>>().await?.0
+		leptos_axum::extract::<axum::Extension<$extension>>().await?.0
 	};
 }
 

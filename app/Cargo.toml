@@ -21,7 +21,7 @@ leptos_router = { workspace = true }
 serde = {workspace = true}
 tracing = {workspace = true}
 cfg-if = "1"
-http = "0.2.8" # Used in the error_template
+http = "1.0" # Used in the error_template
 thiserror = "1.0.56" # Used in the error_template
 bevy_reflect = "0.12.1"
 

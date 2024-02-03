@@ -8,7 +8,7 @@ use crate::utils;
 use sea_orm::*;
 
 #[derive(Debug,Clone,PartialEq,Eq, Params, Serialize,Deserialize)]
-struct SearchParameters {
+pub struct SearchParameters {
 	tag: Option<tag::Ref>,
 }
 

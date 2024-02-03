@@ -1,13 +1,13 @@
 use axum::{
-	routing::get,
 	response::{IntoResponse, Response},
 	http::{Uri, StatusCode, Request},
 	extract::State,
-	body::{boxed, Body},
-	Router, Extension, Server,
+	body::Body,
+	Router, Extension,
 };
+use tokio::net::TcpListener;
 use leptos::*;
-use leptos_axum::{generate_route_list, LeptosRoutes, handle_server_fns};
+use leptos_axum::{generate_route_list, LeptosRoutes};
 use sea_orm_migration::MigratorTrait;
 use tower::ServiceExt;
 use tower_http::services::ServeDir;
@@ -28,7 +28,7 @@ async fn get_static_file(uri: Uri, root: &str) -> Result<Response, (StatusCode, 
 	// `ServeDir` implements `tower::Service` so we can call it with `tower::ServiceExt::oneshot`
 	// This path is relative to the cargo root
 	match ServeDir::new(root).oneshot(req).await {
-		Ok(res) => Ok(res.map(boxed)),
+		Ok(res) => Ok(res.map(Body::new)),
 		Err(err) => Err((
 			StatusCode::INTERNAL_SERVER_ERROR,
 			format!("Something went wrong: {err}"),
@@ -61,7 +61,6 @@ pub fn setup_leptos_routing<View: IntoView + 'static>(app: fn() -> View, leptos_
 	
 	// build our application with a route
 	Router::new()
-		.route("/api/*fn_name", get(handle_server_fns).post(handle_server_fns))
 		.leptos_routes(&leptos_options, generate_route_list(app), app)
 		// .fallback(file_and_error_handler)
 		.fallback(file_or_app_handler)
@@ -148,8 +147,7 @@ pub async fn run<Migrator: MigratorTrait, View>(app: fn() -> View, mut setup: se
 	// run our app with hyper
 	// `axum::Server` is a re-export of `hyper::Server`
 	tracing::info!("listening on http://{}", &serve_address);
-	Server::bind(&serve_address)
-		.serve(router.into_make_service())
-		.await
-		.unwrap();
+	
+	let listener = TcpListener::bind(serve_address).await.unwrap();
+	axum::serve(listener, router).await.unwrap();
 }
