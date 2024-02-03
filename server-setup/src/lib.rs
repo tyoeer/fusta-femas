@@ -93,7 +93,7 @@ fn setup_environment() {
 	std::env::set_var("RUST_BACKTRACE", "1");
 }
 
-pub async fn run<Migrator: MigratorTrait, View>(app: fn() -> View, extend: impl FnOnce(Router) -> Router) where
+pub async fn run<Migrator: MigratorTrait, View>(app: fn() -> View, setup: setup::Setup) where
 	View: IntoView + 'static
 {
 	setup_environment();
@@ -118,9 +118,17 @@ pub async fn run<Migrator: MigratorTrait, View>(app: fn() -> View, extend: impl 
 		}
 	}
 	
+	let res = setup.save_strategy_configurations(&settings);
+	if let Err(err) = res {
+		tracing::error!(?err, "Error saving strategy configurations");
+		panic!("{1}: {:?}", err, "saving strategy configurations should work");
+	}
+	
 	let db_conn = sea_orm::Database::connect(settings.database_url).await.expect("failed connecting to db");
 	//Keep migrations as a generic/function parameter to prevent recompilation whenever migrations change
 	Migrator::up(&db_conn, None).await.expect("failed running database migrations");
+	
+	
 	
 	// A path of `None` means it uses environment values, see
 	// https://github.com/leptos-rs/start-axum#executing-a-server-on-a-remote-machine-without-the-toolchain
@@ -131,7 +139,7 @@ pub async fn run<Migrator: MigratorTrait, View>(app: fn() -> View, extend: impl 
 	let router = setup_leptos_routing(app, leptos_options)
 		.layer(Extension(db_conn));
 	
-	let router = extend(router);
+	let router = setup.extend(router);
 	
 	drop(setup_span_guard);
 	
