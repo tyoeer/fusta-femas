@@ -68,8 +68,6 @@ impl Setup {
 			strat_list.add_from_container(strat);
 		}
 		
-		tracing::info!("Setting up strategies: {:?}", strat_list);
-		
 		router
 			.layer(Extension(strat_list))
 			.layer(Extension(BatchTracker::default()))
@@ -77,5 +75,16 @@ impl Setup {
 	
 	pub fn extend_fn(self) -> impl FnOnce(Router) -> Router {
 		move |router| self.extend(router)
+	}
+}
+
+impl std::fmt::Debug for Setup {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		let strategy_names = self.strategies.iter()
+			.map(|s| s.name())
+			.collect::<Vec<_>>();
+		f.debug_struct("Setup")
+			.field("strategy_names", &strategy_names)
+			.finish()
 	}
 }

@@ -103,6 +103,8 @@ pub async fn run<Migrator: MigratorTrait, View>(app: fn() -> View, setup: setup:
 	let setup_span = &tracing::info_span!("Server setup/startup");
 	let setup_span_guard = setup_span.enter();
 	
+	tracing::info!(?setup);
+	
 	let settings = config::Settings::load();
 	tracing::info!(?settings);
 	
