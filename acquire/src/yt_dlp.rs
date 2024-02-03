@@ -90,7 +90,7 @@ impl From<YtdlpVideoInfo> for EntryInfo {
 	}
 }
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize,serde::Deserialize)]
 pub enum Limit {
 	AfterDate(time::Date),
 	Amount(u16),
@@ -110,7 +110,7 @@ impl Limit {
 	}
 }
 
-#[derive(Clone,PartialEq,Eq)]
+#[derive(Debug, Clone,PartialEq,Eq, serde::Serialize,serde::Deserialize)]
 pub struct YtDlpStrategy {
 	command: String,
 	backup_limit: Limit,

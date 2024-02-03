@@ -6,14 +6,14 @@ use crate::strategy::{
 	EntryInfo
 };
 
-#[derive(Default, Debug, Clone)]
+#[derive(Debug, Default, Clone, serde::Serialize, serde::Deserialize)]
 pub struct MockStrat {
 	///Private field to prevent this from being created without a function call
 	_unused: (),
 }
 
 #[async_trait::async_trait]
-impl Strategy for MockStrat{
+impl Strategy for MockStrat {
 	fn name(&self) -> &'static str {
 		"Mock test"
 	}
@@ -96,8 +96,12 @@ pub enum FetchCommand {
 	Parse(i32),
 }
 
+#[derive(serde::Serialize,serde::Deserialize)]
+#[serde(default)]
 pub struct CommandStrat {
+	#[serde(skip)]
 	send: broadcast::Sender<FetchCommand>,
+	#[serde(skip)]
 	recv: broadcast::Receiver<FetchCommand>,
 }
 
