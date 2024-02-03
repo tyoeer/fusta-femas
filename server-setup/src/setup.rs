@@ -28,7 +28,7 @@ pub fn strategy_serializer<Writer: Write>(writer: Writer) -> ron::Result<ron::Se
 
 #[derive(Debug, thiserror::Error)]
 #[error(transparent)]
-pub enum StrategyIError {
+pub enum StrategySaveLoadError {
 	Ron(#[from] ron::Error),
 	RonSpanned(#[from] ron::error::SpannedError),
 	Io(#[from] IoError),
@@ -45,7 +45,7 @@ impl Setup {
 		self.strategies.push(Box::new(strategy));
 	}
 	
-	pub fn saveload_strategy_configurations(&mut self, settings: &Settings) -> Result<(), StrategyIError> {
+	pub fn saveload_strategy_configurations(&mut self, settings: &Settings) -> Result<(), StrategySaveLoadError> {
 		let base_path = settings.get_strategy_config_path();
 		
 		for strat in &mut self.strategies {
