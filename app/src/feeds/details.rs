@@ -59,13 +59,13 @@ pub fn Sidebar() -> impl IntoView {
 
 
 #[server]
-pub async fn fetch_one_feed(feed_ref: feed::Ref) -> Result<fetch::Model, ServerFnError> {
+pub async fn fetch_one_feed(feed: feed::Ref) -> Result<fetch::Model, ServerFnError> {
 	let conn = crate::extension!(DatabaseConnection);
 	let strats = crate::extension!(acquire::strategy_list::StrategyList);
 	
-	let maybe_feed = feed_ref.find().one(&conn).await?;
+	let maybe_feed = feed.find().one(&conn).await?;
 	let Some(feed) = maybe_feed else {
-		return Err(ServerFnError::ServerError(format!("No feed with id {}", feed_ref.id())));
+		return Err(ServerFnError::ServerError(format!("No feed with id {}", feed.id())));
 	};
 	
 	let fetch = strats.run(&conn, feed).await;
@@ -85,7 +85,7 @@ pub fn FetchFeedButton(#[prop(into)] feed: MaybeSignal<feed::Ref>) -> impl IntoV
 	let fetch_one = create_server_action::<FetchOneFeed>();
 	view! {
 		<ActionForm action=fetch_one>
-			<input type="hidden" name="id" value=move || feed.get().id()/>
+			<input type="hidden" name="feed" value=move || feed.get().id()/>
 			<utils::FormSubmit button="fetch" action=fetch_one/>
 		</ActionForm>
 		<utils::FormResult action=fetch_one let:fetch>
