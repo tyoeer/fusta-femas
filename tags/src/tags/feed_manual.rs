@@ -11,9 +11,9 @@ use crate::tag::{
 pub const NAME: &str = "feed";
 
 #[derive(Debug, Clone, Default)]
-pub struct Feed {}
+pub struct FeedManual {}
 
-impl FeedTag for Feed {
+impl FeedTag for FeedManual {
 	fn filter_query(&self, query: Select<feed::Entity>) -> Select<feed::Entity> {
 		query
 		//TODO
@@ -21,7 +21,7 @@ impl FeedTag for Feed {
 }
 
 
-impl Tag for Feed {
+impl Tag for FeedManual {
 	fn name(&self) -> &'static str {
 		NAME
 	}

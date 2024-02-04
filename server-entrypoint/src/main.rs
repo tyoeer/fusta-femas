@@ -5,7 +5,7 @@ async fn main() {
 	setup.add_strategy(acquire::mock::MockStrat::default());
 	setup.add_strategy(acquire::yt_dlp::YtDlpStrategy::default());
 	
-	setup.add_tag(tags::tags::feed::Feed::default());
+	setup.add_tag(tags::tags::feed_manual::FeedManual::default());
 	
 	server_setup::run::<sea_migration::Migrator, _>(
 		app::app::App,
