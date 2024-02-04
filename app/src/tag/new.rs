@@ -8,7 +8,8 @@ use sea_orm::*;
 #[server]
 pub async fn get_tag_types() -> Result<Vec<String>, ServerFnError> {	
 	let tags = crate::extension!(tags::tag_list::TagList);
-	let list = tags.iter_tags().map(|s| s.name().to_owned()).collect::<Vec<String>>();
+	//TODO entry tags
+	let list = tags.iter_feed_tags().map(|s| s.name().to_owned()).collect::<Vec<String>>();
 	Ok(list)
 }
 
