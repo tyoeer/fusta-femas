@@ -20,6 +20,7 @@ leptos_router = "0.6"
 leptos_axum = "0.6"
 sea-orm = {version = "0.12", features = ["runtime-tokio-rustls","sqlx-sqlite","with-time"]}
 serde = {version="1", features=["derive"]}
+erased-serde = "0.4.2"
 time = {version="0.3", features=["serde","macros","formatting"]}
 async-trait = "0.1.77"
 axum = "0.7.4"
