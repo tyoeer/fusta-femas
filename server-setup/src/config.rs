@@ -7,6 +7,7 @@ const ENVIRONMENT_VARIABLE_PREFIX: &str = "FUSTA_FEMAS_";
 const DEFAULT_DATABASE_FILE: &str = "content.db";
 const STRATEGY_CONFIG_FOLDER: &str = "strategy-config";
 
+///The users input to configure/change the settings. All optional where there are defaults.
 #[derive(Clone, Deserialize)]
 pub struct Config {
 	///The path to the folder in which all data should be stored
@@ -21,6 +22,7 @@ impl Config {
 	}
 }
 
+///The actual settings to use, with the defaults filled in and resolved.
 #[derive(Debug)]
 pub struct Settings {
 	pub data_path: PathBuf,

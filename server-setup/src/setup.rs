@@ -26,6 +26,7 @@ pub fn strategy_serializer<Writer: Write>(writer: Writer) -> ron::Result<ron::Se
 	)
 }
 
+//TODO just use anyhow at this point
 #[derive(Debug, thiserror::Error)]
 #[error(transparent)]
 pub enum StrategySaveLoadError {
@@ -35,6 +36,10 @@ pub enum StrategySaveLoadError {
 	Serde(#[from] erased_serde::Error)
 }
 
+/**
+Hard-coded configuration stuff:
+- Fetch strategies
+*/
 #[derive(Default)]
 pub struct Setup {
 	pub strategies: Vec<Box<dyn Strategy + Send + Sync>>,
