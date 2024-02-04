@@ -58,6 +58,11 @@ impl StrategyList {
 			.ok_or_else(|| NotFoundError(name.to_owned()))
 	}
 	
+	pub fn iter_strats(&self) -> impl Iterator<Item = &(dyn Strategy + Send + Sync)> {
+		self.list.iter().map(|s| s.as_ref())
+	}
+	
+	
 	pub async fn run(&self, conn: &sea_orm::DatabaseConnection, feed: feed::Model) -> Result<fetch::Model, RunError> {
 		let strat = self.get_by_name(&feed.strategy)?;
 		let fetch = run_strategy(conn, &feed, strat.as_ref()).await?;
@@ -75,10 +80,6 @@ impl StrategyList {
 		let fetch = self.run(db, feed).await?;
 		
 		Ok(fetch)
-	}
-	
-	pub fn iter_strats(&self) -> impl Iterator<Item = &(dyn Strategy + Send + Sync)> {
-		self.list.iter().map(|s| s.as_ref())
 	}
 }
 
