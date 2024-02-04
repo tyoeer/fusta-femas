@@ -27,7 +27,8 @@ In rough order in which they depend on each other:
 - [`ff-macros/`](ff-macros/): [Rust](https://rust-lang.org) requires all macros to live in a separate crate. That is this crate.
 - [`entities/`](entities/): structs representing the data in the database + some utility stuff for those.
 - [`sea-migration/`](sea-migration/): Runnable migrations to make the database match the entities crate.
-- [`acquire/`](acquire/): Anything that has to do with getting feed entries from teh internet into our database. Server only.
+- [`acquire/`](acquire/): Anything that has to do with getting feed entries from the internet into our database. Server only.
+- [`tags/`](tags/): Anything that has to do with tagging feeds & entries. Server only.
 - [`app/`](app/): Has all the UI stuff. Shared for server & client.
 - [`server-setup/`](server-setup/): Contains setup and boilerplate for server specific stuff.
 - [`server-entrypoint/`](server-entrypoint/): Hooks up [`server-setup/`](server-setup/) and [`app/`](app/) together

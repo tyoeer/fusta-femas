@@ -1,0 +1,26 @@
+[package]
+name = "tags"
+version = "0.1.0"
+edition = "2021"
+# rust-version = "1.75"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+entities = {path="../entities", features = ["server"]}
+sea-orm = {workspace = true}
+# async-trait = {workspace = true}
+# time = {workspace = true}
+# tokio = {workspace=true}
+tracing = {workspace=true}
+serde = {workspace=true}
+erased-serde = {workspace=true}
+# serde_json = "1.0.113"
+# anyhow = {version="1.0.79", features=["backtrace"]}
+thiserror = "1.0.56"
+# tracing-subscriber = {workspace = true}
+# trait-variant = "0.1.1"
+
+[dev-dependencies]
+sea-migration = {path="../sea-migration"}
+sea-orm-macros = "0.12.6"

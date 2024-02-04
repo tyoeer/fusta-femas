@@ -5,6 +5,7 @@ members = [
 	"sea-migration",
 	"entities",
 	"app",
+	"tags",
 	"acquire",
 	"client-entrypoint",
 	"server-setup",
