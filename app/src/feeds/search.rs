@@ -14,15 +14,21 @@ pub struct SearchParameters {
 
 #[server]
 pub async fn search(params: Option<SearchParameters>) -> Result<Vec<feed::Model>, ServerFnError> {
+	let conn = crate::extension!(DatabaseConnection);
 	let mut query = feed::Entity::find();
 	//Params is an Option because it gets serialised into nothingness when empty
 	//TODO figure out a better way of doing this
 	if let Some(params) = params {
 		if let Some(tag) = params.tag {
-			query = tag.filter_related(query);
+			let maybe_tag = tag.find().one(&conn).await?;
+			let Some(tag) = maybe_tag else {
+				return Err(ServerFnError::ServerError(format!("Could not find tag {tag}")));
+			};
+			let tags = crate::extension!(tags::tag_list::TagList);
+			let tag_type = tags.get_feed_tag_by_name(&tag.kind)?;
+			query = tag_type.filter_query(tag, query);
 		}
 	}
-	let conn = crate::extension!(DatabaseConnection);
 	let feeds = query.all(&conn).await?;
 	Ok(feeds)
 }

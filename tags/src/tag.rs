@@ -21,8 +21,8 @@ pub trait Tag: Send + Sync {
 }
 
 pub trait FeedTag: Tag {
-	fn filter_query(&self, query: Select<feed::Entity>) -> Select<feed::Entity>;
+	fn filter_query(&self, tag: tag::Model, query: Select<feed::Entity>) -> Select<feed::Entity>;
 }
 pub trait EntryTag: Tag {
-	fn filter_query(&self, query: Select<entry::Entity>) -> Select<entry::Entity>;
+	fn filter_query(&self, tag: tag::Model, query: Select<entry::Entity>) -> Select<entry::Entity>;
 }

@@ -1,5 +1,5 @@
 use std::sync::Arc;
-use entities::prelude::feed;
+use entities::prelude::*;
 use sea_orm::Select;
 
 use crate::tag::{
@@ -14,7 +14,7 @@ pub const NAME: &str = "feed";
 pub struct FeedManual {}
 
 impl FeedTag for FeedManual {
-	fn filter_query(&self, query: Select<feed::Entity>) -> Select<feed::Entity> {
+	fn filter_query(&self, tag: tag::Model, query: Select<feed::Entity>) -> Select<feed::Entity> {
 		query
 		//TODO
 	}
