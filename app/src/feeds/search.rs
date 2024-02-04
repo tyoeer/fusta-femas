@@ -32,10 +32,15 @@ pub fn Search() -> impl IntoView {
 	
 	let params_res_memo = use_query::<SearchParameters>();
 	
+	let enable_tag = RwSignal::new(false);
+	
 	view! {
 		<form method="get">
-			<label for="tag">"tag"</label>
-			<select name="tag" id="tag">
+			<label for="tag_enable">"tag"</label>
+			<input type="checkbox" id="tag_enable" on:input=move |event| {
+				enable_tag.set(event_target_checked(&event));
+			}/>
+			<select name="tag" id="tag" prop:disabled=move || !enable_tag.get()>
 				<utils::AwaitOk future=crate::tag::search::all_tags let:tags>
 					<For
 						each=move || tags.clone()
