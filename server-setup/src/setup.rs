@@ -54,8 +54,8 @@ impl Setup {
 	pub fn add_strategy(&mut self, strategy: impl Strategy + Send + 'static) {
 		self.strategies.push(Box::new(strategy));
 	}
-	pub fn add_tag(&mut self, strategy: impl Strategy + Send + 'static) {
-		self.strategies.push(Box::new(strategy));
+	pub fn add_tag(&mut self, tag: impl Tag + Send + Sync + 'static) {
+		self.tags.push(Box::new(tag));
 	}
 	
 	pub fn saveload_strategy_configurations(&mut self, settings: &Settings) -> Result<(), StrategySaveLoadError> {
