@@ -5,7 +5,12 @@ use crate::utils;
 #[cfg(feature="ssr")]
 use sea_orm::*;
 
-
+#[server]
+pub async fn get_tag_types() -> Result<Vec<String>, ServerFnError> {	
+	let tags = crate::extension!(tags::tag_list::TagList);
+	let list = tags.iter_tags().map(|s| s.name().to_owned()).collect::<Vec<String>>();
+	Ok(list)
+}
 
 #[server]
 pub async fn new_tag(title: String, kind: String) -> Result<tag::Ref, ServerFnError> {
@@ -31,13 +36,15 @@ pub fn TagCreator() -> impl IntoView {
 				<li class="object_fieldvalue">
 					<label class="object_field" for="kind_input"> type </label>
 					<select class="object_value" name="kind" id="kind_input">
-						<For
-							each=tag::types
-							key=|s| s.clone()
-							let:kind
-						>
-							<option value=kind.clone()> {kind} </option>
-						</For>
+						<utils::AwaitOk future=get_tag_types let:tags>
+							<For
+								each=move || tags.clone()
+								key=|tag| tag.clone()
+								let:kind
+							>
+								<option value=kind.clone()> {kind} </option>
+							</For>
+						</utils::AwaitOk>
 					</select>
 				</li>
 			</ul>

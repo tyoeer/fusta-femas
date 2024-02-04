@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 acquire = {path = "../acquire"}
+tags = {path = "../tags"}
 axum = {workspace = true}
 tokio = {workspace = true}
 leptos = {workspace = true, features = ["ssr"]}

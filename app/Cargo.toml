@@ -5,8 +5,9 @@ edition = "2021"
 
 [dependencies]
 # server
-leptos_axum = { workspace=true, optional = true } # Used in the error template
 acquire = {path = "../acquire", optional = true}
+tags = {path = "../tags", optional = true}
+leptos_axum = { workspace=true, optional = true } # Used in the error template
 sea-orm = {workspace = true, optional = true}
 axum = {workspace = true, optional = true}
 tokio = {workspace = true, optional = true}
@@ -39,6 +40,7 @@ ssr = [
 	"dep:leptos_axum",
 	"dep:axum",
 	"dep:acquire",
+	"dep:tags",
 	"entities/server",
 	"ff-object/server",
 	"dep:sea-orm",
