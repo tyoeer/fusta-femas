@@ -12,6 +12,9 @@ watch:
 # cargo leptos serve
 up:
 	cargo leptos serve
+# cargo leptos serve
+build:
+	cargo leptos build
 
 
 # Serve the alt database
