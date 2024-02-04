@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 server-setup = {path = "../server-setup"}
 acquire = {path = "../acquire"}
+tags = {path = "../tags"}
 sea-migration = {path = "../sea-migration"}
 app = {path = "../app", default-features = false, features = ["ssr"]}
 tokio = {workspace = true}

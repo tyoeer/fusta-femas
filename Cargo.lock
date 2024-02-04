@@ -3094,6 +3094,7 @@ dependencies = [
  "app",
  "sea-migration",
  "server-setup",
+ "tags",
  "tokio",
 ]
 
