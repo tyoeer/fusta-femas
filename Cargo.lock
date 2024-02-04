@@ -3606,6 +3606,7 @@ version = "0.1.0"
 dependencies = [
  "entities",
  "erased-serde 0.4.2",
+ "ff-object",
  "sea-migration",
  "sea-orm",
  "sea-orm-macros",
