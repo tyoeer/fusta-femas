@@ -1,0 +1,19 @@
+@use "table";
+
+.search {
+	display: flex;
+	flex-direction: column;
+	> * {
+		width: fit-content;
+	}
+}
+
+.search_parameters {
+	@extend %table;
+}
+.search_parameter {
+	@extend %table_row;
+	> * {
+		@extend %table_cell;
+	}
+}
