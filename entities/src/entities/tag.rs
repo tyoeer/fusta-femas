@@ -12,20 +12,10 @@ use crate::time_fields as time;
 #[cfg_attr(feature="orm", sea_orm(table_name = "tag") )]
 pub struct Model {
 	pub title: String,
-	#[cfg_attr(feature="orm", sea_orm(column_name="type") )]
-	pub kind: String,
-	pub config: Option<Vec<u8>>,
 	#[cfg_attr(feature="orm", sea_orm(primary_key) )]
 	pub id: i32,
 	pub created_at: time::PrimitiveDateTime,
 	pub updated_at: time::PrimitiveDateTime,
-}
-
-//TODO better way for this, probably using a newtype
-pub fn types() -> impl Iterator<Item=String> {
-	[
-		"feed",
-	].into_iter().map(|str| str.to_owned())
 }
 
 

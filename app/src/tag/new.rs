@@ -19,7 +19,7 @@ pub async fn new_tag(title: String, kind: String) -> Result<tag::Ref, ServerFnEr
 	let mut new = tag::ActiveModel::new();
 	new.title = Set(title);
 	//TODO validate
-	new.kind = Set(kind);
+	// new.kind = Set(kind); TODO remove
 	let inserted = new.insert(&conn).await?;
 	Ok(inserted.id.into())
 }

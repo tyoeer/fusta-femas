@@ -8,6 +8,7 @@ mod m20231219_000003_add_fetches;
 mod m20231219_000004_add_entries;
 mod m20240113_220905_tags;
 mod m20240115_131700_feedtag;
+mod m20240207_170000_filterless_tags;
 
 pub struct Migrator;
 
@@ -21,6 +22,7 @@ impl MigratorTrait for Migrator {
 			Box::new(m20231219_000004_add_entries::Migration),
 			Box::new(m20240113_220905_tags::Migration),
 			Box::new(m20240115_131700_feedtag::Migration),
+			Box::new(m20240207_170000_filterless_tags::Migration),
 		]
 	}
 }
