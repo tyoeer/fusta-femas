@@ -7,7 +7,7 @@ use acquire::{
 	strategy::Strategy,
 	StrategyList,
 };
-use tags::{
+use ffilter::{
 	tag::Tag,
 	tag_list::TagList,
 };

@@ -5,7 +5,7 @@ members = [
 	"sea-migration",
 	"entities",
 	"app",
-	"tags",
+	"ffilter",
 	"acquire",
 	"client-entrypoint",
 	"server-setup",

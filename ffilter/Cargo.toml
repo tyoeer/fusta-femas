@@ -1,5 +1,5 @@
 [package]
-name = "tags"
+name = "ffilter" # extra f so "filter" can still easily be used for naming variables
 version = "0.1.0"
 edition = "2021"
 # rust-version = "1.75"

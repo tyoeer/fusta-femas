@@ -167,6 +167,7 @@ dependencies = [
  "entities",
  "ff-macros",
  "ff-object",
+ "ffilter",
  "http 1.0.0",
  "leptos",
  "leptos_axum",
@@ -174,7 +175,6 @@ dependencies = [
  "leptos_router",
  "sea-orm",
  "serde",
- "tags",
  "thiserror",
  "tokio",
  "tracing",
@@ -1094,6 +1094,21 @@ dependencies = [
  "leptos",
  "sea-orm",
  "serde",
+]
+
+[[package]]
+name = "ffilter"
+version = "0.1.0"
+dependencies = [
+ "entities",
+ "erased-serde 0.4.2",
+ "ff-object",
+ "sea-migration",
+ "sea-orm",
+ "sea-orm-macros",
+ "serde",
+ "thiserror",
+ "tracing",
 ]
 
 [[package]]
@@ -3094,9 +3109,9 @@ version = "0.1.0"
 dependencies = [
  "acquire",
  "app",
+ "ffilter",
  "sea-migration",
  "server-setup",
- "tags",
  "tokio",
 ]
 
@@ -3109,13 +3124,13 @@ dependencies = [
  "dotenvy",
  "envy",
  "erased-serde 0.4.2",
+ "ffilter",
  "leptos",
  "leptos_axum",
  "ron",
  "sea-orm",
  "sea-orm-migration",
  "serde",
- "tags",
  "thiserror",
  "tokio",
  "tower",
@@ -3601,21 +3616,6 @@ name = "sync_wrapper"
 version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2047c6ded9c721764247e62cd3b03c09ffc529b2ba5b10ec482ae507a4a70160"
-
-[[package]]
-name = "tags"
-version = "0.1.0"
-dependencies = [
- "entities",
- "erased-serde 0.4.2",
- "ff-object",
- "sea-migration",
- "sea-orm",
- "sea-orm-macros",
- "serde",
- "thiserror",
- "tracing",
-]
 
 [[package]]
 name = "tap"

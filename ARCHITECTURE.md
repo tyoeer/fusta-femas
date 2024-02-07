@@ -28,7 +28,7 @@ In rough order in which they depend on each other:
 - [`entities/`](entities/): structs representing the data in the database + some utility stuff for those.
 - [`sea-migration/`](sea-migration/): Runnable migrations to make the database match the entities crate.
 - [`acquire/`](acquire/): Anything that has to do with getting feed entries from the internet into our database. Server only.
-- [`tags/`](tags/): Anything that has to do with tagging feeds & entries. Server only.
+- [`filter/`](filter/): Anything that has to do with tagging and filtering feeds & entries. Server only.
 - [`app/`](app/): Has all the UI stuff. Shared for server & client.
 - [`server-setup/`](server-setup/): Contains setup and boilerplate for server specific stuff.
 - [`server-entrypoint/`](server-entrypoint/): Hooks up [`server-setup/`](server-setup/) and [`app/`](app/) together
