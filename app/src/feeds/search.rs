@@ -20,13 +20,14 @@ pub async fn search(params: Option<SearchParameters>) -> Result<Vec<feed::Model>
 	//TODO figure out a better way of doing this
 	if let Some(params) = params {
 		if let Some(tag) = params.tag {
-			let maybe_tag = tag.find().one(&conn).await?;
-			let Some(tag) = maybe_tag else {
-				return Err(ServerFnError::ServerError(format!("Could not find tag {tag}")));
-			};
-			let tags = crate::extension!(tags::tag_list::TagList);
-			let tag_type = tags.get_feed_tag_by_name(&tag.kind)?;
-			query = tag_type.filter_query(tag, query);
+			query = tag.filter_related(query);
+			// let maybe_tag = tag.find().one(&conn).await?;
+			// let Some(tag) = maybe_tag else {
+			// 	return Err(ServerFnError::ServerError(format!("Could not find tag {tag}")));
+			// };
+			// let tags = crate::extension!(tags::tag_list::TagList);
+			// let tag_type = tags.get_feed_tag_by_name(&tag.kind)?;
+			// query = tag_type.filter_query(tag, query);
 		}
 	}
 	let feeds = query.all(&conn).await?;
