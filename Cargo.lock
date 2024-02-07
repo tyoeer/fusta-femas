@@ -10,6 +10,7 @@ dependencies = [
  "async-trait",
  "entities",
  "erased-serde 0.4.2",
+ "ff-object",
  "sea-migration",
  "sea-orm",
  "sea-orm-macros",
@@ -1089,6 +1090,7 @@ name = "ff-object"
 version = "0.1.0"
 dependencies = [
  "bevy_reflect",
+ "erased-serde 0.4.2",
  "leptos",
  "sea-orm",
  "serde",

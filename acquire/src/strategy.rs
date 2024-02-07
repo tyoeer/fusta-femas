@@ -76,27 +76,10 @@ async fn logged<Output>(task: impl std::future::Future<Output = Output>) -> (Str
 }
 
 
-pub trait DynSer {
-	//Deserialized object replaces self for trait object safety reasons
-	fn deserialize_replace(&mut self, deserializer: &mut dyn erased_serde::Deserializer) -> Result<(), erased_serde::Error>;
-	fn serialize(&self, serializer: &mut dyn erased_serde::Serializer) -> Result<(), erased_serde::Error>;
-}
-
-impl<T: serde::Serialize + serde::de::DeserializeOwned> DynSer for T {
-	fn deserialize_replace(&mut self, deserializer: &mut dyn erased_serde::Deserializer) -> Result<(), erased_serde::Error> {
-		let new = erased_serde::deserialize::<Self>(deserializer)?;
-		let _ = std::mem::replace(self, new);
-		Ok(())
-	}
-	fn serialize(&self, serializer: &mut dyn erased_serde::Serializer) -> Result<(), erased_serde::Error> {
-		<Self as erased_serde::Serialize>::erased_serialize(self, serializer)
-	}
-	
-}
 
 ///The type itself should serve as a configuration/settings, which is why it should be serializable
 #[async_trait::async_trait]
-pub trait Strategy: DynSer + Send + Sync {
+pub trait Strategy: ff_object::traits::DynSer + Send + Sync {
 	//&self required to be able to call it in a dyn context
 	fn name(&self) -> &'static str;
 	async fn fetch(&self, conn: &DatabaseConnection, feed: &feed::Model) -> anyhow::Result<String>;

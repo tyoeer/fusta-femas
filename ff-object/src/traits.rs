@@ -11,6 +11,28 @@ pub trait Object {
 }
 
 
+/**
+Something that can be (de)serialised as a trait object.
+Has a generic implementation for everything that can already be (de)serialised normally.
+*/
+pub trait DynSer {
+	//Deserialized object replaces self for trait object safety reasons
+	fn deserialize_replace(&mut self, deserializer: &mut dyn erased_serde::Deserializer) -> Result<(), erased_serde::Error>;
+	fn serialize(&self, serializer: &mut dyn erased_serde::Serializer) -> Result<(), erased_serde::Error>;
+}
+
+impl<T: serde::Serialize + serde::de::DeserializeOwned> DynSer for T {
+	fn deserialize_replace(&mut self, deserializer: &mut dyn erased_serde::Deserializer) -> Result<(), erased_serde::Error> {
+		let new = erased_serde::deserialize::<Self>(deserializer)?;
+		let _ = std::mem::replace(self, new);
+		Ok(())
+	}
+	fn serialize(&self, serializer: &mut dyn erased_serde::Serializer) -> Result<(), erased_serde::Error> {
+		<Self as erased_serde::Serialize>::erased_serialize(self, serializer)
+	}
+	
+}
+
 
 #[cfg(feature="orm")]
 use sea_orm::{
