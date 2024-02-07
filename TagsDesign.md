@@ -72,6 +72,19 @@ EntryTag:
 	- Requires system for automatic tags
 - Add entry manual tags
 
+## Redesign
+
+What's called a "tag" is actually a "filter".
+The `tags` crate should be `filter`.
+"Tags" should be just the manual ones/
+The DB stuff should get rid of the `config` field, and probably `type` as well,
+having manual tags be applyable to both feeds and entries always seems good enough for now.
+
+For searching it seems like a good idea to have a custom query system:
+- A GUI for building them
+- A text version for advanced users
+- The system should probably work with with booleans (&&, ||), functions (the filters), and function arguments (tag name, date) for start.
+
 ## Followup ideas
 
 - Numerical valued tags, e.g. a scoring system for entries
