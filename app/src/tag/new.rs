@@ -5,21 +5,12 @@ use crate::utils;
 #[cfg(feature="ssr")]
 use sea_orm::*;
 
-#[server]
-pub async fn get_tag_types() -> Result<Vec<String>, ServerFnError> {	
-	let tags = crate::extension!(ffilter::tag_list::TagList);
-	//TODO entry tags
-	let list = tags.iter_feed_tags().map(|s| s.name().to_owned()).collect::<Vec<String>>();
-	Ok(list)
-}
 
 #[server]
-pub async fn new_tag(title: String, kind: String) -> Result<tag::Ref, ServerFnError> {
+pub async fn new_tag(title: String) -> Result<tag::Ref, ServerFnError> {
 	let conn = crate::extension!(DatabaseConnection);
 	let mut new = tag::ActiveModel::new();
 	new.title = Set(title);
-	//TODO validate
-	// new.kind = Set(kind); TODO remove
 	let inserted = new.insert(&conn).await?;
 	Ok(inserted.id.into())
 }
@@ -33,20 +24,6 @@ pub fn TagCreator() -> impl IntoView {
 				<li class="object_fieldvalue">
 					<label class="object_field" for="title_input"> name </label>
 					<input class="object_value" type="text" name="title" id="title_input" size=50/>
-				</li>
-				<li class="object_fieldvalue">
-					<label class="object_field" for="kind_input"> type </label>
-					<select class="object_value" name="kind" id="kind_input">
-						<utils::AwaitOk future=get_tag_types let:tags>
-							<For
-								each=move || tags.clone()
-								key=|tag| tag.clone()
-								let:kind
-							>
-								<option value=kind.clone()> {kind} </option>
-							</For>
-						</utils::AwaitOk>
-					</select>
 				</li>
 			</ul>
 			
