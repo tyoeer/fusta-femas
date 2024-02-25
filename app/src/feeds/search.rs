@@ -2,7 +2,7 @@ use leptos::*;
 use leptos_router::{Params, use_query};
 use entities::prelude::*;
 use serde::{Serialize, Deserialize};
-use crate::table::*;
+use crate::{query::Query, table::*};
 use crate::utils;
 #[cfg(feature="ssr")]
 use sea_orm::*;
@@ -75,13 +75,21 @@ pub fn Search() -> impl IntoView {
 	}
 }
 
+#[server]
+pub async fn search2(query: Query) -> Result<Vec<feed::Model>, ServerFnError> {
+	tracing::info!(?query, "search");
+	Ok(Vec::new())
+}
+
 #[component]
 pub fn Search2() -> impl IntoView {
-	use crate::query::filter::Filter;
+	use crate::query::QueryUI;
+	
+	let action = Action::new(|query: &Query| search2(query.clone()));
 	
 	view! {
 		<div>
-			<Filter sub_id="test" />
+			<QueryUI action/>
 		</div>
 		
 		{ move || {
