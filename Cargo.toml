@@ -15,10 +15,10 @@ members = [
 ]
 
 [workspace.dependencies]
-leptos = "0.6.5"
-leptos_meta = "0.6"
-leptos_router = "0.6"
-leptos_axum = "0.6"
+leptos = "0.6.6"
+leptos_meta = "0.6.6"
+leptos_router = "0.6.6"
+leptos_axum = "0.6.6"
 sea-orm = {version = "0.12", features = ["runtime-tokio-rustls","sqlx-sqlite","with-time"]}
 serde = {version="1", features=["derive"]}
 erased-serde = "0.4.3"

@@ -1689,9 +1689,9 @@ dependencies = [
 
 [[package]]
 name = "leptos"
-version = "0.6.5"
+version = "0.6.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0c115de7c6fca2164133e18328777d02c371434ace38049ac02886b5cffd22dc"
+checksum = "1c0772cef6b7f26966b9243797a27e3e7f69f91cd444cb0c42e0d67e67e605ac"
 dependencies = [
  "cfg-if",
  "leptos_config",
@@ -1709,9 +1709,9 @@ dependencies = [
 
 [[package]]
 name = "leptos_axum"
-version = "0.6.5"
+version = "0.6.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "933ce9f409dd29ce429eb457f928d1cb48ebd39386d2dfe2f78d366e78cf7842"
+checksum = "51fed8933d2adcf3ff3b46dd6a9cb0cbd02f496c78becb7bd1e354ed1fe8a994"
 dependencies = [
  "axum",
  "cfg-if",
@@ -1831,9 +1831,9 @@ dependencies = [
 
 [[package]]
 name = "leptos_meta"
-version = "0.6.5"
+version = "0.6.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4bbbbd77839b4d3189c06319b32aaa3bc43510fb43f9c1bffb8e124a33decd6c"
+checksum = "f13f7146816452cd040394d51fb6a8eaf3c12d1b1dc911ca8ac03120d92cac27"
 dependencies = [
  "cfg-if",
  "indexmap",
@@ -1872,9 +1872,9 @@ dependencies = [
 
 [[package]]
 name = "leptos_router"
-version = "0.6.5"
+version = "0.6.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "498159479603569e1d7c969cffa0817b73249e96f825c295743f8f4607a68cbe"
+checksum = "ac85523a2d11d135955670b89eb3c0cadf2f51547779dece5e74584380767276"
 dependencies = [
  "cached",
  "cfg-if",
@@ -3136,9 +3136,9 @@ dependencies = [
 
 [[package]]
 name = "server_fn"
-version = "0.6.5"
+version = "0.6.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "97fab54d9dd2d7e9eba4efccac41d2ec3e7c6e9973d14c0486d662a32662320c"
+checksum = "dcbe027777b6bcb1fff76eb2ff3596cd68dbc52e5b703a0264db31fb6eb870ba"
 dependencies = [
  "axum",
  "bytes",
