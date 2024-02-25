@@ -2,7 +2,10 @@ use leptos::*;
 use serde::{Deserialize, Serialize};
 use ff_object::describe::Described;
 #[cfg(feature="ssr")]
-use ffilter::filter_list::FilterList;
+use ffilter::{
+	filter_list::FilterList,
+	filter::Filter,
+};
 use crate::{
 	utils,
 	extension,
@@ -33,29 +36,44 @@ pub async fn get_filters() -> Result<Vec<Described<()>>, ServerFnError> {
 
 
 #[derive(Debug,Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct Filter {
+pub struct ClientFilter {
 	name: String,
 }
 
-impl Filter {
+impl ClientFilter {
 	pub fn from_name(name: String) -> Self {
 		Self { name }
+	}
+	
+	#[cfg(feature="ssr")]
+	pub fn into_filter(self, list: FilterList) -> Result<Box<dyn Filter>, ffilter::filter_list::NotFoundError> {
+		let filter = list.get_by_name(&self.name)?;
+		
+		let filter = filter.box_clone();
+		
+		Ok(filter)
 	}
 }
 
 
 #[component]
-pub fn Filter(filter: RwSignal<Filter>, #[prop(into)] sub_id: String) -> impl IntoView {
+pub fn Filter(set: SignalSetter<ClientFilter>, get: Signal<ClientFilter>, #[prop(into)] sub_id: String) -> impl IntoView {
 	let id = format!("filter_{sub_id}");
-	
-	let filter_signal = filter;
 	
 	view! {
 		<div>
 			<select name=id.clone() id=id on:change=move |event| {
 				let value = event_target_value(&event);
-				filter_signal.update(|filter| filter.name = value);
+				let mut filter = get.get();
+				filter.name = value;
+				set.set(filter);
 			}>
+				<option
+					value=""
+					selected=move || get.get().name.is_empty()
+				>
+					"-- Select filter --"
+				</option>
 				<utils::AwaitOk future=get_filters let:filters>
 					<For
 						each=move || filters.clone()
@@ -67,7 +85,7 @@ pub fn Filter(filter: RwSignal<Filter>, #[prop(into)] sub_id: String) -> impl In
 							view! {
 								<option
 									value=filter_data.name.clone()
-									selected=move || filter_signal.get().name==name_clone
+									selected=move || get.get().name==name_clone
 								>
 									{filter_data.name}
 								</option>

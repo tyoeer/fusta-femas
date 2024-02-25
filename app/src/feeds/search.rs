@@ -5,6 +5,8 @@ use serde::{Serialize, Deserialize};
 use crate::{query::Query, table::*};
 use crate::utils;
 #[cfg(feature="ssr")]
+use ffilter::filter_list::FilterList;
+#[cfg(feature="ssr")]
 use sea_orm::*;
 
 #[derive(Debug,Clone,PartialEq,Eq, Params, Serialize,Deserialize)]
@@ -77,8 +79,20 @@ pub fn Search() -> impl IntoView {
 
 #[server]
 pub async fn search2(query: Query) -> Result<Vec<feed::Model>, ServerFnError> {
-	tracing::info!(?query, "search");
-	Ok(Vec::new())
+	let conn = crate::extension!(DatabaseConnection);
+	let filter_list = crate::extension!(FilterList);
+	
+	let filter = query.into_filter().into_filter(filter_list)?;
+	
+	let query = feed::Entity::find();
+	
+	let query = filter.filter(query);
+	
+	//filter is not necessarily Send, so it can't be held across the await
+	drop(filter);
+	
+	let feeds = query.all(&conn).await?;
+	Ok(feeds)
 }
 
 #[component]
@@ -87,17 +101,22 @@ pub fn Search2() -> impl IntoView {
 	
 	let action = Action::new(|query: &Query| search2(query.clone()));
 	
+	let feeds_res = move || {
+		match action.value().get() {
+			None => Ok(Vec::new()),
+			Some(feeds) => feeds,
+		}
+	};
+	
 	view! {
 		<div>
 			<QueryUI action/>
 		</div>
 		
 		{ move || {
-			view!{
-				<utils::AwaitOk future=all_feeds let:feeds>
-					<ObjectTable items = feeds />
-				</utils::AwaitOk>
-			}
+			feeds_res().map(|feeds| view! {
+				<ObjectTable items = feeds />
+			})
 		} }	
 	}
 }
