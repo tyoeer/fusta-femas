@@ -6,10 +6,7 @@ use ffilter::{
 	filter_list::FilterList,
 	filter::Filter,
 };
-use crate::{
-	utils,
-	extension,
-};
+use crate::utils;
 
 
 pub type Argument = Described<()>;
@@ -17,7 +14,7 @@ pub type FilterData = Described<Vec<Argument>>;
 
 #[server]
 pub async fn get_filters() -> Result<Vec<Described<()>>, ServerFnError> {
-	let filters = extension!(FilterList);
+	let filters = crate::extension!(FilterList);
 	
 	let filter_descriptions = filters.iter_filters()
 		.map(|filter| {
