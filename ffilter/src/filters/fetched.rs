@@ -1,6 +1,6 @@
-use entities::prelude::feed;
+use entities::prelude::*;
 use ff_object::describe::Describe;
-use sea_orm::prelude::Select;
+use sea_orm::{prelude::Select, QuerySelect};
 use serde::{Deserialize, Serialize};
 
 use crate::filter::{
@@ -14,7 +14,11 @@ pub struct Fetched;
 
 impl Filter for Fetched {
 	fn filter(&self, query: Select<feed::Entity>) -> Select<feed::Entity> {
-		todo!()
+		query
+			//inner join makes sure the relation exists
+			.inner_join(fetch::Entity)
+			//distinct prevents duplication from multiple fetches existing
+			.distinct()
 	}
 }
 
