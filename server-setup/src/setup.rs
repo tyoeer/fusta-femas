@@ -10,6 +10,8 @@ use acquire::{
 use ffilter::{
 	tag::Tag,
 	tag_list::TagList,
+	filter_list::FilterList,
+	filter::Filter,
 };
 use std::{fs::File, io::{Error as IoError, Write}};
 
@@ -43,11 +45,14 @@ pub enum StrategySaveLoadError {
 /**
 Hard-coded configuration stuff:
 - Fetch strategies
+- Filters
+- Tag types
 */
 #[derive(Default)]
 pub struct Setup {
 	pub strategies: Vec<Box<dyn Strategy + Send + Sync>>,
 	pub tags: Vec<Box<dyn Tag + Send + Sync>>,
+	pub filters: FilterList,
 }
 
 impl Setup {
@@ -57,6 +62,10 @@ impl Setup {
 	pub fn add_tag(&mut self, tag: impl Tag + Send + Sync + 'static) {
 		self.tags.push(Box::new(tag));
 	}
+	pub fn add_filter(&mut self, filter: impl Filter + Send + Sync + 'static) {
+		self.filters.add(filter);
+	}
+	
 	
 	pub fn saveload_strategy_configurations(&mut self, settings: &Settings) -> Result<(), StrategySaveLoadError> {
 		let base_path = settings.get_strategy_config_path();
@@ -94,6 +103,7 @@ impl Setup {
 		router
 			.layer(Extension(tag_list))
 			.layer(Extension(strat_list))
+			.layer(Extension(self.filters))
 			.layer(Extension(BatchTracker::default()))
 	}
 	
@@ -107,8 +117,14 @@ impl std::fmt::Debug for Setup {
 		let strategy_names = self.strategies.iter()
 			.map(|s| s.name())
 			.collect::<Vec<_>>();
+		
+		let filter_names = self.filters.iter_filters()
+			.map(|filter| filter.get_name())
+			.collect::<Vec<_>>();
+		
 		f.debug_struct("Setup")
 			.field("strategy_names", &strategy_names)
+			.field("filter_names", &filter_names)
 			.finish()
 	}
 }
