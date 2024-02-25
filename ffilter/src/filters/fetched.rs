@@ -19,7 +19,7 @@ impl Filter for Fetched {
 }
 
 impl Describe for Fetched {
-	const NAME: &'static str = "viewed";
+	const NAME: &'static str = "fetched";
 }
 
 impl ReprArgument for Fetched {
