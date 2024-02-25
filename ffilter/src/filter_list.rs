@@ -17,11 +17,11 @@ impl FilterList {
 		Self::default()
 	}
 	
-	pub fn add(&mut self, strat: impl Filter + Send + Sync + 'static) {
-		self.list.push(Arc::new(strat));
+	pub fn add(&mut self, filter: impl Filter + Send + Sync + 'static) {
+		self.list.push(Arc::new(filter));
 	}
-	pub fn add_from_container(&mut self, strat: impl Into<Arc<dyn Filter + Send + Sync>>) {
-		self.list.push(strat.into());
+	pub fn add_from_container(&mut self, filter: impl Into<Arc<dyn Filter + Send + Sync>>) {
+		self.list.push(filter.into());
 	}
 	
 	pub fn get_by_name(&self, name: &str) -> Result<&Arc<dyn Filter + Send + Sync>, NotFoundError> {
