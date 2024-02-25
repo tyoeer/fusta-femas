@@ -1,8 +1,11 @@
+use serde::{Deserialize, Serialize};
+
 /**
 Generic runtime data that is described at runtime using a name and an optional description.
 
 Also see [`Describe`] for a compile-time description of a type.
 */
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[non_exhaustive]
 pub struct Described<Data> {
 	pub name: String,
@@ -25,6 +28,15 @@ impl<Data> Described<Data> {
 			data,
 			Describer::NAME.to_owned(),
 			Describer::DESCRIPTION.map(|s| s.to_owned())
+		)
+	}
+	
+	///Describe data using the description of a separate [`&dyn DynDescribe`](DynDescribe)
+	pub fn new_with_dyn_describer(data: Data, describer: &dyn DynDescribe) -> Self {
+		Self::custom_new(
+			data,
+			describer.get_name().to_owned(),
+			describer.get_description().map(|s| s.to_owned())
 		)
 	}
 }
