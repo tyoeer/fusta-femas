@@ -4,3 +4,4 @@ pub mod tags;
 
 pub mod filter;
 pub mod filter_list;
+pub mod filters;
