@@ -75,6 +75,25 @@ pub fn Search() -> impl IntoView {
 	}
 }
 
+#[component]
+pub fn Search2() -> impl IntoView {
+	use crate::query::filter::Filter;
+	
+	view! {
+		<div>
+			<Filter sub_id="test" />
+		</div>
+		
+		{ move || {
+			view!{
+				<utils::AwaitOk future=all_feeds let:feeds>
+					<ObjectTable items = feeds />
+				</utils::AwaitOk>
+			}
+		} }	
+	}
+}
+
 
 #[server]
 pub async fn all_feeds() -> Result<Vec<feed::Model>, ServerFnError> {

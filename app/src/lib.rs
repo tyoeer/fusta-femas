@@ -8,3 +8,5 @@ pub mod strategies;
 
 pub mod table;
 pub mod utils;
+
+pub mod query;

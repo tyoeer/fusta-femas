@@ -21,6 +21,7 @@ pub fn FeedRoutes() -> impl IntoView {
 			}>
 				<utils::RouteAlias to="search" />
 				<Route path="/search" view=search::Search />
+				<Route path="/search2" view=search::Search2 />
 				<Route path="/all" view=search::All />
 				<Route path="/new" view=new::FeedCreator />
 			</Route>
@@ -36,6 +37,9 @@ fn Sidebar() -> impl IntoView {
 			<ul>
 				<li>
 					<A href="search">Search</A>
+				</li>
+				<li>
+					<A href="search2">Search2</A>
 				</li>
 				<li>
 					<A href="all">All</A>
