@@ -9,7 +9,7 @@ dependencies = [
  "anyhow",
  "async-trait",
  "entities",
- "erased-serde 0.4.2",
+ "erased-serde 0.4.3",
  "ff-object",
  "sea-migration",
  "sea-orm",
@@ -1032,9 +1032,9 @@ dependencies = [
 
 [[package]]
 name = "erased-serde"
-version = "0.4.2"
+version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "55d05712b2d8d88102bc9868020c9e5c7a1f5527c452b9b97450a1d006140ba7"
+checksum = "388979d208a049ffdfb22fa33b9c81942215b940910bccfe258caeb25d125cb3"
 dependencies = [
  "serde",
 ]
@@ -1090,7 +1090,7 @@ name = "ff-object"
 version = "0.1.0"
 dependencies = [
  "bevy_reflect",
- "erased-serde 0.4.2",
+ "erased-serde 0.4.3",
  "leptos",
  "sea-orm",
  "serde",
@@ -1101,7 +1101,7 @@ name = "ffilter"
 version = "0.1.0"
 dependencies = [
  "entities",
- "erased-serde 0.4.2",
+ "erased-serde 0.4.3",
  "ff-object",
  "sea-migration",
  "sea-orm",
@@ -3129,7 +3129,7 @@ dependencies = [
  "axum",
  "dotenvy",
  "envy",
- "erased-serde 0.4.2",
+ "erased-serde 0.4.3",
  "ffilter",
  "leptos",
  "leptos_axum",
