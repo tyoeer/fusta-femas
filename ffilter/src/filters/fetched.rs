@@ -9,7 +9,7 @@ use crate::filter::{
 };
 
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct Fetched;
 
 impl Filter for Fetched {
