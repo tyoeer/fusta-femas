@@ -4,6 +4,8 @@ pub mod fields;
 mod object_ref;
 pub use object_ref::ObjRef;
 
+pub mod describe;
+
 ///Traits for representing object behaviour
 pub mod traits;
 pub use traits::Object;
