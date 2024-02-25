@@ -63,16 +63,28 @@ pub trait ReprArgument {
 }
 
 
-pub trait DynBoxClone {
-	fn box_clone(&self) -> Box<dyn DynBoxClone>;
+pub trait DynFilterClone {
+	fn box_clone(&self) -> Box<dyn Filter>;
 }
 
-impl<T: Clone + 'static> DynBoxClone for T {
-	fn box_clone(&self) -> Box<dyn DynBoxClone> {
+impl<T: Clone + Filter + 'static> DynFilterClone for T {
+	fn box_clone(&self) -> Box<dyn Filter> {
 		Box::new(self.clone())
 	}
 }
 
-pub trait Filter: DynSer + DynDescribe + DynBoxClone + ReprArgument {
+pub trait Filter: DynSer + DynDescribe + DynFilterClone + ReprArgument {
 	fn filter(&self, query: Select<feed::Entity>) -> Select<feed::Entity>;
+}
+
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	
+	#[test]
+	fn filter_dyn() {
+		let a = crate::filters::Fetched::default();
+		let b: &dyn Filter = &a;
+	}
 }
