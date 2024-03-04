@@ -16,7 +16,7 @@ tokio = {workspace=true}
 tracing = {workspace=true}
 serde = {workspace=true}
 erased-serde = {workspace=true}
-serde_json = "1.0.113"
+serde_json = "1.0.114"
 anyhow = {version="1.0.80", features=["backtrace"]}
 thiserror = "1.0.57"
 tracing-subscriber = {workspace = true}
