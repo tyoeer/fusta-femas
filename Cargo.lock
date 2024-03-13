@@ -168,7 +168,7 @@ dependencies = [
  "ff-macros",
  "ff-object",
  "ffilter",
- "http 1.0.0",
+ "http 1.1.0",
  "leptos",
  "leptos_axum",
  "leptos_meta",
@@ -283,7 +283,7 @@ dependencies = [
  "axum-core",
  "bytes",
  "futures-util",
- "http 1.0.0",
+ "http 1.1.0",
  "http-body",
  "http-body-util",
  "hyper",
@@ -317,7 +317,7 @@ dependencies = [
  "async-trait",
  "bytes",
  "futures-util",
- "http 1.0.0",
+ "http 1.1.0",
  "http-body",
  "http-body-util",
  "mime",
@@ -1359,7 +1359,7 @@ dependencies = [
  "futures-core",
  "futures-sink",
  "futures-util",
- "http 1.0.0",
+ "http 1.1.0",
  "indexmap",
  "slab",
  "tokio",
@@ -1478,9 +1478,9 @@ dependencies = [
 
 [[package]]
 name = "http"
-version = "1.0.0"
+version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b32afd38673a8016f7c9ae69e5af41a58f81b1d31689040f2f1959594ce194ea"
+checksum = "21b9ddb458710bc376481b842f5da65cdf31522de232c1ca8146abce2a358258"
 dependencies = [
  "bytes",
  "fnv",
@@ -1494,7 +1494,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1cac85db508abc24a2e48553ba12a996e87244a0395ce011e62b37158745d643"
 dependencies = [
  "bytes",
- "http 1.0.0",
+ "http 1.1.0",
 ]
 
 [[package]]
@@ -1505,7 +1505,7 @@ checksum = "41cb79eb393015dadd30fc252023adb0b2400a0caee0fa2a077e6e21a551e840"
 dependencies = [
  "bytes",
  "futures-util",
- "http 1.0.0",
+ "http 1.1.0",
  "http-body",
  "pin-project-lite",
 ]
@@ -1538,7 +1538,7 @@ dependencies = [
  "futures-channel",
  "futures-util",
  "h2",
- "http 1.0.0",
+ "http 1.1.0",
  "http-body",
  "httparse",
  "httpdate",
@@ -1555,7 +1555,7 @@ checksum = "ca38ef113da30126bbff9cd1705f9273e15d45498615d138b0c20279ac7a76aa"
 dependencies = [
  "bytes",
  "futures-util",
- "http 1.0.0",
+ "http 1.1.0",
  "http-body",
  "hyper",
  "pin-project-lite",
@@ -2086,7 +2086,7 @@ dependencies = [
  "bytes",
  "encoding_rs",
  "futures-util",
- "http 1.0.0",
+ "http 1.1.0",
  "httparse",
  "log",
  "memchr",
@@ -3155,7 +3155,7 @@ dependencies = [
  "dashmap",
  "futures",
  "gloo-net 0.5.0",
- "http 1.0.0",
+ "http 1.1.0",
  "http-body-util",
  "hyper",
  "inventory",
@@ -3866,7 +3866,7 @@ dependencies = [
  "bitflags 2.4.1",
  "bytes",
  "futures-util",
- "http 1.0.0",
+ "http 1.1.0",
  "http-body",
  "http-body-util",
  "http-range-header",
