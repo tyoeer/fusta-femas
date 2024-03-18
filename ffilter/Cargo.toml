@@ -24,4 +24,4 @@ thiserror = "1.0.58"
 
 [dev-dependencies]
 sea-migration = {path="../sea-migration"}
-sea-orm-macros = "0.12.14"
+sea-orm-macros = "0.12.15"
