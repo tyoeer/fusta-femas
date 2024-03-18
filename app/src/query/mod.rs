@@ -3,35 +3,28 @@ use serde::{Deserialize, Serialize};
 
 
 pub mod filter;
+use filter::ClientFilter;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct Query {
-	filter: filter::ClientFilter,
+	filter: Option<ClientFilter>,
 }
 
 impl Query {
 	pub fn from_filter_name(name: impl Into<String>) -> Self {
 		Self {
-			filter: filter::ClientFilter::from_name(name.into()),
+			filter: Some(ClientFilter::from_name(name.into())),
 		}
 	}
 	
-	pub fn into_filter(self) -> filter::ClientFilter {
+	pub fn into_filter(self) -> Option<ClientFilter> {
 		self.filter
-	}
-	
-	pub fn filter_signal(self_signal: RwSignal<Self>) -> (Signal<filter::ClientFilter>, SignalSetter<filter::ClientFilter>) {
-		slice!(self_signal.filter)
 	}
 }
 
 
 #[component]
 pub fn QueryUI<ActionOutput: 'static>(action: Action<Query, Result<ActionOutput, ServerFnError>>) -> impl IntoView {
-	let query_signal = RwSignal::new(Query::from_filter_name(""));
-	
-	let (get, set) = Query::filter_signal(query_signal);
-	
 	let button_name = move || {
 		if action.pending().get() {
 			"searching...".to_owned()
@@ -68,7 +61,7 @@ pub fn QueryUI<ActionOutput: 'static>(action: Action<Query, Result<ActionOutput,
 			disabled=move || action.pending().get()
 			on:click = move |event| {
 				event.prevent_default();
-				action.dispatch(query_signal.get());
+				action.dispatch(Query::default());
 			}
 		>
 			{button_name}

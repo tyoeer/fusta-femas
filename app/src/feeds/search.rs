@@ -78,18 +78,18 @@ pub fn Search() -> impl IntoView {
 }
 
 #[server]
-pub async fn search2(query: Query) -> Result<Vec<feed::Model>, ServerFnError> {
+pub async fn search2(search_query: Query) -> Result<Vec<feed::Model>, ServerFnError> {
 	let conn = crate::extension!(DatabaseConnection);
 	let filter_list = crate::extension!(FilterList);
 	
-	let filter = query.into_filter().into_filter(filter_list)?;
+	let maybe_filter = search_query.into_filter();
 	
-	let query = feed::Entity::find();
+	let mut query = feed::Entity::find();
 	
-	let query = filter.filter(query);
-	
-	//filter is not necessarily Send, so it can't be held across the await
-	drop(filter);
+	if let Some(filter) =  maybe_filter {
+		let filter = filter.into_filter(filter_list)?;
+		query = filter.filter(query);
+	}
 	
 	let feeds = query.all(&conn).await?;
 	Ok(feeds)
