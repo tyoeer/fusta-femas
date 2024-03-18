@@ -38,7 +38,8 @@ pub struct ClientFilter {
 }
 
 impl ClientFilter {
-	pub fn from_name(name: String) -> Self {
+	pub fn from_name(name: impl Into<String>) -> Self {
+		let name = name.into();
 		Self { name }
 	}
 	

@@ -40,8 +40,29 @@ pub fn QueryUI<ActionOutput: 'static>(action: Action<Query, Result<ActionOutput,
 		}
 	};
 	
+	let filter: RwSignal<Option<RwSignal<ClientFilter>>> = RwSignal::new(None);
+	
+	let filter_ui = move || {
+		match filter.get() {
+			Some(filter_sig) => {
+				let (get, set) = filter_sig.split();
+				view! {
+					<filter::Filter get=get.into() set=set.into() sub_id="" />
+				}.into_view()
+			},
+			None => ().into_view(),
+		}
+	};
+	
 	view! {
-		<filter::Filter set get sub_id=""/>
+		<input type="checkbox" id="tag_enable" on:input=move |event| {
+			if event_target_checked(&event) {
+				filter.set(Some(RwSignal::new(ClientFilter::from_name(""))));
+			} else {
+				filter.set(None);
+			}
+		}/>
+		{filter_ui}
 		
 		<button
 			disabled=move || action.pending().get()
