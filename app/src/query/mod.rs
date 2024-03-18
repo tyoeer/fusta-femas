@@ -17,6 +17,20 @@ impl Query {
 		}
 	}
 	
+	pub fn from_filter_signal(filter_signal: RwSignal<Option<RwSignal<ClientFilter>>>) -> Self {
+		match filter_signal.get() {
+			None => Self {
+				filter: None
+			},
+			Some(filter_signal) => {
+				let filter = filter_signal.get();
+				Self {
+					filter: Some(filter)
+				}
+			}
+		}
+	}
+	
 	pub fn into_filter(self) -> Option<ClientFilter> {
 		self.filter
 	}
@@ -59,9 +73,8 @@ pub fn QueryUI<ActionOutput: 'static>(action: Action<Query, Result<ActionOutput,
 		
 		<button
 			disabled=move || action.pending().get()
-			on:click = move |event| {
-				event.prevent_default();
-				action.dispatch(Query::default());
+			on:click = move |_event| {
+				action.dispatch(Query::from_filter_signal(filter));
 			}
 		>
 			{button_name}
