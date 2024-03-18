@@ -59,7 +59,7 @@ pub fn Filter(set: SignalSetter<ClientFilter>, get: Signal<ClientFilter>, #[prop
 	let id = format!("filter_{sub_id}");
 	
 	view! {
-		<div>
+		<span>
 			<select name=id.clone() id=id on:change=move |event| {
 				let value = event_target_value(&event);
 				let mut filter = get.get();
@@ -92,6 +92,6 @@ pub fn Filter(set: SignalSetter<ClientFilter>, get: Signal<ClientFilter>, #[prop
 					</For>
 				</utils::AwaitOk>
 			</select>
-		</div>
+		</span>
 	}
 }

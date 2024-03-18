@@ -110,9 +110,7 @@ pub fn Search2() -> impl IntoView {
 	};
 	
 	view! {
-		<div>
-			<QueryUI action/>
-		</div>
+		<QueryUI action/>
 		
 		{ move || {
 			feeds_res().map(|feeds| view! {

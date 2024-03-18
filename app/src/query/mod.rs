@@ -62,23 +62,28 @@ pub fn QueryUI<ActionOutput: 'static>(action: Action<Query, Result<ActionOutput,
 	};
 	
 	view! {
-		<input type="checkbox" id="tag_enable" on:input=move |event| {
-			if event_target_checked(&event) {
-				filter.set(Some(RwSignal::new(ClientFilter::from_name(""))));
-			} else {
-				filter.set(None);
-			}
-		}/>
-		{filter_ui}
-		
-		<button
-			disabled=move || action.pending().get()
-			on:click = move |_event| {
-				action.dispatch(Query::from_filter_signal(filter));
-			}
-		>
-			{button_name}
-		</button>
+		<div class="search">
+			<div class="search_parameters">
+				<label for="filter_enable">filter</label>
+				<input type="checkbox" id="filter_enable" on:input=move |event| {
+					if event_target_checked(&event) {
+						filter.set(Some(RwSignal::new(ClientFilter::from_name(""))));
+					} else {
+						filter.set(None);
+					}
+				}/>
+				{filter_ui}
+			</div>
+			
+			<button
+				disabled=move || action.pending().get()
+				on:click = move |_event| {
+					action.dispatch(Query::from_filter_signal(filter));
+				}
+			>
+				{button_name}
+			</button>
+		</div>
 	}
 }
 
