@@ -78,7 +78,8 @@ pub fn Search() -> impl IntoView {
 }
 
 #[server]
-pub async fn search2(search_query: Query) -> Result<Vec<feed::Model>, ServerFnError> {
+// #[server(default)] because it otherwise errors when it only contains a None
+pub async fn search2(#[server(default)] search_query: Query) -> Result<Vec<feed::Model>, ServerFnError> {
 	let conn = crate::extension!(DatabaseConnection);
 	let filter_list = crate::extension!(FilterList);
 	
