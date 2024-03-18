@@ -64,15 +64,17 @@ pub fn QueryUI<ActionOutput: 'static>(action: Action<Query, Result<ActionOutput,
 	view! {
 		<div class="search">
 			<div class="search_parameters">
-				<label for="filter_enable">filter</label>
-				<input type="checkbox" id="filter_enable" on:input=move |event| {
-					if event_target_checked(&event) {
-						filter.set(Some(RwSignal::new(ClientFilter::from_name(""))));
-					} else {
-						filter.set(None);
-					}
-				}/>
-				{filter_ui}
+				<div class="search_parameter">
+					<label for="filter_enable">filter</label>
+					<input type="checkbox" id="filter_enable" on:input=move |event| {
+						if event_target_checked(&event) {
+							filter.set(Some(RwSignal::new(ClientFilter::from_name(""))));
+						} else {
+							filter.set(None);
+						}
+					}/>
+					{filter_ui}
+				</div>
 			</div>
 			
 			<button
