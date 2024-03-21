@@ -6,7 +6,6 @@ use ffilter::{
 	filter_list::FilterList,
 	filter::Filter,
 };
-use crate::utils;
 
 
 pub type Argument = Described<()>;

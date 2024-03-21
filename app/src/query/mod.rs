@@ -5,7 +5,7 @@ use crate::utils;
 pub mod filter;
 use filter::ClientFilter;
 
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, PartialEq,Eq, Serialize, Deserialize)]
 pub struct Query {
 	filter: Option<ClientFilter>,
 }
@@ -36,14 +36,53 @@ impl Query {
 	}
 }
 
+///Wrapper around Query with [std::fmt::Display]/[ToString] and [std::str::FromStr] impl based on serde_json. Used to put a (search) query in a browser query.
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
+pub struct QueryString {
+	pub query: Query,
+}
+
+impl std::fmt::Display for QueryString {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		let maybe_serialized = serde_json::to_string(&self.query);
+		let serialized = maybe_serialized.map_err(|err| {
+			tracing::error!(?err, "Error serializing query");
+			std::fmt::Error
+		})?;
+		write!(f, "{serialized}")
+	}
+}
+
+impl std::str::FromStr for QueryString {
+	type Err = serde_json::Error;
+	
+	fn from_str(source: &str) -> Result<Self, Self::Err> {
+		let query = serde_json::from_str::<Query>(source)?;
+		Ok(Self { query })
+	}
+}
+
+impl From<Query> for QueryString {
+	fn from(query: Query) -> Self {
+		Self { query }
+	}
+}
+
+impl From<QueryString> for Query {
+	fn from(query_string: QueryString) -> Self {
+		query_string.query
+	}
+}
 
 #[component]
-pub fn QueryUI<ActionOutput: 'static>(action: Action<Query, Result<ActionOutput, ServerFnError>>) -> impl IntoView {
+pub fn QueryUI(#[prop(into)] on_search: Callback<Query>, pending: Signal<bool>) -> impl IntoView {
+	let again = RwSignal::new(false);
+	
 	let button_name = move || {
-		if action.pending().get() {
+		if pending.get() {
 			"searching...".to_owned()
 		} else {
-			format!("search{}", if action.value().with(|val| val.is_some()) {" again"} else {""} )
+			format!("search{}", if again.get() {" again"} else {""} )
 		}
 	};
 	
@@ -83,9 +122,11 @@ pub fn QueryUI<ActionOutput: 'static>(action: Action<Query, Result<ActionOutput,
 			</div>
 			
 			<button
-				disabled=move || action.pending().get()
+				disabled=pending
 				on:click = move |_event| {
-					action.dispatch(Query::from_filter_signal(filter));
+					let query = Query::from_filter_signal(filter);
+					again.set(true);
+					on_search.call(query.clone());
 				}
 			>
 				{button_name}

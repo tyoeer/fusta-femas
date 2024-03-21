@@ -1,8 +1,8 @@
 use leptos::*;
-use leptos_router::{Params, use_query};
+use leptos_router::{create_query_signal, use_query, Params};
 use entities::prelude::*;
 use serde::{Serialize, Deserialize};
-use crate::{query::Query, table::*};
+use crate::{query::{Query, QueryString}, table::*};
 use crate::utils;
 #[cfg(feature="ssr")]
 use ffilter::filter_list::FilterList;
@@ -100,23 +100,23 @@ pub async fn search2(#[server(default)] search_query: Query) -> Result<Vec<feed:
 pub fn Search2() -> impl IntoView {
 	use crate::query::QueryUI;
 	
-	let action = Action::new(|query: &Query| search2(query.clone()));
+	let (query_get, query_set) = create_query_signal::<QueryString>("query");
 	
-	let feeds_res = move || {
-		match action.value().get() {
-			None => Ok(Vec::new()),
-			Some(feeds) => feeds,
-		}
+	let on_search = move |query: Query| {
+		query_set.set(Some(query.into()));
 	};
 	
+	let search_results = Resource::new(
+		move || query_get.get().unwrap_or_default().query,
+		search2
+	);
+	
 	view! {
-		<QueryUI action/>
+		<QueryUI on_search pending=search_results.loading() />
 		
-		{ move || {
-			feeds_res().map(|feeds| view! {
-				<ObjectTable items = feeds />
-			})
-		} }	
+		<utils::ResourceOk resource=search_results let:feeds fallback=|| ()>
+			<ObjectTable items = feeds />
+		</utils::ResourceOk>
 	}
 }
 
