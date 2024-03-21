@@ -66,15 +66,18 @@ pub fn QueryUI<ActionOutput: 'static>(action: Action<Query, Result<ActionOutput,
 			<div class="search_parameters">
 				<div class="search_parameter">
 					<utils::AwaitOk future=filter::get_filters let:filters>
-						<label for="filter_enable">filter</label>
-						<input type="checkbox" id="filter_enable" on:input=move |event| {
-							if event_target_checked(&event) {
-								filter.set(Some(RwSignal::new(ClientFilter::from_name(""))));
-							} else {
-								filter.set(None);
-							}
-						}/>
-						{ move || filter_ui(filters.clone()) }
+						<utils::CloneSignal base=filters let:filters_signal>
+							<label for="filter_enable">filter</label>
+							<input type="checkbox" id="filter_enable" on:input=move |event| {
+								if event_target_checked(&event) {
+									let default = filters_signal.get().first().expect("the server should have at least 1 filter").clone();
+									filter.set(Some(RwSignal::new(ClientFilter::from_description(default))));
+								} else {
+									filter.set(None);
+								}
+							}/>
+							{ move || filter_ui(filters_signal.get()) }
+						</utils::CloneSignal>
 					</utils::AwaitOk>
 				</div>
 			</div>

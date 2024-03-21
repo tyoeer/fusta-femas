@@ -43,6 +43,10 @@ impl ClientFilter {
 		Self { name }
 	}
 	
+	pub fn from_description(description: Described<()>) -> Self {
+		Self::from_name(description.name)
+	}
+	
 	#[cfg(feature="ssr")]
 	pub fn into_filter(self, list: FilterList) -> Result<Box<dyn Filter>, ffilter::filter_list::NotFoundError> {
 		let filter = list.get_by_name(&self.name)?;
@@ -71,12 +75,6 @@ pub fn Filter(
 				filter.name = value;
 				set.set(filter);
 			}>
-				<option
-					value=""
-					selected=move || get.get().name.is_empty()
-				>
-					"-- Select filter --"
-				</option>
 				<For
 					each=move || filters.clone()
 					key=|filter| filter.name.clone()
