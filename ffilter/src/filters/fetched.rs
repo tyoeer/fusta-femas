@@ -31,7 +31,7 @@ impl ReprArgument for Fetched {
 		Vec::new()
 	}
 
-	fn replace_from_args(&mut self, args: Vec<crate::filter::Argument>) {
+	fn replace_from_args(&mut self, _args: Vec<crate::filter::Argument>) {
 		//do nothing, since we have no arguments
 	}
 }
