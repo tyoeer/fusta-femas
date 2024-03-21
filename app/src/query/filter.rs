@@ -55,7 +55,12 @@ impl ClientFilter {
 
 
 #[component]
-pub fn Filter(set: SignalSetter<ClientFilter>, get: Signal<ClientFilter>, #[prop(into)] sub_id: String) -> impl IntoView {
+pub fn Filter(
+	set: SignalSetter<ClientFilter>,
+	get: Signal<ClientFilter>,
+	filters: Vec<Described<()>>,
+	#[prop(into)] sub_id: String
+) -> impl IntoView {
 	let id = format!("filter_{sub_id}");
 	
 	view! {
@@ -72,25 +77,23 @@ pub fn Filter(set: SignalSetter<ClientFilter>, get: Signal<ClientFilter>, #[prop
 				>
 					"-- Select filter --"
 				</option>
-				<utils::AwaitOk future=get_filters let:filters>
-					<For
-						each=move || filters.clone()
-						key=|filter| filter.name.clone()
-						let:filter_data
-					>
-						{
-							let name_clone = filter_data.name.clone();
-							view! {
-								<option
-									value=filter_data.name.clone()
-									selected=move || get.get().name==name_clone
-								>
-									{filter_data.name}
-								</option>
-							}
+				<For
+					each=move || filters.clone()
+					key=|filter| filter.name.clone()
+					let:filter_data
+				>
+					{
+						let name_clone = filter_data.name.clone();
+						view! {
+							<option
+								value=filter_data.name.clone()
+								selected=move || get.get().name==name_clone
+							>
+								{filter_data.name}
+							</option>
 						}
-					</For>
-				</utils::AwaitOk>
+					}
+				</For>
 			</select>
 		</span>
 	}

@@ -1,6 +1,6 @@
 use leptos::*;
 use serde::{Deserialize, Serialize};
-
+use crate::utils;
 
 pub mod filter;
 use filter::ClientFilter;
@@ -49,12 +49,12 @@ pub fn QueryUI<ActionOutput: 'static>(action: Action<Query, Result<ActionOutput,
 	
 	let filter: RwSignal<Option<RwSignal<ClientFilter>>> = RwSignal::new(None);
 	
-	let filter_ui = move || {
+	let filter_ui = move |filters| {
 		match filter.get() {
 			Some(filter_sig) => {
 				let (get, set) = filter_sig.split();
 				view! {
-					<filter::Filter get=get.into() set=set.into() sub_id="" />
+					<filter::Filter get=get.into() set=set.into() filters sub_id="" />
 				}.into_view()
 			},
 			None => ().into_view(),
@@ -65,15 +65,17 @@ pub fn QueryUI<ActionOutput: 'static>(action: Action<Query, Result<ActionOutput,
 		<div class="search">
 			<div class="search_parameters">
 				<div class="search_parameter">
-					<label for="filter_enable">filter</label>
-					<input type="checkbox" id="filter_enable" on:input=move |event| {
-						if event_target_checked(&event) {
-							filter.set(Some(RwSignal::new(ClientFilter::from_name(""))));
-						} else {
-							filter.set(None);
-						}
-					}/>
-					{filter_ui}
+					<utils::AwaitOk future=filter::get_filters let:filters>
+						<label for="filter_enable">filter</label>
+						<input type="checkbox" id="filter_enable" on:input=move |event| {
+							if event_target_checked(&event) {
+								filter.set(Some(RwSignal::new(ClientFilter::from_name(""))));
+							} else {
+								filter.set(None);
+							}
+						}/>
+						{ move || filter_ui(filters.clone()) }
+					</utils::AwaitOk>
 				</div>
 			</div>
 			
