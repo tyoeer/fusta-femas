@@ -111,8 +111,10 @@ pub fn Search2() -> impl IntoView {
 		search2
 	);
 	
+	let initial = query_get.get_untracked().map(|qs| qs.into());
+	
 	view! {
-		<QueryUI on_search pending=search_results.loading() />
+		<QueryUI on_search pending=search_results.loading() default=initial/>
 		
 		<utils::ResourceOk resource=search_results let:feeds fallback=|| ()>
 			<ObjectTable items = feeds />

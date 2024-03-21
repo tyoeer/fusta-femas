@@ -75,7 +75,7 @@ impl From<QueryString> for Query {
 }
 
 #[component]
-pub fn QueryUI(#[prop(into)] on_search: Callback<Query>, pending: Signal<bool>) -> impl IntoView {
+pub fn QueryUI(#[prop(into)] on_search: Callback<Query>, pending: Signal<bool>, #[prop(default=None)] default: Option<Query>) -> impl IntoView {
 	let again = RwSignal::new(false);
 	
 	let button_name = move || {
@@ -86,7 +86,13 @@ pub fn QueryUI(#[prop(into)] on_search: Callback<Query>, pending: Signal<bool>) 
 		}
 	};
 	
-	let filter: RwSignal<Option<RwSignal<ClientFilter>>> = RwSignal::new(None);
+	//A whole map statement looks cleaner/is more readable than .map(...).flatten()
+	let filter = match default {
+		None => None,
+		Some(query) => query.into_filter().map(RwSignal::new),
+	};
+	
+	let filter: RwSignal<Option<RwSignal<ClientFilter>>> = RwSignal::new(filter);
 	
 	let filter_ui = move |filters| {
 		match filter.get() {
@@ -107,7 +113,7 @@ pub fn QueryUI(#[prop(into)] on_search: Callback<Query>, pending: Signal<bool>) 
 					<utils::AwaitOk future=filter::get_filters let:filters>
 						<utils::CloneSignal base=filters let:filters_signal>
 							<label for="filter_enable">filter</label>
-							<input type="checkbox" id="filter_enable" on:input=move |event| {
+							<input type="checkbox" id="filter_enable" prop:checked=filter.get().is_some() on:input=move |event| {
 								if event_target_checked(&event) {
 									let default = filters_signal.get().first().expect("the server should have at least 1 filter").clone();
 									filter.set(Some(RwSignal::new(ClientFilter::from_description(default))));
