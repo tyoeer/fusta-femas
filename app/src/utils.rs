@@ -201,6 +201,34 @@ pub fn ResourceOk<ResourceIn, ResourceOk,	ResourceErr, ChildrenView, Children>(
 	}
 }
 
+/**
+Puts `base` in the reactive system, and gives its children a signal to get a clone back.
+Useful when you need to use something multiple times and don't want to add a view! in a closure in a view! just to get your clones in.
+*/
+#[component]
+pub fn CloneSignal<
+	ValueType:
+		//Needed to get it out of the reactive system
+		Clone + 
+		//Needed to store it in the reactive system
+		'static,
+	ChildrenView:
+		IntoView + Clone +
+		//Not quite sure why this one is required
+		'static,
+	Children:
+		Fn(Signal<ValueType>) -> ChildrenView +
+		//Wanted by await
+		'static,
+>(
+	base: ValueType,
+	children: Children,
+) -> impl IntoView {
+	let stored = store_value(base);
+	let signal = (move || stored.get_value()).into();
+	move || children(signal)
+}
+
 
 /**
 Renders an outlet in a `<main>` with a [`RwSignal`](leptos::RwSignal)`<Object>` in the context.
