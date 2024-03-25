@@ -13,7 +13,7 @@ time = {workspace = true}
 serde = {workspace = true}
 
 sea-orm = {workspace = true, optional = true}
-bevy_reflect = "0.13.0"
+bevy_reflect = "0.13.1"
 derive_more = "0.99"
 
 [features]
