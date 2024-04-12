@@ -20,7 +20,7 @@ jobs:
     - uses: actions/checkout@v3
     - uses: Swatinem/rust-cache@v2
       with:
-        shared-key: "SharedTests"
+        save-if: ${{ github.ref == 'refs/heads/main' }}
     - name: Run tests
       run: cargo test --verbose
   
@@ -32,7 +32,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: Swatinem/rust-cache@v2
         with:
-          shared-key: "SharedTests"
+          save-if: ${{ github.ref == 'refs/heads/main' }}
       - name: Get WASM target (& std)
         run: rustup target add wasm32-unknown-unknown
       - uses: taiki-e/install-action@v2
