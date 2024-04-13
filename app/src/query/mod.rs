@@ -5,6 +5,8 @@ use crate::utils;
 pub mod filter;
 use filter::ClientFilter;
 
+
+///Condensed query type for transport between server and client
 #[derive(Debug, Default, Clone, PartialEq,Eq, Serialize, Deserialize)]
 pub struct Query {
 	filter: Option<ClientFilter>,
@@ -33,6 +35,42 @@ impl Query {
 	
 	pub fn into_filter(self) -> Option<ClientFilter> {
 		self.filter
+	}
+}
+
+
+///Query type with signals in its innards so it can easily be hooked up into editor UI
+#[derive(Debug, Default, Clone, PartialEq,Eq)]
+pub struct ClientQuery {
+	filter: RwSignal<Option<RwSignal<ClientFilter>>>,
+}
+
+impl ClientQuery {
+	pub fn get_filter_signal(&self) -> RwSignal<Option<RwSignal<ClientFilter>>> {
+		self.filter
+	}
+	
+	
+	pub fn into_query(&self) -> Query {
+		let filter = self.filter.get().map(|filter_sig| filter_sig.get());
+		Query {
+			filter,
+		}
+	}
+}
+
+impl From<ClientQuery> for Query {
+	fn from(client_query: ClientQuery) -> Self {
+		client_query.into_query()
+	}
+}
+
+impl From<Query> for ClientQuery {
+	fn from(query: Query) -> Self {
+		let filter = RwSignal::new(query.filter.map(RwSignal::new));
+		Self {
+			filter,
+		}
 	}
 }
 
@@ -88,13 +126,8 @@ pub fn QueryUI(#[prop(into)] on_search: Callback<Query>, pending: Signal<bool>, 
 		}
 	};
 	
-	//A whole map statement looks cleaner/is more readable than .map(...).flatten()
-	let filter = match default {
-		None => None,
-		Some(query) => query.into_filter().map(RwSignal::new),
-	};
-	
-	let filter: RwSignal<Option<RwSignal<ClientFilter>>> = RwSignal::new(filter);
+	let client_query = default.map(ClientQuery::from).unwrap_or_default();
+	let filter = client_query.get_filter_signal();
 	
 	let filter_ui = move |filters| {
 		match filter.get() {
@@ -132,9 +165,8 @@ pub fn QueryUI(#[prop(into)] on_search: Callback<Query>, pending: Signal<bool>, 
 			<button
 				disabled=pending
 				on:click = move |_event| {
-					let query = Query::from_filter_signal(filter);
 					again.set(true);
-					on_search.call(query.clone());
+					on_search.call(client_query.clone().into());
 				}
 			>
 				{button_name}
