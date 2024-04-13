@@ -36,6 +36,7 @@ impl Query {
 	}
 }
 
+
 ///Wrapper around Query with [std::fmt::Display]/[ToString] and [std::str::FromStr] impl based on serde_json. Used to put a (search) query in a browser query.
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct QueryString {
@@ -73,6 +74,7 @@ impl From<QueryString> for Query {
 		query_string.query
 	}
 }
+
 
 #[component]
 pub fn QueryUI(#[prop(into)] on_search: Callback<Query>, pending: Signal<bool>, #[prop(default=None)] default: Option<Query>) -> impl IntoView {

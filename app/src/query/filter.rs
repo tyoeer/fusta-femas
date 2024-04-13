@@ -8,11 +8,17 @@ use ffilter::{
 };
 
 
-pub type Argument = Described<()>;
-pub type FilterData = Described<Vec<Argument>>;
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum ArgumentType {
+	Bool,
+}
+
+pub type ArgumentDesc = Described<ArgumentType>;
+pub type FilterDesc = Described<Vec<ArgumentDesc>>;
+
 
 #[server]
-pub async fn get_filters() -> Result<Vec<Described<()>>, ServerFnError> {
+pub async fn get_filters() -> Result<Vec<FilterDesc>, ServerFnError> {
 	let filters = crate::extension!(FilterList);
 	
 	let filter_descriptions = filters.iter_filters()
@@ -20,7 +26,7 @@ pub async fn get_filters() -> Result<Vec<Described<()>>, ServerFnError> {
 			//Can't use new_with_dyn_describer because that needs dyn trait upcasting
 			//See https://github.com/rust-lang/rust/issues/65991
 			Described::custom_new(
-				(),
+				Vec::new(),
 				filter.get_name().to_owned(),
 				filter.get_description().map(|d| d.to_owned()),
 			)
@@ -42,7 +48,7 @@ impl ClientFilter {
 		Self { name }
 	}
 	
-	pub fn from_description(description: Described<()>) -> Self {
+	pub fn from_description(description: FilterDesc) -> Self {
 		Self::from_name(description.name)
 	}
 	
@@ -61,7 +67,7 @@ impl ClientFilter {
 pub fn Filter(
 	set: SignalSetter<ClientFilter>,
 	get: Signal<ClientFilter>,
-	filters: Vec<Described<()>>,
+	filters: Vec<FilterDesc>,
 	#[prop(into)] sub_id: String
 ) -> impl IntoView {
 	let id = format!("filter_{sub_id}");
