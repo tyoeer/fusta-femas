@@ -4,6 +4,7 @@ use sea_orm::{prelude::Select, QuerySelect};
 use serde::{Deserialize, Serialize};
 
 use crate::filter::{
+	Argument,
 	Filter,
 	ReprArgument
 };
@@ -27,11 +28,11 @@ impl Describe for Fetched {
 }
 
 impl ReprArgument for Fetched {
-	fn into_arguments(self) -> Vec<crate::filter::Argument> {
+	fn into_arguments(self) -> Vec<Argument> {
 		Vec::new()
 	}
 
-	fn replace_from_args(&mut self, _args: Vec<crate::filter::Argument>) {
+	fn replace_from_args(&mut self, _args: Vec<Argument>) {
 		//do nothing, since we have no arguments
 	}
 }
