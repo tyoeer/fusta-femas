@@ -35,7 +35,7 @@ pub async fn get_filters() -> Result<Vec<FilterDesc>, ServerFnError> {
 	let filter_descriptions = filters.iter_filters()
 		.map(|filter| {
 			let args = filter.box_clone().into_arguments().into_iter()
-				.map(|arg_dec| arg_dec.map(ArgumentType::from))
+				.map(|arg_desc| arg_desc.map(ArgumentType::from))
 				.collect();
 			//Can't use new_with_dyn_describer because that needs dyn trait upcasting
 			//See https://github.com/rust-lang/rust/issues/65991
