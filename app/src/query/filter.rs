@@ -76,16 +76,27 @@ impl Filter {
 #[derive(Debug,Clone, PartialEq, Eq)]
 pub struct ClientFilter {
 	name: String,
+	arguments: Vec<String>,
 }
 
 impl ClientFilter {
 	pub fn from_name(name: impl Into<String>) -> Self {
 		let name = name.into();
-		Self { name }
+		Self {
+			name,
+			arguments: Vec::new(),
+		}
 	}
 	
-	pub fn from_description(description: FilterDesc) -> Self {
-		Self::from_name(description.name)
+	pub fn from_description(description: &FilterDesc) -> Self {
+		let arguments = description.data.iter()
+			.map(|arg_desc| arg_desc.name.clone())
+			.collect();
+		
+		Self {
+			name: description.name.clone(),
+			arguments,
+		}
 	}
 }
 
@@ -102,6 +113,7 @@ impl From<Filter> for ClientFilter {
 	fn from(filter: Filter) -> Self {
 		Self {
 			name: filter.name,
+			arguments: Vec::new(),
 		}
 	}
 }
@@ -116,16 +128,18 @@ pub fn Filter(
 ) -> impl IntoView {
 	let id = format!("filter_{sub_id}");
 	
+	let filters2 = filters.clone();
+	
 	view! {
 		<span>
 			<select name=id.clone() id=id on:change=move |event| {
-				let value = event_target_value(&event);
-				let mut filter = get.get();
-				filter.name = value;
-				set.set(filter);
+				let selected_name = event_target_value(&event);
+				let filter_data = filters.iter().find(|filter| filter.name==selected_name)
+					.expect("the name can only be selected from values from this list, so it should be in this list");
+				set.set(ClientFilter::from_description(filter_data));
 			}>
 				<For
-					each=move || filters.clone()
+					each=move || filters2.clone()
 					key=|filter| filter.name.clone()
 					let:filter_data
 				>
@@ -142,6 +156,16 @@ pub fn Filter(
 					}
 				</For>
 			</select>
+			
+			<For
+				each=move || get.get().arguments
+				key=|arg| arg.clone()
+				let:arg_name
+			>
+				<span>
+					{arg_name}
+				</span>
+			</For>
 		</span>
 	}
 }

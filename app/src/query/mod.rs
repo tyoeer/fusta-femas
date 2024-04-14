@@ -136,7 +136,8 @@ pub fn QueryUI(#[prop(into)] on_search: Callback<Query>, pending: Signal<bool>, 
 							<label for="filter_enable">filter</label>
 							<input type="checkbox" id="filter_enable" prop:checked=filter.get().is_some() on:input=move |event| {
 								if event_target_checked(&event) {
-									let default = filters_signal.get().first().expect("the server should have at least 1 filter").clone();
+									let filters = filters_signal.get();
+									let default = filters.first().expect("the server should have at least 1 filter");
 									filter.set(Some(RwSignal::new(ClientFilter::from_description(default))));
 								} else {
 									filter.set(None);
