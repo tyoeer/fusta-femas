@@ -1,6 +1,6 @@
 use entities::prelude::*;
 use ff_object::describe::{Describe, Described};
-use sea_orm::{prelude::Select, QuerySelect};
+use sea_orm::prelude::Select;
 use serde::{Deserialize, Serialize};
 
 use crate::filter::{
