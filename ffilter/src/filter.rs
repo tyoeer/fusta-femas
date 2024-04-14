@@ -49,7 +49,7 @@ use ff_object::describe::*;
 
 
 pub enum ArgumentData {
-	String(String)
+	Bool(bool)
 }
 
 
