@@ -5,12 +5,23 @@ use ff_object::describe::Described;
 use ffilter::{
 	filter_list::FilterList,
 	filter::Filter as ServerFilter,
+	filter::ArgumentData,
 };
 
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum ArgumentType {
 	Bool,
+}
+
+#[cfg(feature="ssr")]
+impl From<ArgumentData> for ArgumentType {
+	fn from(data: ArgumentData) -> Self {
+		use ArgumentData::*;
+		match data {
+			Bool(_) => Self::Bool,
+		}
+	}
 }
 
 pub type ArgumentDesc = Described<ArgumentType>;
@@ -23,10 +34,13 @@ pub async fn get_filters() -> Result<Vec<FilterDesc>, ServerFnError> {
 	
 	let filter_descriptions = filters.iter_filters()
 		.map(|filter| {
+			let args = filter.box_clone().into_arguments().into_iter()
+				.map(|arg_dec| arg_dec.map(ArgumentType::from))
+				.collect();
 			//Can't use new_with_dyn_describer because that needs dyn trait upcasting
 			//See https://github.com/rust-lang/rust/issues/65991
 			Described::custom_new(
-				Vec::new(),
+				args,
 				filter.get_name().to_owned(),
 				filter.get_description().map(|d| d.to_owned()),
 			)
