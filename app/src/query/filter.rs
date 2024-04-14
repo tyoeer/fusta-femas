@@ -4,7 +4,7 @@ use ff_object::describe::Described;
 #[cfg(feature="ssr")]
 use ffilter::{
 	filter_list::FilterList,
-	filter::Filter,
+	filter::Filter as ServerFilter,
 };
 
 
@@ -38,6 +38,28 @@ pub async fn get_filters() -> Result<Vec<FilterDesc>, ServerFnError> {
 
 
 #[derive(Debug,Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Filter {
+	name: String,
+}
+
+impl Filter {
+	pub fn from_name(name: impl Into<String>) -> Self {
+		let name = name.into();
+		Self { name }
+	}
+	
+	#[cfg(feature="ssr")]
+	pub fn into_filter(self, list: FilterList) -> Result<Box<dyn ServerFilter>, ffilter::filter_list::NotFoundError> {
+		let filter = list.get_by_name(&self.name)?;
+
+		let filter = filter.box_clone();
+
+		Ok(filter)
+	}
+}
+
+
+#[derive(Debug,Clone, PartialEq, Eq)]
 pub struct ClientFilter {
 	name: String,
 }
@@ -51,14 +73,22 @@ impl ClientFilter {
 	pub fn from_description(description: FilterDesc) -> Self {
 		Self::from_name(description.name)
 	}
-	
-	#[cfg(feature="ssr")]
-	pub fn into_filter(self, list: FilterList) -> Result<Box<dyn Filter>, ffilter::filter_list::NotFoundError> {
-		let filter = list.get_by_name(&self.name)?;
-		
-		let filter = filter.box_clone();
-		
-		Ok(filter)
+}
+
+
+impl From<ClientFilter> for Filter {
+	fn from(client_filter: ClientFilter) -> Self {
+		Self {
+			name: client_filter.name,
+		}
+	}
+}
+
+impl From<Filter> for ClientFilter {
+	fn from(filter: Filter) -> Self {
+		Self {
+			name: filter.name,
+		}
 	}
 }
 

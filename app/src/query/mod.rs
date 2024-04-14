@@ -3,37 +3,23 @@ use serde::{Deserialize, Serialize};
 use crate::utils;
 
 pub mod filter;
-use filter::ClientFilter;
+use filter::{ClientFilter, Filter};
 
 
 ///Condensed query type for transport between server and client
 #[derive(Debug, Default, Clone, PartialEq,Eq, Serialize, Deserialize)]
 pub struct Query {
-	filter: Option<ClientFilter>,
+	filter: Option<Filter>,
 }
 
 impl Query {
 	pub fn from_filter_name(name: impl Into<String>) -> Self {
 		Self {
-			filter: Some(ClientFilter::from_name(name.into())),
+			filter: Some(Filter::from_name(name.into())),
 		}
 	}
 	
-	pub fn from_filter_signal(filter_signal: RwSignal<Option<RwSignal<ClientFilter>>>) -> Self {
-		match filter_signal.get() {
-			None => Self {
-				filter: None
-			},
-			Some(filter_signal) => {
-				let filter = filter_signal.get();
-				Self {
-					filter: Some(filter)
-				}
-			}
-		}
-	}
-	
-	pub fn into_filter(self) -> Option<ClientFilter> {
+	pub fn into_filter(self) -> Option<Filter> {
 		self.filter
 	}
 }
@@ -52,7 +38,7 @@ impl ClientQuery {
 	
 	
 	pub fn into_query(&self) -> Query {
-		let filter = self.filter.get().map(|filter_sig| filter_sig.get());
+		let filter = self.filter.get().map(|filter_sig| filter_sig.get().into());
 		Query {
 			filter,
 		}
@@ -67,7 +53,7 @@ impl From<ClientQuery> for Query {
 
 impl From<Query> for ClientQuery {
 	fn from(query: Query) -> Self {
-		let filter = RwSignal::new(query.filter.map(RwSignal::new));
+		let filter = RwSignal::new(query.filter.map(|filter| RwSignal::new(filter.into())));
 		Self {
 			filter,
 		}
