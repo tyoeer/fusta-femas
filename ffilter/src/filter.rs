@@ -62,6 +62,24 @@ pub trait ReprArgument {
 	fn replace_from_args(&mut self, args: Vec<Argument>);
 }
 
+/**
+ReprArguments for trait objects.
+Trait objects can't be moved due to not having a static size, which is required to call [`ReprArgument::into_arguments`] with it's self argument
+*/
+pub trait DynReprArgument {
+	fn into_arguments(self: Box<Self>) -> Vec<Argument>;
+	fn replace_from_args(&mut self, args: Vec<Argument>);
+}
+
+impl<T: ReprArgument> DynReprArgument for T {
+	fn into_arguments(self: Box<Self>) -> Vec<Argument> {
+		<Self as ReprArgument>::into_arguments(*self)
+	}
+	
+	fn replace_from_args(&mut self, args: Vec<Argument>) {
+		<Self as ReprArgument>::replace_from_args(self, args)
+	}
+}
 
 pub trait DynFilterClone {
 	fn box_clone(&self) -> Box<dyn Filter>;
@@ -73,7 +91,7 @@ impl<T: Clone + Filter + 'static> DynFilterClone for T {
 	}
 }
 
-pub trait Filter: DynSer + DynDescribe + DynFilterClone + ReprArgument {
+pub trait Filter: DynSer + DynDescribe + DynFilterClone + DynReprArgument {
 	fn filter(&self, query: Select<feed::Entity>) -> Select<feed::Entity>;
 }
 
