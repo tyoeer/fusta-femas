@@ -39,6 +39,16 @@ impl<Data> Described<Data> {
 			describer.get_description().map(|s| s.to_owned())
 		)
 	}
+	
+	
+	///Changes the described data using the provided closure, while keeping the description the same
+	pub fn map<NewData>(self, map_fn: impl FnOnce(Data)->NewData) -> Described<NewData> {
+		Described::<NewData> {
+			data: map_fn(self.data),
+			name: self.name,
+			description: self.description,
+		}
+	}
 }
 
 impl<Data: Describe> Described<Data> {
