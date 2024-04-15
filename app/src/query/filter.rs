@@ -9,7 +9,7 @@ use ffilter::{
 };
 
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone,Copy, Serialize, Deserialize)]
 pub enum ArgumentType {
 	Bool,
 }
@@ -26,6 +26,39 @@ impl From<ArgumentData> for ArgumentType {
 
 pub type ArgumentDesc = Described<ArgumentType>;
 pub type FilterDesc = Described<Vec<ArgumentDesc>>;
+
+
+
+#[derive(Debug,Clone, PartialEq, Eq)]
+pub enum ClientArgument {
+	Bool(RwSignal<bool>)
+}
+
+fn client_arg_default(kind: ArgumentType) -> ClientArgument {
+	use ClientArgument as CA;
+	use ArgumentType as AT;
+	
+	match kind {
+		AT::Bool => CA::Bool(RwSignal::new(false)),
+	}
+}
+
+#[component]
+fn BoolEditor(value: RwSignal<bool>, #[prop(default=None)] id: Option<String>) -> impl IntoView {
+	view! {
+		<input type="checkbox" id=id prop:checked=value on:input=move |event| {
+			value.set(event_target_checked(&event));
+		}/>
+	}
+}
+
+#[component]
+fn ArgumentUI(argument: ClientArgument, #[prop(optional, default=None)] id: Option<String>) -> impl IntoView {
+	use ClientArgument::*;
+	match argument {
+		Bool(value) => view!{ <BoolEditor value id/> },
+	}
+}
 
 
 #[server]
@@ -76,7 +109,7 @@ impl Filter {
 #[derive(Debug,Clone, PartialEq, Eq)]
 pub struct ClientFilter {
 	name: String,
-	arguments: Vec<String>,
+	arguments: Vec<ClientArgument>,
 }
 
 impl ClientFilter {
@@ -90,7 +123,7 @@ impl ClientFilter {
 	
 	pub fn from_description(description: &FilterDesc) -> Self {
 		let arguments = description.data.iter()
-			.map(|arg_desc| arg_desc.name.clone())
+			.map(|arg_desc| client_arg_default(arg_desc.data))
 			.collect();
 		
 		Self {
@@ -172,7 +205,8 @@ pub fn Filter(
 				let:arg
 			>
 				<span>
-					{arg.1.name}
+					<label for=format!("arg_{}",arg.1.name)> {arg.1.name.clone()} ":" </label>
+					<ArgumentUI argument=arg.0 id=format!("arg_{}",arg.1.name)/>
 				</span>
 			</For>
 		</span>
