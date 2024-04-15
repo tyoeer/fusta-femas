@@ -128,15 +128,24 @@ pub fn Filter(
 ) -> impl IntoView {
 	let id = format!("filter_{sub_id}");
 	
+	let current = get.get();
+	let desc = filters.iter().find(|filter| filter.name==current.name)
+		.expect("provided ClientFilter should be from the filters list");
+	let description = RwSignal::new(desc.clone());
+	
 	let filters2 = filters.clone();
 	
 	view! {
 		<span>
 			<select name=id.clone() id=id on:change=move |event| {
 				let selected_name = event_target_value(&event);
-				let filter_data = filters.iter().find(|filter| filter.name==selected_name)
+				let filter_desc = filters.iter().find(|filter| filter.name==selected_name)
 					.expect("the name can only be selected from values from this list, so it should be in this list");
-				set.set(ClientFilter::from_description(filter_data));
+				//Batch to avoid mismatch between argument data and descriptions
+				batch(|| {
+					set.set(ClientFilter::from_description(filter_desc));
+					description.set(filter_desc.clone());
+				})
 			}>
 				<For
 					each=move || filters2.clone()
@@ -158,12 +167,12 @@ pub fn Filter(
 			</select>
 			
 			<For
-				each=move || get.get().arguments
-				key=|arg| arg.clone()
-				let:arg_name
+				each=move || std::iter::zip(get.get().arguments, description.get().data)
+				key=|(_value, desc)| desc.name.clone()
+				let:arg
 			>
 				<span>
-					{arg_name}
+					{arg.1.name}
 				</span>
 			</For>
 		</span>
