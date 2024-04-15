@@ -28,6 +28,32 @@ pub type ArgumentDesc = Described<ArgumentType>;
 pub type FilterDesc = Described<Vec<ArgumentDesc>>;
 
 
+#[derive(Debug,Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum Argument {
+	Bool(bool)
+}
+
+
+#[cfg(feature="ssr")]
+impl From<Argument> for ArgumentData {
+	fn from(arg: Argument) -> Self {
+		use ArgumentData as AD;
+		use Argument as A;
+		match arg {
+			A::Bool(value) => AD::Bool(value),
+		}
+	}
+}
+
+impl From<ClientArgument> for Argument {
+	fn from(ca: ClientArgument) -> Self {
+		use ClientArgument as CA;
+		use Argument as A;
+		match ca {
+			CA::Bool(sig) => A::Bool(sig.get()),
+		}
+	}
+}
 
 #[derive(Debug,Clone, PartialEq, Eq)]
 pub enum ClientArgument {
@@ -87,19 +113,30 @@ pub async fn get_filters() -> Result<Vec<FilterDesc>, ServerFnError> {
 #[derive(Debug,Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Filter {
 	name: String,
+	#[serde(default)] //Default transport format errors on empty Vec
+	arguments: Vec<Argument>,
 }
 
 impl Filter {
 	pub fn from_name(name: impl Into<String>) -> Self {
 		let name = name.into();
-		Self { name }
+		Self {
+			name,
+			arguments: Vec::new(),
+		}
 	}
 	
 	#[cfg(feature="ssr")]
 	pub fn into_filter(self, list: FilterList) -> Result<Box<dyn ServerFilter>, ffilter::filter_list::NotFoundError> {
 		let filter = list.get_by_name(&self.name)?;
 
-		let filter = filter.box_clone();
+		let mut filter = filter.box_clone();
+		//Need to get the descriptions
+		let mut args = filter.box_clone().into_arguments();
+		for (arg_desc, value) in std::iter::zip(&mut args, self.arguments)   {
+			arg_desc.data = value.into();
+		}
+		filter.replace_from_args(args);
 
 		Ok(filter)
 	}
@@ -138,6 +175,7 @@ impl From<ClientFilter> for Filter {
 	fn from(client_filter: ClientFilter) -> Self {
 		Self {
 			name: client_filter.name,
+			arguments: client_filter.arguments.into_iter().map(|arg| arg.into()).collect()
 		}
 	}
 }
