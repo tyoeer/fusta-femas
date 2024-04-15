@@ -5,7 +5,7 @@ Generic runtime data that is described at runtime using a name and an optional d
 
 Also see [`Describe`] for a compile-time description of a type.
 */
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[non_exhaustive]
 pub struct Described<Data> {
 	pub name: String,
@@ -48,6 +48,17 @@ impl<Data> Described<Data> {
 			name: self.name,
 			description: self.description,
 		}
+	}
+	
+	///Extracts out the data while leaving a separate data-less [`Described`]
+	pub fn split(self) -> (Data, Described<()>) {
+		let Described {
+			data, name, description
+		} = self;
+		
+		let new = Described::<()>::custom_new((), name, description);
+		
+		(data, new)
 	}
 }
 
