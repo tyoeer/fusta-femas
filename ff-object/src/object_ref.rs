@@ -60,6 +60,11 @@ impl<Model: Object> From<Model> for ObjRef<Model> {
 		Self::new(model.get_id())
 	}
 }
+impl<Model: Object> From<&Model> for ObjRef<Model> {
+	fn from(model: &Model) -> Self {
+		Self::new(model.get_id())
+	}
+}
 
 impl<Model, Id: Clone> From<Id> for ObjRef<Model, Id> {
 	fn from(id: Id) -> Self {
