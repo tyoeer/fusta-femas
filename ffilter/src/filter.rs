@@ -43,13 +43,14 @@ impl QueryFilter
 
 
 use sea_orm::Select;
-use entities::prelude::feed;
+use entities::prelude::*;
 use ff_object::traits::DynSer;
 use ff_object::describe::*;
 
 
 pub enum ArgumentData {
-	Bool(bool)
+	Bool(bool),
+	Tag(tag::Ref),
 }
 
 

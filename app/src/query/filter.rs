@@ -1,6 +1,8 @@
 use leptos::*;
+use crate::utils;
 use serde::{Deserialize, Serialize};
 use ff_object::describe::Described;
+use entities::prelude::tag;
 #[cfg(feature="ssr")]
 use ffilter::{
 	filter_list::FilterList,
@@ -12,6 +14,7 @@ use ffilter::{
 #[derive(Debug, Clone,Copy, Serialize, Deserialize)]
 pub enum ArgumentType {
 	Bool,
+	Tag,
 }
 
 #[cfg(feature="ssr")]
@@ -20,6 +23,7 @@ impl From<ArgumentData> for ArgumentType {
 		use ArgumentData::*;
 		match data {
 			Bool(_) => Self::Bool,
+			Tag(_) => Self::Tag,
 		}
 	}
 }
@@ -30,7 +34,8 @@ pub type FilterDesc = Described<Vec<ArgumentDesc>>;
 
 #[derive(Debug,Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Argument {
-	Bool(bool)
+	Bool(bool),
+	Tag(tag::Ref)
 }
 
 
@@ -41,6 +46,7 @@ impl From<Argument> for ArgumentData {
 		use Argument as A;
 		match arg {
 			A::Bool(value) => AD::Bool(value),
+			A::Tag(value) => AD::Tag(value),
 		}
 	}
 }
@@ -51,21 +57,24 @@ impl From<ClientArgument> for Argument {
 		use Argument as A;
 		match ca {
 			CA::Bool(sig) => A::Bool(sig.get()),
+			CA::Tag(sig) => A::Tag(sig.get()),
 		}
 	}
 }
 
 #[derive(Debug,Clone, PartialEq, Eq)]
 pub enum ClientArgument {
-	Bool(RwSignal<bool>)
+	Bool(RwSignal<bool>),
+	Tag(RwSignal<tag::Ref>),
 }
 
-fn client_arg_default(kind: ArgumentType) -> ClientArgument {
+fn client_arg_default(kind: ArgumentType, default_tag: Option<tag::Ref>) -> ClientArgument {
 	use ClientArgument as CA;
 	use ArgumentType as AT;
 	
 	match kind {
 		AT::Bool => CA::Bool(RwSignal::new(false)),
+		AT::Tag => CA::Tag(RwSignal::new(default_tag.expect("there should exist a tag to select"))),
 	}
 }
 
@@ -78,11 +87,40 @@ fn BoolEditor(value: RwSignal<bool>, #[prop(default=None)] id: Option<String>) -
 	}
 }
 
+
+#[component]
+fn TagEditor(value: RwSignal<tag::Ref>, #[prop(default=None)] id: Option<String>) -> impl IntoView {
+	view! {
+		<select id=id on:change=move |event| {
+			let id_str = event_target_value(&event);
+			let id = id_str.parse::<i32>().expect("option value should have been set to a valid i32");
+			value.set(tag::Ref::new(id));
+			
+		}>
+			<utils::AwaitOk future=crate::tag::search::all_tags let:tags>
+				<For
+					each=move || tags.clone()
+					key=|tag| tag.id
+					let:tag
+				>
+					<option
+						value=tag.id
+						selected=move || value.get().id()==tag.id
+					>
+						{tag.title}
+					</option>
+				</For>
+			</utils::AwaitOk>
+		</select>
+	}
+}
+
 #[component]
 fn ArgumentUI(argument: ClientArgument, #[prop(optional, default=None)] id: Option<String>) -> impl IntoView {
 	use ClientArgument::*;
 	match argument {
 		Bool(value) => view!{ <BoolEditor value id/> },
+		Tag(value) => view!{ <TagEditor value id/> },
 	}
 }
 
@@ -159,8 +197,11 @@ impl ClientFilter {
 	}
 	
 	pub fn from_description(description: &FilterDesc) -> Self {
+		let default_tag = use_context::<Vec<tag::Model>>()
+			.map(|tags| tags.first().map(tag::Ref::from))
+			.flatten();
 		let arguments = description.data.iter()
-			.map(|arg_desc| client_arg_default(arg_desc.data))
+			.map(|arg_desc| client_arg_default(arg_desc.data, default_tag.clone()))
 			.collect();
 		
 		Self {
