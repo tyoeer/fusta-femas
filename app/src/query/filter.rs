@@ -197,8 +197,7 @@ impl ClientFilter {
 	}
 	
 	pub fn from_description(description: &FilterDesc) -> Self {
-		let default_tag = use_context::<Vec<tag::Model>>()
-			.and_then(|tags| tags.first().map(tag::Ref::from));
+		let default_tag = Some(tag::Ref::new(1));
 		let arguments = description.data.iter()
 			.map(|arg_desc| client_arg_default(arg_desc.data, default_tag.clone()))
 			.collect();
