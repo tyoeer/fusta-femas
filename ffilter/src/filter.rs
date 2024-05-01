@@ -48,6 +48,7 @@ use ff_object::traits::DynSer;
 use ff_object::describe::*;
 
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ArgumentData {
 	Bool(bool),
 	Tag(tag::Ref),
