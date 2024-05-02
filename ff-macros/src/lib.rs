@@ -10,7 +10,7 @@ mod field_list;
 
 
 /**
-Generates an impl for [ff_object::Object].
+Generates an impl for [ff_object::Object](../ff_object/traits/trait.Object.html).
 
 Id field selection:
 1. first field named "id"
@@ -30,7 +30,7 @@ pub fn object_derive(input: TokenStream) -> TokenStream {
 
 
 /**
-Generates an impl for [`ff_object::fields::FieldListable`](ff_object::fields::FieldListable)`<`[`dyn bevy_reflect::Reflect`](dyn bevy_reflect::Reflect)`>`.
+Generates an impl for [`ff_object::fields::FieldListable`](../ff_object/fields/trait.FieldListable.html)`<``dyn bevy_reflect::Reflect``>`.
 */
 #[proc_macro_error]
 #[proc_macro_derive(FieldList)]
