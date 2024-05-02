@@ -16,7 +16,7 @@ members = [
 
 [workspace.dependencies]
 leptos = "0.6.11"
-leptos_meta = "0.6.8"
+leptos_meta = "0.6.11"
 leptos_router = "0.6.8"
 leptos_axum = "0.6.8"
 sea-orm = {version = "0.12", features = ["runtime-tokio-rustls","sqlx-sqlite","with-time"]}
