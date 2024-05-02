@@ -230,7 +230,7 @@ impl From<Filter> for ClientFilter {
 
 
 #[component]
-pub fn Filter(
+pub fn FilterUI(
 	set: SignalSetter<ClientFilter>,
 	get: Signal<ClientFilter>,
 	filters: Vec<FilterDesc>,
