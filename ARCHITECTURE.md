@@ -4,7 +4,7 @@ Fusta Femas is written in [the Rust language](https://rust-lang.org), and is org
 
 ## UI / Leptos
 
-Fusta Femas is build using/on [the Leptos framework](https://leptos.dev) for UI. This allows us to make our UI directly in the browser, and also handles communication with the running program.
+Fusta Femas is build using/on [the Leptos framework](https://leptos.dev) for UI. This allows us to render our UI directly in the browser, while also managing communication with the not-browser part.
 
 This leads to two overlapping modules:
 - The server, which runs as a separate program, and does all the feed management stuff. \
@@ -24,14 +24,15 @@ Fusta Femas stores its feed related data in a database, and uses [SeaORM](https:
 
 In rough order in which they depend on each other:
 
-- [`ff-macros/`](ff-macros/): [Rust](https://rust-lang.org) requires all macros to live in a separate crate. That is this crate.
+- [`ff-macros/`](ff-macros/): [Rust](https://rust-lang.org) requires all macros to live in a separate crate. This is that crate.
+- [`ff-object/`](ff-object/): More generic stuff that could be independent of Fusta Femas. Mostly "object" related functionality.
 - [`entities/`](entities/): structs representing the data in the database + some utility stuff for those.
-- [`sea-migration/`](sea-migration/): Runnable migrations to make the database match the entities crate.
+- [`sea-migration/`](sea-migration/): Runnable migrations to make the database match the entities crate. Server only.
 - [`acquire/`](acquire/): Anything that has to do with getting feed entries from the internet into our database. Server only.
-- [`filter/`](filter/): Anything that has to do with tagging and filtering feeds & entries. Server only.
+- [`ffilter/`](ffilter/): Anything that has to do with filtering feeds & entries. Server only.
 - [`app/`](app/): Has all the UI stuff. Shared for server & client.
 - [`server-setup/`](server-setup/): Contains setup and boilerplate for server specific stuff.
-- [`server-entrypoint/`](server-entrypoint/): Hooks up [`server-setup/`](server-setup/) and [`app/`](app/) together
+- [`server-entrypoint/`](server-entrypoint/): Hooks up [`server-setup/`](server-setup/) and [`app/`](app/) together, and sets up the available strategies and filters.
 - [`client-entrypoint/`](client-entrypoint/): Sets up logging and hooks up [`app/`](app/) in the client.
 
 
