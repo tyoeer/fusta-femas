@@ -147,6 +147,14 @@ pub async fn get_filters() -> Result<Vec<FilterDesc>, ServerFnError> {
 	Ok(filter_descriptions)
 }
 
+#[cfg(feature="ssr")]
+#[derive(Debug, thiserror::Error)]
+pub enum FromFilterError {
+	#[error("Server does not know filter: {0}")]
+	ListNotFound(#[from] ffilter::filter_list::NotFoundError),
+	#[error("Wrong arguments for filter: {0}")]
+	ArgumentError(#[from] ffilter::filter::ArgumentError)
+}
 
 #[derive(Debug,Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Filter {
@@ -165,7 +173,7 @@ impl Filter {
 	}
 	
 	#[cfg(feature="ssr")]
-	pub fn into_filter(self, list: FilterList) -> Result<Box<dyn ServerFilter>, ffilter::filter_list::NotFoundError> {
+	pub fn into_filter(self, list: FilterList) -> Result<Box<dyn ServerFilter>, FromFilterError> {
 		let filter = list.get_by_name(&self.name)?;
 
 		let mut filter = filter.box_clone();
@@ -174,7 +182,7 @@ impl Filter {
 		for (arg_desc, value) in std::iter::zip(&mut args, self.arguments)   {
 			arg_desc.data = value.into();
 		}
-		filter.replace_from_args(args);
+		filter.replace_from_args(args)?;
 
 		Ok(filter)
 	}
