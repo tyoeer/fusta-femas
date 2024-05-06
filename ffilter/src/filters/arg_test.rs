@@ -4,7 +4,7 @@ use sea_orm::prelude::Select;
 use serde::{Deserialize, Serialize};
 
 use crate::filter::{
-	Argument, ArgumentData, Filter, ReprArgument
+	Argument, ArgumentData, Filter, ReprArgument, ArgumentError
 };
 
 
@@ -34,16 +34,38 @@ impl ReprArgument for ArgTest {
 		]
 	}
 
-	fn replace_from_args(&mut self, args: Vec<Argument>) {
+	fn replace_from_args(&mut self, args: Vec<Argument>) -> Result<(), ArgumentError> {
+		//Can't move-destructure something without a const size for some reason
+		let sized_args = match <[Argument; 1]>::try_from(args) {
+			Ok(sized) => sized,
+			Err(original) => return Err(
+				ArgumentError::WrongCount {
+					expected: 1,
+					found: original.len()
+				}
+			),
+		};
+		
 		let [
 			Described {
-				data: ArgumentData::Bool(bool),
+				data: first_arg,
 				..
 			}
-		] = *args.into_boxed_slice() else {
-			panic!("Wrong arguments");
+		] = sized_args;
+		
+		let bool = match first_arg {
+			ArgumentData::Bool(bool) => bool,
+			other => return Err(
+				ArgumentError::WrongType {
+					index: 0,
+					expected: ArgumentData::Bool(self.bool.clone()),
+					found: other
+				}
+			),
 		};
 		
 		self.bool = bool;
+		
+		Ok(())
 	}
 }

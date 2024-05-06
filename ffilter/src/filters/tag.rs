@@ -4,7 +4,7 @@ use sea_orm::prelude::Select;
 use serde::{Deserialize, Serialize};
 
 use crate::filter::{
-	Argument, ArgumentData, Filter, ReprArgument
+	Argument, ArgumentData, Filter, ReprArgument, ArgumentError
 };
 
 
@@ -43,18 +43,38 @@ impl ReprArgument for Tag {
 		]
 	}
 
-	fn replace_from_args(&mut self, args: Vec<Argument>) {
-		//Can't destructure something without a const size for some reason
-		let bs: [Argument; 1] = args.try_into().expect("there should only be 1 argument");
+	fn replace_from_args(&mut self, args: Vec<Argument>) -> Result<(), ArgumentError> {
+		//Can't move-destructure something without a const size for some reason
+		let sized_args = match <[Argument; 1]>::try_from(args) {
+			Ok(sized) => sized,
+			Err(original) => return Err(
+				ArgumentError::WrongCount {
+					expected: 1,
+					found: original.len()
+				}
+			),
+		};
+		
 		let [
 			Described {
-				data: ArgumentData::Tag(tag),
+				data: first_arg,
 				..
 			}
-		] = bs else {
-			panic!("Wrong argument type(s)");
+		] = sized_args;
+		
+		let tag = match first_arg {
+			ArgumentData::Tag(tag) => tag,
+			other => return Err(
+				ArgumentError::WrongType {
+					index: 0,
+					expected: ArgumentData::Tag(self.tag.clone()),
+					found: other
+				}
+			),
 		};
-
+		
 		self.tag = tag;
+		
+		Ok(())
 	}
 }

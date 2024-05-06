@@ -6,7 +6,8 @@ use serde::{Deserialize, Serialize};
 use crate::filter::{
 	Argument,
 	Filter,
-	ReprArgument
+	ReprArgument,
+	ArgumentError,
 };
 
 
@@ -32,7 +33,8 @@ impl ReprArgument for Fetched {
 		Vec::new()
 	}
 
-	fn replace_from_args(&mut self, _args: Vec<Argument>) {
+	fn replace_from_args(&mut self, _args: Vec<Argument>) -> Result<(), ArgumentError>{
 		//do nothing, since we have no arguments
+		Ok(())
 	}
 }
