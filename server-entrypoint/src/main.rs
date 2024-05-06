@@ -5,7 +5,6 @@ async fn main() {
 	setup.add_strategy(acquire::mock::MockStrat::default());
 	setup.add_strategy(acquire::yt_dlp::YtDlpStrategy::default());
 	
-	setup.add_tag(ffilter::tags::feed_manual::FeedManual::default());
 	setup.add_filter(ffilter::filters::Fetched::default());
 	setup.add_filter(ffilter::filters::ArgTest::default());
 	setup.add_filter(ffilter::filters::Tag::default());

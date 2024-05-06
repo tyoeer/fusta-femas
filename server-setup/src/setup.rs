@@ -8,8 +8,6 @@ use acquire::{
 	StrategyList,
 };
 use ffilter::{
-	tag::Tag,
-	tag_list::TagList,
 	filter_list::FilterList,
 	filter::Filter,
 };
@@ -51,16 +49,12 @@ Hard-coded configuration stuff:
 #[derive(Default)]
 pub struct Setup {
 	pub strategies: Vec<Box<dyn Strategy + Send + Sync>>,
-	pub tags: Vec<Box<dyn Tag + Send + Sync>>,
 	pub filters: FilterList,
 }
 
 impl Setup {
 	pub fn add_strategy(&mut self, strategy: impl Strategy + Send + 'static) {
 		self.strategies.push(Box::new(strategy));
-	}
-	pub fn add_tag(&mut self, tag: impl Tag + Send + Sync + 'static) {
-		self.tags.push(Box::new(tag));
 	}
 	pub fn add_filter(&mut self, filter: impl Filter + Send + Sync + 'static) {
 		self.filters.add(filter);
@@ -95,13 +89,7 @@ impl Setup {
 			strat_list.add_from_container(strat);
 		}
 		
-		let mut tag_list = TagList::new();
-		for tag in self.tags {
-			tag_list.add_from_container(tag);
-		}
-		
 		router
-			.layer(Extension(tag_list))
 			.layer(Extension(strat_list))
 			.layer(Extension(self.filters))
 			.layer(Extension(BatchTracker::default()))
