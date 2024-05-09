@@ -12,7 +12,7 @@ use sea_orm::*;
 #[component(transparent)]
 pub fn Routes() -> impl IntoView {
 	view! {
-		<Route path="/:id" view=FeedContext>
+		<Route path="/:id" view=TagContext>
 			<utils::RouteAlias to="about" />
 			<Route path="about" view=TagInfo/>
 			// <Route path="entries" view=Entries/>
@@ -21,7 +21,7 @@ pub fn Routes() -> impl IntoView {
 }
 
 #[component]
-pub fn FeedContext() -> impl IntoView {
+pub fn TagContext() -> impl IntoView {
 	view! {
 		<utils::ObjectContext getter=get_tag>
 			<Sidebar />
