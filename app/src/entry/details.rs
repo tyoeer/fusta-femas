@@ -4,6 +4,7 @@ use entities::prelude::*;
 use crate::table;
 use crate::fetch::search::FetchOverview;
 use crate::utils;
+use ff_object::ref_signal;
 #[cfg(feature="ssr")]
 use sea_orm::*;
 #[cfg(feature="ssr")]
@@ -63,13 +64,13 @@ pub async fn get_entry(id: i32) -> Result<entry::Model, ServerFnError> {
 }
 
 #[server]
-pub async fn mark_viewed(id: i32, viewed: bool) -> Result<entry::Model, ServerFnError> {
+pub async fn mark_viewed(entry: entry::Ref, viewed: bool) -> Result<entry::Model, ServerFnError> {
 	let db = crate::extension!(DatabaseConnection);
 	
-	let mut entry = entry::ActiveModel::new();
-	entry.viewed = Set(viewed);
-	entry.id = Unchanged(id);
-	let entry = entry.update(&db).await?;
+	let mut entry_model = entry::ActiveModel::new();
+	entry_model.viewed = Set(viewed);
+	entry_model.id = Unchanged(entry.id());
+	let entry = entry_model.update(&db).await?;
 	
 	Ok(entry)
 }
@@ -97,7 +98,7 @@ pub fn MarkViewedButton(entry: RwSignal<entry::Model>) -> impl IntoView {
 	
 	view! {
 		<ActionForm action = action>
-			<input type="hidden" name="id" value=move || entry.get().id />
+			<input type="hidden" name="entry" value=move || entry.get().id />
 			<input type="hidden" name="viewed" value=move || (!viewed()).to_string() />
 			<input type="submit" value=button_name disabled=move || action.pending().get() />
 		</ActionForm>
@@ -174,10 +175,10 @@ pub fn Embed() -> impl IntoView {
 }
 
 #[server]
-pub async fn get_fetches(entry_id: i32) -> Result<Vec<FetchOverview>, ServerFnError> {
+pub async fn get_fetches(entry: entry::Ref) -> Result<Vec<FetchOverview>, ServerFnError> {
 	let conn = crate::extension!(DatabaseConnection);
-	let query = <entry::Entity as Related<fetch::Entity>>::find_related()
-		.filter(entry::Column::Id.eq(entry_id));
+	
+	let query = entry.find_related();
 	FetchOverview::from_query(query)
 		.all(&conn)
 		.await
@@ -187,10 +188,10 @@ pub async fn get_fetches(entry_id: i32) -> Result<Vec<FetchOverview>, ServerFnEr
 #[component]
 pub fn Fetches() -> impl IntoView {
 	let entry = crate::model!(entry);
-	let (id, _) = slice!(entry.id);
+	let entry_ref = ref_signal(entry);
 	
 	view! {
-		<utils::AwaitOk future=move || get_fetches(id.get()) let:fetches>
+		<utils::AwaitOk future=move || get_fetches(entry_ref.get()) let:fetches>
 			<table::ObjectTable items = fetches />
 		</utils::AwaitOk>
 	}.into()
