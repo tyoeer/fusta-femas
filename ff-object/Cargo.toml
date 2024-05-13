@@ -7,15 +7,16 @@ edition = "2021"
 
 [dependencies]
 sea-orm = {workspace=true, optional=true}
+leptos = {workspace = true, optional=true}
 serde = {workspace = true}
 erased-serde = {workspace=true}
-leptos = {workspace = true}
 bevy_reflect = "0.13.2"
 
 [features]
 server = ["orm"]
 
 orm = ["dep:sea-orm"]
+leptos = ["dep:leptos"]
 
 [lints]
 workspace = true

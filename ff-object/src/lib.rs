@@ -14,14 +14,17 @@ pub use traits::View;
 
 
 
+#[cfg(feature="leptos")]
 use leptos::{
 	SignalWith,
 	Signal,
 	IntoSignal,
 };
+#[cfg(feature="leptos")]
 use Object as ObjectTrait;
 
 ///Returns a [Signal] containing an ObjRef for the given signal containing an object
+#[cfg(feature="leptos")]
 pub fn ref_signal<Object: ObjectTrait>(object: impl SignalWith<Value=Object> + 'static) -> Signal<ObjRef<Object>> {
 	let closure = move || object.with(|object| object.get_ref());
 	closure.into_signal()
