@@ -3,79 +3,33 @@ use quote::{quote, quote_spanned};
 use syn::{DeriveInput, Ident, Type, TypePath, parse2, punctuated::Punctuated, spanned::Spanned};
 use proc_macro_error::abort;
 
+
+#[derive(Clone)]
 pub struct Field {
 	name: Ident,
 	ty: Type,
 	span: Span,
 }
 
-pub struct FieldListDerive {
-	struct_name: Ident,
+pub struct List {
+	r#type: Type,
 	fields: Vec<Field>,
-	crate_path: TypePath,
 }
 
-impl FieldListDerive {
-	pub fn new(struct_name: Ident, fields: Vec<Field>) -> Self {
+impl List {
+	pub fn new(ty: Type) -> Self {
 		Self {
-			struct_name,
-			fields,
-			crate_path: Self::default_trait_path(),
+			r#type: ty,
+			fields: Vec::new(),
 		}
 	}
-	fn default_trait_path() -> TypePath {
-		parse2(quote!{ ::ff_object }).expect("hardcoded path should be valid")
-	}
-}
-
-impl From<DeriveInput> for FieldListDerive {
-	fn from(di: DeriveInput) -> Self {
-		let struct_name = di.ident.to_owned();
-		let struct_data = match di.data {
-			syn::Data::Struct(struct_data) => struct_data,
-			syn::Data::Enum(enum_data) => abort!(enum_data.enum_token, "enums aren't supported"),
-			syn::Data::Union(union_data) => abort!(union_data.union_token, "unions aren't supported"),
-		};
-		
-		let fields = match struct_data.fields {
-			syn::Fields::Named(fields) => fields.named,
-			syn::Fields::Unnamed(fields) => fields.unnamed,
-			syn::Fields::Unit => Punctuated::new(),
-		};
-		
-		let mut counter = 0;
-		let fields: Vec<Field> = fields.into_iter()
-			.map(|field| {
-				let span = field.span();
-				let name = if let Some(ident) = field.ident {
-					ident
-				} else {
-					counter += 1;
-					Ident::new(counter.to_string().as_ref(), field.span())
-				};
-				
-				Field {
-					name,
-					span,
-					ty: field.ty,
-				}
-			})
-			.collect();
-		
-		Self::new(struct_name, fields)
-	}
-}
-
-impl FieldListDerive {
-	pub fn generate(self) -> TokenStream {
-		let crate_path = self.crate_path;
-		let struct_name = self.struct_name;
-		
-		let field_type = quote!{ dyn bevy_reflect::Reflect };
+	
+	pub fn generate_impl(self, crate_path: &TypePath, struct_name: &Ident) -> TokenStream {
+		let field_type = self.r#type;
 		let fields = self.fields.into_iter().map(|field| {
 			let Field {mut name, ty, span} = field;
 			let name_str = name.to_string();
-			
+
 			//Use type span to put errors of the field not implementing Reflect on the type
 			name.set_span(ty.span());
 			let get = quote_spanned! {ty.span()=> &obj.#name};
@@ -89,19 +43,115 @@ impl FieldListDerive {
 				),
 			}
 		});
-		
+
 		quote! {
-			
+
 			impl #crate_path::fields::FieldListable<#field_type> for #struct_name {
 				fn iter_fields() -> impl Iterator<Item = &'static (impl #crate_path::fields::Field<Object=Self, FieldType=#field_type> + 'static) > {
 					//const item to prevent duplication
 					const FIELDS: &[#crate_path::fields::DynField<#struct_name>] = &[
 						#(#fields)*
 					];
-					
+
 					FIELDS.iter()
 				}
 			}
 		}
 	}
+}
+
+fn default_list_type() -> Type {
+	parse2(quote!{ dyn bevy_reflect::Reflect }).expect("hardcoded type should be valid")
+}
+
+impl Default for List {
+	fn default() -> Self {
+		Self {
+			r#type: default_list_type(),
+			fields: Vec::new(),
+		}
+	}
+}
+
+pub struct FieldListDerive {
+	struct_name: Ident,
+	crate_path: TypePath,
+	lists: Vec<List>,
+}
+
+impl FieldListDerive {
+	pub fn new(struct_name: Ident, lists: Vec<List>) -> Self {
+		Self {
+			struct_name,
+			lists,
+			crate_path: Self::default_trait_path(),
+		}
+	}
+	fn default_trait_path() -> TypePath {
+		parse2(quote!{ ::ff_object }).expect("hardcoded path should be valid")
+	}
+	
+}
+
+impl From<DeriveInput> for FieldListDerive {
+	fn from(derive_input: DeriveInput) -> Self {
+		let DeriveInput {ident: struct_name, data, ..} = derive_input;
+		
+		//Attribute
+		
+		let mut lists = vec![ List::default() ];
+		
+		//Fields
+		
+		let struct_data = match data {
+			syn::Data::Struct(struct_data) => struct_data,
+			syn::Data::Enum(enum_data) => abort!(enum_data.enum_token, "enums aren't supported"),
+			syn::Data::Union(union_data) => abort!(union_data.union_token, "unions aren't supported"),
+		};
+		
+		let fields = match struct_data.fields {
+			syn::Fields::Named(fields) => fields.named,
+			syn::Fields::Unnamed(fields) => fields.unnamed,
+			syn::Fields::Unit => Punctuated::new(),
+		};
+		
+		let mut counter = 0;
+		for field in fields {
+			let span = field.span();
+			let name = if let Some(ident) = field.ident {
+				ident
+			} else {
+				counter += 1;
+				Ident::new(counter.to_string().as_ref(), field.span())
+			};
+			
+			let field = Field {
+				name,
+				span,
+				ty: field.ty,
+			};
+			
+			for list in &mut lists {
+				list.fields.push(field.clone());
+			}
+		}
+		
+		Self::new(struct_name, lists)
+	}
+}
+
+impl FieldListDerive {
+	pub fn generate(self) -> TokenStream {
+		let Self {
+			struct_name,
+			crate_path,
+			lists
+		} = self;
+		
+		lists.into_iter()
+			.map(|list| list.generate_impl(&crate_path, &struct_name))
+			.collect()
+	}
+	
+
 }
