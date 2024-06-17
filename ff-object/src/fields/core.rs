@@ -16,13 +16,13 @@ pub trait Field {
 
 /// dyn [Field] with a static known sized, so they don't have to be boxed
 #[derive(Debug)]
-pub struct DynField<Object> {
+pub struct DynField<Object, Field: ?Sized = dyn Reflect> {
 	name: Cow<'static, str>,
-	get: fn(&Object) -> &dyn Reflect,
-	get_mut: fn(&mut Object) -> &mut dyn Reflect,
+	get: fn(&Object) -> &Field,
+	get_mut: fn(&mut Object) -> &mut Field,
 }
 
-impl<Object> Clone for DynField<Object> {
+impl<Object, Field: ?Sized> Clone for DynField<Object, Field> {
 	fn clone(&self) -> Self {
 		Self {
 			name: self.name.clone(),
@@ -32,11 +32,11 @@ impl<Object> Clone for DynField<Object> {
 	}
 }
 
-impl<Object> DynField<Object> {
+impl<Object, Field: ?Sized> DynField<Object, Field> {
 	pub const fn new(
 		name: Cow<'static, str>,
-		get: fn(&Object) -> &dyn Reflect,
-		get_mut: fn(&mut Object) -> &mut dyn Reflect,
+		get: fn(&Object) -> &Field,
+		get_mut: fn(&mut Object) -> &mut Field,
 	) -> Self {
 		Self {
 			name,
@@ -46,9 +46,9 @@ impl<Object> DynField<Object> {
 	}
 }
 
-impl<Object> Field for DynField<Object> {
+impl<Object, FieldType: ?Sized> Field for DynField<Object, FieldType> {
 	type Object = Object;
-	type FieldType = dyn Reflect;
+	type FieldType = FieldType;
 	
 	fn name(&self) -> &str {
 		self.name.as_ref()
