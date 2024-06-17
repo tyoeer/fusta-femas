@@ -1,7 +1,19 @@
 use proc_macro2::{TokenStream, Span};
 use quote::{quote, quote_spanned};
 use syn::{DeriveInput, Ident, Type, TypePath, parse2, punctuated::Punctuated, spanned::Spanned};
-use proc_macro_error::abort;
+use proc_macro_error::{
+	abort,
+	emit_error,
+};
+
+use attribute_derive::FromAttr;
+
+#[derive(FromAttr)]
+#[attribute(ident = field_list)]
+struct FieldListAttributes {
+	#[attribute(default = vec![ default_list_type() ])]
+	lists: Vec<Type>,
+}
 
 
 #[derive(Clone)]
@@ -10,6 +22,7 @@ pub struct Field {
 	ty: Type,
 	span: Span,
 }
+
 
 pub struct List {
 	r#type: Type,
@@ -36,7 +49,7 @@ impl List {
 			let get_mut = quote_spanned! {ty.span()=> &mut obj.#name};
 			// Don't use the ff_object::dyn_field! macro because it loses span info and puts the error on the macro instead of the field
 			quote_spanned! {span=> 
-				#crate_path::fields::DynField::<#struct_name>::new(
+				#crate_path::fields::DynField::<#struct_name, #field_type>::new(
 					std::borrow::Cow::Borrowed(#name_str),
 					|obj| #get,
 					|obj| #get_mut,
@@ -49,7 +62,7 @@ impl List {
 			impl #crate_path::fields::FieldListable<#field_type> for #struct_name {
 				fn iter_fields() -> impl Iterator<Item = &'static (impl #crate_path::fields::Field<Object=Self, FieldType=#field_type> + 'static) > {
 					//const item to prevent duplication
-					const FIELDS: &[#crate_path::fields::DynField<#struct_name>] = &[
+					const FIELDS: &[#crate_path::fields::DynField<#struct_name, #field_type>] = &[
 						#(#fields)*
 					];
 
@@ -60,10 +73,6 @@ impl List {
 	}
 }
 
-fn default_list_type() -> Type {
-	parse2(quote!{ dyn bevy_reflect::Reflect }).expect("hardcoded type should be valid")
-}
-
 impl Default for List {
 	fn default() -> Self {
 		Self {
@@ -72,6 +81,12 @@ impl Default for List {
 		}
 	}
 }
+
+
+fn default_list_type() -> Type {
+	parse2(quote!{ dyn bevy_reflect::Reflect }).expect("hardcoded type should be valid")
+}
+
 
 pub struct FieldListDerive {
 	struct_name: Ident,
@@ -95,11 +110,22 @@ impl FieldListDerive {
 
 impl From<DeriveInput> for FieldListDerive {
 	fn from(derive_input: DeriveInput) -> Self {
-		let DeriveInput {ident: struct_name, data, ..} = derive_input;
+		let DeriveInput {ident: struct_name, data, attrs, ..} = derive_input;
 		
 		//Attribute
 		
-		let mut lists = vec![ List::default() ];
+		let attrs_res = FieldListAttributes::from_attributes(attrs);
+		let list_types = match attrs_res {
+			Ok(attrs) => attrs.lists,
+			Err(error) => {
+				emit_error!(error.to_compile_error(), error);
+				vec![ default_list_type() ]
+			}
+		};
+		
+		let mut lists = list_types.into_iter()
+			.map(List::new)
+			.collect::<Vec<_>>();
 		
 		//Fields
 		

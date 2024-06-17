@@ -31,9 +31,17 @@ pub fn object_derive(input: TokenStream) -> TokenStream {
 
 /**
 Generates an impl for [`ff_object::fields::FieldListable`](../ff_object/fields/trait.FieldListable.html)`<``dyn bevy_reflect::Reflect``>`.
+
+Attributes:
+
+`field_list` on struct:
+-	`lists`: explicitly list the types to generate [`FieldListable`](../ff_object/fields/trait.FieldListable.html) impls for. Defaults to `dyn bevy_reflect::Reflect`
+
+See the tests for example usage.
+
 */
 #[proc_macro_error]
-#[proc_macro_derive(FieldList)]
+#[proc_macro_derive(FieldList, attributes(field_list))]
 pub fn field_list_derive(input: TokenStream) -> TokenStream {
 	let input = parse_macro_input!(input as DeriveInput);
 	field_list::FieldListDerive::from(input)

@@ -1,0 +1,27 @@
+error: expected supported field `lists`
+ --> tests/field_list_failures/attribute_problems.rs:4:14
+  |
+4 | #[field_list(list(dyn ToString))]
+  |              ^^^^
+
+error: unexpected end of input, expected `=` or `(`
+
+       = help: try `#[field_list(lists = ...)]`
+ --> tests/field_list_failures/attribute_problems.rs:7:10
+  |
+7 | #[derive(FieldList)]
+  |          ^^^^^^^^^
+  |
+  = note: this error originates in the derive macro `FieldList` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: expected supported field `lists`
+  --> tests/field_list_failures/attribute_problems.rs:16:14
+   |
+16 | #[field_list(test(test))]
+   |              ^^^^
+
+error: cannot find attribute `fieldlist` in this scope
+  --> tests/field_list_failures/attribute_problems.rs:12:3
+   |
+12 | #[fieldlist(lists)]
+   |   ^^^^^^^^^ help: a derive helper attribute with a similar name exists: `field_list`
