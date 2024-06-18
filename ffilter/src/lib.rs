@@ -6,7 +6,10 @@ For a high-level overview of the filter life-cycle, see [app::query](../app/quer
 
 */
 
-pub mod argument;
+
+pub mod shared;
+
+
 pub mod filter;
 pub mod filter_list;
 ///Actual filters
