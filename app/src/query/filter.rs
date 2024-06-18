@@ -3,58 +3,22 @@ use crate::utils;
 use serde::{Deserialize, Serialize};
 use ff_object::describe::Described;
 use entities::prelude::tag;
+use ffilter::shared::{ArgumentData, ArgumentType};
 #[cfg(feature="ssr")]
 use ffilter::{
 	filter_list::FilterList,
 	filter::Filter as ServerFilter,
-	filter::ArgumentData,
 };
 
-
-#[derive(Debug, Clone,Copy, Serialize, Deserialize)]
-pub enum ArgumentType {
-	Bool,
-	Tag,
-}
-
-#[cfg(feature="ssr")]
-impl From<ArgumentData> for ArgumentType {
-	fn from(data: ArgumentData) -> Self {
-		use ArgumentData::*;
-		match data {
-			Bool(_) => Self::Bool,
-			Tag(_) => Self::Tag,
-		}
-	}
-}
 
 pub type ArgumentDesc = Described<ArgumentType>;
 pub type FilterDesc = Described<Vec<ArgumentDesc>>;
 
 
-#[derive(Debug,Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum Argument {
-	Bool(bool),
-	Tag(tag::Ref)
-}
-
-
-#[cfg(feature="ssr")]
-impl From<Argument> for ArgumentData {
-	fn from(arg: Argument) -> Self {
-		use ArgumentData as AD;
-		use Argument as A;
-		match arg {
-			A::Bool(value) => AD::Bool(value),
-			A::Tag(value) => AD::Tag(value),
-		}
-	}
-}
-
-impl From<ClientArgument> for Argument {
+impl From<ClientArgument> for ArgumentData {
 	fn from(ca: ClientArgument) -> Self {
 		use ClientArgument as CA;
-		use Argument as A;
+		use ArgumentData as A;
 		match ca {
 			CA::Bool(sig) => A::Bool(sig.get()),
 			CA::Tag(sig) => A::Tag(sig.get()),
@@ -160,7 +124,7 @@ pub enum FromFilterError {
 pub struct Filter {
 	name: String,
 	#[serde(default)] //Default transport format errors on empty Vec
-	arguments: Vec<Argument>,
+	arguments: Vec<ArgumentData>,
 }
 
 impl Filter {
