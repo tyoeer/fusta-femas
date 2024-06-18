@@ -9,7 +9,6 @@ acquire = {path = "../acquire", optional = true}
 leptos_axum = { workspace=true, optional = true } # Used in the error template
 sea-orm = {workspace = true, optional = true}
 axum = {workspace = true, optional = true}
-tokio = {workspace = true, optional = true}
 
 # shared
 entities = {path = "../entities"}
@@ -22,7 +21,6 @@ leptos_router = { workspace = true }
 serde = {workspace = true}
 tracing = {workspace = true}
 serde_json = "1.0.116"
-cfg-if = "1"
 http = "1.1" # Used in the error_template
 thiserror = "1.0.59" # Used in the error_template
 bevy_reflect = "0.13.2"
@@ -45,7 +43,6 @@ ssr = [
 	"entities/server",
 	"ff-object/server",
 	"dep:sea-orm",
-	"dep:tokio",
 ]
 
 [package.metadata.cargo-all-features]

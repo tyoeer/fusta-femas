@@ -9,7 +9,6 @@ dependencies = [
  "anyhow",
  "async-trait",
  "entities",
- "erased-serde",
  "ff-object",
  "sea-migration",
  "sea-orm",
@@ -164,7 +163,6 @@ dependencies = [
  "acquire",
  "axum",
  "bevy_reflect",
- "cfg-if",
  "entities",
  "ff-macros",
  "ff-object",
@@ -178,7 +176,6 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
- "tokio",
  "tracing",
 ]
 
@@ -1107,14 +1104,12 @@ version = "0.1.0"
 dependencies = [
  "cfg-if",
  "entities",
- "erased-serde",
  "ff-object",
  "sea-migration",
  "sea-orm",
  "sea-orm-macros",
  "serde",
  "thiserror",
- "tracing",
 ]
 
 [[package]]
@@ -2945,7 +2940,6 @@ version = "0.1.0"
 dependencies = [
  "sea-orm-migration",
  "tokio",
- "tracing",
 ]
 
 [[package]]

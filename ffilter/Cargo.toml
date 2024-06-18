@@ -10,9 +10,7 @@ edition = "2021"
 entities = {path="../entities", optional=true}
 ff-object = {path="../ff-object", optional=true}
 sea-orm = {workspace=true, optional=true}
-tracing = {workspace=true, optional=true}
 serde = {workspace=true}
-erased-serde = {workspace=true, optional=true}
 thiserror = {version="1.0.59", optional=true}
 cfg-if = "1"
 
@@ -23,8 +21,6 @@ server = [
 	"entities/server",
 	"ff-object/server",
 	"dep:sea-orm",
-	"dep:tracing",
-	"dep:erased-serde",
 	"dep:thiserror",
 ]
 
