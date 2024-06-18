@@ -8,8 +8,7 @@ use acquire::{
 	StrategyList,
 };
 use ffilter::{
-	filter_list::FilterList,
-	filter::Filter,
+	filter::{Filter, GetBuilder}, filter_list::FilterList
 };
 use std::{fs::File, io::{Error as IoError, Write}};
 
@@ -56,8 +55,9 @@ impl Setup {
 	pub fn add_strategy(&mut self, strategy: impl Strategy + Send + 'static) {
 		self.strategies.push(Box::new(strategy));
 	}
-	pub fn add_filter(&mut self, filter: impl Filter + Send + Sync + 'static) {
+	pub fn add_filter<FilterType: GetBuilder + Filter + Send + Sync + 'static>(&mut self, filter: FilterType) {
 		self.filters.add(filter);
+		self.filters.add_builder::<FilterType>();
 	}
 	
 	
