@@ -1105,6 +1105,7 @@ dependencies = [
 name = "ffilter"
 version = "0.1.0"
 dependencies = [
+ "cfg-if",
  "entities",
  "erased-serde",
  "ff-object",
