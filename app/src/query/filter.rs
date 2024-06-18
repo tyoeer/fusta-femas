@@ -174,16 +174,15 @@ impl Filter {
 	
 	#[cfg(feature="ssr")]
 	pub fn into_filter(self, list: FilterList) -> Result<Box<dyn ServerFilter>, FromFilterError> {
-		let filter = list.get_by_name(&self.name)?;
-
-		let mut filter = filter.box_clone();
-		//Need to get the descriptions
-		let mut args = filter.box_clone().into_arguments();
-		for (arg_desc, value) in std::iter::zip(&mut args, self.arguments)   {
-			arg_desc.data = value.into();
-		}
-		filter.replace_from_args(args)?;
-
+		let builder = list.get_builder_by_name(&self.name)?;
+		
+		let arguments = self.arguments.into_iter()
+			.map(ArgumentData::from)
+			.collect();
+		
+		
+		let filter = (builder.data)(arguments)?;
+		
 		Ok(filter)
 	}
 }
