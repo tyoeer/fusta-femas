@@ -4,7 +4,7 @@ use sea_orm::prelude::Select;
 use serde::{Deserialize, Serialize};
 
 use crate::filter::{
-	Argument, ArgumentData, Filter, ReprArgument, ArgumentError
+	Argument, ArgumentData, ArgumentError, Build, Filter, ReprArgument
 };
 
 
@@ -30,6 +30,40 @@ impl Filter for Tag {
 
 impl Describe for Tag {
 	const NAME: &'static str = "tag";
+}
+
+impl Build for Tag {
+	fn build(args: Vec<ArgumentData>) -> Result<Self, ArgumentError> {
+		//Can't move-destructure something without a const size for some reason
+		let sized_args = match <[ArgumentData; 1]>::try_from(args) {
+			Ok(sized) => sized,
+			Err(original) => return Err(
+				ArgumentError::WrongCount {
+					expected: 1,
+					found: original.len()
+				}
+			),
+		};
+
+		let [
+			first_arg,
+		] = sized_args;
+
+		let tag = match first_arg {
+			ArgumentData::Tag(tag) => tag,
+			other => return Err(
+				ArgumentError::WrongType {
+					index: 0,
+					expected: ArgumentData::Tag(tag::Ref::new(-1)),
+					found: other
+				}
+			),
+		};
+
+		Ok(Self {
+			tag
+		})
+	}
 }
 
 impl ReprArgument for Tag {

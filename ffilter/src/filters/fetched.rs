@@ -4,10 +4,7 @@ use sea_orm::{prelude::Select, QuerySelect};
 use serde::{Deserialize, Serialize};
 
 use crate::filter::{
-	Argument,
-	Filter,
-	ReprArgument,
-	ArgumentError,
+	Argument, ArgumentData, ArgumentError, Build, Filter, ReprArgument
 };
 
 
@@ -26,6 +23,12 @@ impl Filter for Fetched {
 
 impl Describe for Fetched {
 	const NAME: &'static str = "fetched";
+}
+
+impl Build for Fetched {
+	fn build(_args: Vec<ArgumentData>) -> Result<Self, ArgumentError> {
+		Ok(Fetched)
+	}
 }
 
 impl ReprArgument for Fetched {
