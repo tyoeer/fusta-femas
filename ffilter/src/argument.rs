@@ -1,5 +1,7 @@
 use entities::prelude::*;
-use ff_object::describe::Described;
+use ff_object::describe::{Describe, Described};
+
+use crate::filter::Filter;
 
 
 
@@ -12,6 +14,31 @@ pub enum ArgumentData {
 
 pub type Argument = Described<ArgumentData>;
 pub type FilterData = Described<Vec<Argument>>;
+
+pub type BuildFilterFn = fn(Vec<ArgumentData>) -> Result<Box<dyn Filter>, ArgumentError>;
+pub type Builder = Described<BuildFilterFn>;
+
+///Create Self from a [`Vec`]`<`[`ArgumentData`]`>`
+pub trait Build: Sized {
+	fn build(args: Vec<ArgumentData>) -> Result<Self, ArgumentError>;
+}
+
+fn box_dyn_filter<T: Build + Filter + 'static>(args: Vec<ArgumentData>) -> Result<Box<dyn Filter>, ArgumentError> {
+	Ok(Box::new(T::build(args)?))
+}
+
+///Get a [`Builder`] from a type that implements that required traits
+pub trait GetBuilder {
+	fn get_builder() -> Builder;
+}
+
+impl<This: Build + Filter + Describe + 'static> GetBuilder for This {
+	fn get_builder() -> Builder {
+		Described::new_with_describer::<Self>(box_dyn_filter::<Self>)
+	}
+}
+
+
 
 
 #[derive(Debug, thiserror::Error)]
