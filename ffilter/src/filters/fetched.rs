@@ -1,10 +1,10 @@
 use entities::prelude::*;
-use ff_object::describe::Describe;
+use ff_object::describe::{Describe, Described};
 use sea_orm::{prelude::Select, QuerySelect};
 use serde::{Deserialize, Serialize};
 
 use crate::filter::{
-	Argument, ArgumentData, ArgumentError, Build, Filter, ReprArgument
+	Argument, ArgumentData, ArgumentError, ArgumentType, Build, Filter, ReprArgument
 };
 
 
@@ -28,6 +28,10 @@ impl Describe for Fetched {
 impl Build for Fetched {
 	fn build(_args: Vec<ArgumentData>) -> Result<Self, ArgumentError> {
 		Ok(Fetched)
+	}
+	
+	fn describe_args() -> Vec<Described<ArgumentType>> {
+		Vec::new()
 	}
 }
 

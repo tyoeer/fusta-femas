@@ -11,6 +11,12 @@ pub enum ArgumentData {
 	Tag(tag::Ref),
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ArgumentType {
+	Bool,
+	Tag,
+}
+
 
 pub type Argument = Described<ArgumentData>;
 pub type FilterData = Described<Vec<Argument>>;
@@ -23,6 +29,7 @@ pub type BuildFilterFn = fn(Vec<ArgumentData>) -> Result<Box<dyn Filter>, Argume
 pub struct FilterInfo {
 	description: Described<()>,
 	build_fn: BuildFilterFn,
+	args_description: Vec<Described<ArgumentType>>
 }
 
 impl FilterInfo {
@@ -30,6 +37,7 @@ impl FilterInfo {
 		Self {
 			description: Described::new_with_describer::<FilterType>(()),
 			build_fn: box_dyn_filter::<FilterType>,
+			args_description: FilterType::describe_args()
 		}
 	}
 	
@@ -49,6 +57,7 @@ pub type Builder = FilterInfo;
 ///Create Self from a [`Vec`]`<`[`ArgumentData`]`>`
 pub trait Build: Sized {
 	fn build(args: Vec<ArgumentData>) -> Result<Self, ArgumentError>;
+	fn describe_args() -> Vec<Described<ArgumentType>>;
 }
 
 fn box_dyn_filter<T: Build + Filter + 'static>(args: Vec<ArgumentData>) -> Result<Box<dyn Filter>, ArgumentError> {

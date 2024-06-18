@@ -4,7 +4,7 @@ use sea_orm::prelude::Select;
 use serde::{Deserialize, Serialize};
 
 use crate::filter::{
-	Argument, ArgumentData, ArgumentError, Build, Filter, ReprArgument
+	Argument, ArgumentData, ArgumentError, ArgumentType, Build, Filter, ReprArgument
 };
 
 
@@ -54,6 +54,16 @@ impl Build for ArgTest {
 		Ok(Self {
 			bool,
 		})
+	}
+	
+	fn describe_args() -> Vec<Described<ArgumentType>> {
+		vec![
+			Described::custom_new(
+				ArgumentType::Bool,
+				"bool".to_owned(),
+				None
+			)
+		]
 	}
 }
 

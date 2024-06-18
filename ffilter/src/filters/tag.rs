@@ -4,7 +4,7 @@ use sea_orm::prelude::Select;
 use serde::{Deserialize, Serialize};
 
 use crate::filter::{
-	Argument, ArgumentData, ArgumentError, Build, Filter, ReprArgument
+	Argument, ArgumentData, ArgumentError, ArgumentType, Build, Filter, ReprArgument
 };
 
 
@@ -63,6 +63,16 @@ impl Build for Tag {
 		Ok(Self {
 			tag
 		})
+	}
+	
+	fn describe_args() -> Vec<Described<ArgumentType>> {
+		vec![
+			Described::custom_new(
+				ArgumentType::Tag,
+				"tag".to_owned(),
+				None
+			)
+		]
 	}
 }
 
