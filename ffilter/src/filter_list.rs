@@ -31,7 +31,7 @@ impl FilterList {
 	
 	pub fn get_builder_by_name(&self, name: &str) -> Result<&Builder, NotFoundError> {
 		self.builder_list.iter()
-			.find(|f| f.name==name)
+			.find(|f| f.get_name()==name)
 			.ok_or_else(|| NotFoundError(name.to_owned()))
 	}
 	

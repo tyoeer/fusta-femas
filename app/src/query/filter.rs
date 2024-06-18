@@ -181,7 +181,7 @@ impl Filter {
 			.collect();
 		
 		
-		let filter = (builder.data)(arguments)?;
+		let filter = builder.build(arguments)?;
 		
 		Ok(filter)
 	}

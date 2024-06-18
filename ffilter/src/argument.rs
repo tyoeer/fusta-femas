@@ -15,8 +15,36 @@ pub enum ArgumentData {
 pub type Argument = Described<ArgumentData>;
 pub type FilterData = Described<Vec<Argument>>;
 
+
 pub type BuildFilterFn = fn(Vec<ArgumentData>) -> Result<Box<dyn Filter>, ArgumentError>;
-pub type Builder = Described<BuildFilterFn>;
+
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FilterInfo {
+	description: Described<()>,
+	build_fn: BuildFilterFn,
+}
+
+impl FilterInfo {
+	pub fn new<FilterType: Build + Filter + Describe + 'static>() -> Self {
+		Self {
+			description: Described::new_with_describer::<FilterType>(()),
+			build_fn: box_dyn_filter::<FilterType>,
+		}
+	}
+	
+	pub fn build(&self, args: Vec<ArgumentData>) -> Result<Box<dyn Filter>, ArgumentError> {
+		(self.build_fn)(args)
+	}
+	
+	pub fn get_name(&self) -> &str{
+		&self.description.name
+	}
+}
+
+
+
+pub type Builder = FilterInfo;
 
 ///Create Self from a [`Vec`]`<`[`ArgumentData`]`>`
 pub trait Build: Sized {
@@ -34,7 +62,7 @@ pub trait GetBuilder {
 
 impl<This: Build + Filter + Describe + 'static> GetBuilder for This {
 	fn get_builder() -> Builder {
-		Described::new_with_describer::<Self>(box_dyn_filter::<Self>)
+		FilterInfo::new::<This>()
 	}
 }
 
