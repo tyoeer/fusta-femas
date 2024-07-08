@@ -23,7 +23,7 @@ tracing = {workspace = true}
 serde_json = "1.0.116"
 http = "1.1" # Used in the error_template
 thiserror = "1.0.59" # Used in the error_template
-bevy_reflect = "0.13.2"
+bevy_reflect = "0.14.0"
 
 [features]
 default = ["ssr","hydrate"]
