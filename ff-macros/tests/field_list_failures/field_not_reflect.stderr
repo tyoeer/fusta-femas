@@ -5,13 +5,13 @@ error[E0277]: the trait bound `NotReflect: Reflect` is not satisfied
   |            ^^^^^^^^^^ the trait `Reflect` is not implemented for `NotReflect`
   |
   = help: the following other types implement trait `Reflect`:
-            bool
-            char
-            isize
-            i8
-            i16
-            i32
-            i64
-            i128
+            &'static Path
+            &'static str
+            ()
+            (A, B)
+            (A, B, C)
+            (A, B, C, D)
+            (A, B, C, D, E)
+            (A, B, C, D, E, F)
           and $N others
   = note: required for the cast from `&NotReflect` to `&(dyn Reflect + 'static)`
