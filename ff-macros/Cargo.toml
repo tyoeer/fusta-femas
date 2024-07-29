@@ -15,7 +15,7 @@ attribute-derive = "0.9"
 proc-macro-error = {version="1.0.4", default-features = false}
 
 [dev-dependencies]
-trybuild = "1.0.91"
+trybuild = "1.0.98"
 bevy_reflect = "0.13.2"
 
 ff-object = {path="../ff-object"}
