@@ -140,6 +140,10 @@ pub fn All() -> impl IntoView {
 #[component]
 pub fn Table(#[prop(into)] entries: MaybeSignal<Vec<EntryOverview>>) -> impl IntoView {
 	view! {
-		<table::ObjectTable items = entries />
+		<table::ObjectTable items = entries adds = vec![
+			("view", |entry| view!{
+				<A href=format!("/entry/{}/embedded", entry.id)> view </A>
+			}),
+		]/>
 	}
 }
