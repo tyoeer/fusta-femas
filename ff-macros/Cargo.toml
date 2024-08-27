@@ -16,6 +16,6 @@ proc-macro-error = {version="1.0.4", default-features = false}
 
 [dev-dependencies]
 trybuild = "1.0.98"
-bevy_reflect = "0.13.2"
+bevy_reflect = "0.14.1"
 
 ff-object = {path="../ff-object"}

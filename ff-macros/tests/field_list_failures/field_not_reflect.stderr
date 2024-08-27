@@ -1,9 +1,10 @@
-error[E0277]: the trait bound `NotReflect: Reflect` is not satisfied
+error[E0277]: `NotReflect` can not be reflected
  --> tests/field_list_failures/field_not_reflect.rs:7:9
   |
 7 |     field: NotReflect,
   |            ^^^^^^^^^^ the trait `Reflect` is not implemented for `NotReflect`
   |
+  = note: consider annotating `NotReflect` with `#[derive(Reflect)]`
   = help: the following other types implement trait `Reflect`:
             &'static Path
             &'static str
