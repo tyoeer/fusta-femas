@@ -114,12 +114,18 @@ pub fn Reflected<'a>(value: &'a dyn Reflect, #[prop(default = false)] short: boo
 #[component]
 pub fn ObjectFieldList<Object: FieldListable<dyn Reflect>>(
 	#[prop(optional)] _ignore: PhantomData<Object>,
+	#[prop(optional)] adds: ObjectValueAdds<Object>,
 ) -> impl IntoView {
 	view! {
 		<li class="object_field_list">
 			{
 				Object::iter_fields().map(|field| {
 					view! {<span class="object_field">{field.name()}</span>}
+				}).collect::<Vec<_>>()
+			}
+			{
+				adds.into_iter().map(|add| view!{
+					<span class="object_field">{add.0}</span>
 				}).collect::<Vec<_>>()
 			}
 		</li>
@@ -192,10 +198,19 @@ pub fn ObjectFieldValueList<Object: FieldListable<dyn Reflect> + 'static>(
 	}
 }
 
+/**
+The tuple components are:
+- `&'static str`: name of field
+- `fn(&Object) -> View`: function taking in the object whose fields are being displayed, returning what to render for this field
+*/
+pub type ObjectValueAdds<Object> = Vec<(&'static str, fn(&Object) -> View)>;
+
 #[component]
 pub fn ObjectLinkValues<Object: FieldListable<dyn Reflect> + Clone + ff_object::Object + 'static>(
 	#[prop(into)] items: MaybeSignal<Vec<Object>>,
+	#[prop(optional)] adds: ObjectValueAdds<Object>,
 ) -> impl IntoView {
+	let adds = store_value(adds);
 	view! {
 		<For
 			each = move || items.get().into_iter()
@@ -208,6 +223,17 @@ pub fn ObjectLinkValues<Object: FieldListable<dyn Reflect> + Clone + ff_object::
 				object.get_id()
 			)} >
 				<ObjectValues object = &object/>
+				<For
+					each = move || adds.get_value().into_iter()
+					key = |add| add.0
+					let:addition
+				>
+					<span class="object_value">
+					<div>
+						{addition.1(&object)}
+						</div>
+					</span>
+				</For>
 			</A>
 		</For>
 	}
@@ -217,11 +243,12 @@ pub fn ObjectLinkValues<Object: FieldListable<dyn Reflect> + Clone + ff_object::
 #[component]
 pub fn ObjectTable<Object: FieldListable<dyn Reflect> + Clone + ff_object::Object + 'static>(
 	#[prop(into)] items: MaybeSignal<Vec<Object>>,
+	#[prop(optional)] adds: ObjectValueAdds<Object>,
 ) -> impl IntoView {
 	view! {
 		<ul class="object_list object_table">
-			<ObjectFieldList<Object> />
-			<ObjectLinkValues items />
+			<ObjectFieldList<Object> adds=adds.clone() />
+			<ObjectLinkValues items adds />
 		</ul>
 	}
 }
