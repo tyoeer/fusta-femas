@@ -14,7 +14,7 @@ serde = {workspace = true}
 
 sea-orm = {workspace = true, optional = true}
 bevy_reflect = "0.14.1"
-derive_more = "0.99"
+derive_more = "1.0"
 
 [features]
 default = []
