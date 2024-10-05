@@ -254,11 +254,11 @@ dependencies = [
 
 [[package]]
 name = "attribute-derive"
-version = "0.10.0"
+version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9f6763469f78790650fe2b25ea8c2947b1bf5889b7be7833e23f383437fa8fc5"
+checksum = "36f18fc482cf559bca9efe778ba2fd0d1c16a31d5d24a2c886ed16b2d217e454"
 dependencies = [
- "attribute-derive-macro 0.10.0",
+ "attribute-derive-macro 0.10.1",
  "derive-where",
  "manyhow 0.11.4",
  "proc-macro2",
@@ -284,9 +284,9 @@ dependencies = [
 
 [[package]]
 name = "attribute-derive-macro"
-version = "0.10.0"
+version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c1318b422e4ad618775982a521842870d74ab4e07cf7588a968bc6d68c62a4ff"
+checksum = "a85958950e587256a16c72325ff3c4f3e4db25999173e9ca2864665be84ff63b"
 dependencies = [
  "collection_literals",
  "interpolator",
@@ -1095,7 +1095,7 @@ checksum = "e8c02a5121d4ea3eb16a80748c74f5549a5665e4c21333c6098f283870fbdea6"
 name = "ff-macros"
 version = "0.1.0"
 dependencies = [
- "attribute-derive 0.10.0",
+ "attribute-derive 0.10.1",
  "bevy_reflect",
  "ff-object",
  "proc-macro-error",
