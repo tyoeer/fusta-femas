@@ -10,7 +10,7 @@ sea-orm = {workspace=true, optional=true}
 leptos = {workspace = true, optional=true}
 serde = {workspace = true}
 erased-serde = {workspace=true}
-bevy_reflect = "0.14.1"
+bevy_reflect = "0.14.2"
 
 [features]
 server = ["orm"]
