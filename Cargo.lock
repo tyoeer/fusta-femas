@@ -12,7 +12,7 @@ dependencies = [
  "ff-object",
  "sea-migration",
  "sea-orm",
- "sea-orm-macros",
+ "sea-orm-macros 1.1.0",
  "serde",
  "serde_json",
  "thiserror",
@@ -1125,7 +1125,7 @@ dependencies = [
  "ff-object",
  "sea-migration",
  "sea-orm",
- "sea-orm-macros",
+ "sea-orm-macros 1.1.0",
  "serde",
  "thiserror",
 ]
@@ -2842,7 +2842,7 @@ dependencies = [
  "log",
  "ouroboros",
  "rust_decimal",
- "sea-orm-macros",
+ "sea-orm-macros 0.12.15",
  "sea-query",
  "sea-query-binder",
  "serde",
@@ -2878,6 +2878,20 @@ name = "sea-orm-macros"
 version = "0.12.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5e115c6b078e013aa963cc2d38c196c2c40b05f03d0ac872fe06b6e0d5265603"
+dependencies = [
+ "heck 0.4.1",
+ "proc-macro2",
+ "quote",
+ "sea-bae",
+ "syn 2.0.79",
+ "unicode-ident",
+]
+
+[[package]]
+name = "sea-orm-macros"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "85f714906b72e7265c0b2077d0ad8f235dabebda513c92f1326d5d40cef0dd01"
 dependencies = [
  "heck 0.4.1",
  "proc-macro2",
