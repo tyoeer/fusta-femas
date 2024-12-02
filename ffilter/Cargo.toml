@@ -11,7 +11,7 @@ entities = {path="../entities"}
 ff-object = {path="../ff-object", optional=true}
 sea-orm = {workspace=true, optional=true}
 serde = {workspace=true}
-thiserror = {version="1.0.59", optional=true}
+thiserror = {version="2.0.3", optional=true}
 cfg-if = "1"
 
 
