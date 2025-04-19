@@ -18,7 +18,7 @@ erased-serde = {workspace=true}
 tower = "0.4.13"
 tower-http = {version = "0.5.2", features = ["fs"]}
 dotenvy = "0.15"
-sea-orm-migration = "0.12"
+sea-orm-migration = "1.0"
 envy = "0.4"
 ron = "0.8.1"
 thiserror = "1.0.59"
